@@ -1,0 +1,3 @@
+This study aims to investigate the effectiveness of appointment scheduling within Hospital Management Systems (HMS). The dissertation attempts to address the inefficiencies in HMS appointment scheduling systems by conducting a comprehensive analysis of the current state and performance of these systems.  
+
+The primary objective is to thoroughly examine the current appointment scheduling practices and workflows within HMS systems, identifying potential bottlenecks, inefficiencies, and challenges that may lead to longer wait times, increased patient dissatisfaction, and strain on staff and resources 
