@@ -1,0 +1,54 @@
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Newtonsoft.Json;
+using static HMSPortal.Models.Enums;
+
+namespace HMSPortal.Models.Contract
+{
+    public class AuditEntry
+    {
+        public EntityEntry Entry { get; }
+
+        public Guid? UserId { get; set; }
+
+        public string TableName { get; set; }
+
+        public Dictionary<string, object> KeyValues { get; } = new Dictionary<string, object>();
+
+
+        public Dictionary<string, object> OldValues { get; } = new Dictionary<string, object>();
+
+
+        public Dictionary<string, object> NewValues { get; } = new Dictionary<string, object>();
+
+
+        public List<PropertyEntry> TemporaryProperties { get; } = new List<PropertyEntry>();
+
+
+        public AuditType AuditType { get; set; }
+
+        public List<string> ChangedColumns { get; } = new List<string>();
+
+
+        public bool HasTemporaryProperties => TemporaryProperties.Any();
+
+        public AuditEntry(EntityEntry entry)
+        {
+            Entry = entry;
+        }
+
+        public BaseEntity ToAudit()
+        {
+            return new BaseEntity
+            {
+                UserId = UserId,
+                Type = AuditType.ToString(),
+                TableName = TableName,
+                DateTime = DateTime.UtcNow,
+                PrimaryKey = JsonConvert.SerializeObject(KeyValues),
+                OldValues = OldValues.Count == 0 ? null : JsonConvert.SerializeObject(OldValues),
+                NewValues = NewValues.Count == 0 ? null : JsonConvert.SerializeObject(NewValues),
+                AffectedColumns = ChangedColumns.Count == 0 ? null : JsonConvert.SerializeObject(ChangedColumns)
+            };
+        }
+    }
+}
