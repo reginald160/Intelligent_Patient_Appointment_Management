@@ -1,4 +1,5 @@
-﻿using HMSPortal.Domain.Models;
+﻿using HMSPortal.Domain;
+using HMSPortal.Domain.Models;
 using HMSPortal.Domain.Models.Contract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,8 +29,11 @@ namespace HMS.Infrastructure.Persistence.DataContext
         public DbSet<Patient>? Patients { get; set; }
 
         public DbSet<Doctor>? Doctors { get; set; }
+        public DbSet<Payment>? Payments { get; set; }
+        public DbSet<PaymentInvoice>? PaymentInvoices { get; set; }
+       // public DbSet<InvoicePaymentDetail>? InvoicePaymentDetails { get; set; }
 
-        public IDbConnection Connection => throw new NotImplementedException();
+        //public IDbConnection Connection => throw new NotImplementedException();
 
 
         public override EntityEntry Remove(object entity)
@@ -84,7 +89,26 @@ namespace HMS.Infrastructure.Persistence.DataContext
                 property.SetColumnType("decimal(18,2)");
             }
             base.OnModelCreating(builder);
-        }
+
+
+			builder.Entity<Payment>()
+		        .HasOne(p => p.PaymentInvoice)
+		        .WithMany()
+		        .HasForeignKey(p => p.PaymentInvoiceId)
+		        .OnDelete(DeleteBehavior.Restrict); 
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Patient)
+				.WithMany()
+				.HasForeignKey(p => p.PatientId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Doctor)
+				.WithMany()
+				.HasForeignKey(p => p.DoctorId)
+				.OnDelete(DeleteBehavior.Restrict);
+		}
 
 
         #endregion

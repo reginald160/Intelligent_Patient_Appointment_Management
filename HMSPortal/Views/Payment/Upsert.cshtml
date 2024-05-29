@@ -1,0 +1,148 @@
+﻿@model HMSPortal.Application.ViewModels.AddPaymentViewModel
+<div class="row no-margin-padding">
+	<div class="col-md-6">
+		<h3 class="block-title">Add Doctor</h3>
+	</div>
+	<div class="col-md-6">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item">
+				<a href="index.html">
+					<span class="ti-home"></span>
+				</a>
+			</li>
+			<li class="breadcrumb-item">Doctor</li>
+		</ol>
+	</div>
+</div>
+<!-- /Page Title -->
+<!-- /Breadcrumb -->
+<!-- Main Content -->
+<div class="container-fluid">
+	
+	<div class="row">
+
+		<!-- Widget Item -->
+		<div class="col-md-12">
+			<div class ="card-body p-4" >
+				<h3 class="widget-title">Add Doctor</h3>
+				<form method="post" class="row" enctype="multipart/form-data">
+					<input asp-for="Payment.Id" hidden />
+					<input asp-for="Payment.ImageUrl" hidden />
+					<div class="form-row">
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.PaymentInvoice.FirstName" class="ms-2">Doctor Name</label>
+							<select asp-for="Payment.PaymentInvoice.DoctorId" asp-items="@Model.DoctorList" class="form-control">
+								<option disabled selected>-Select A Doctor-</option>
+							</select>
+							<span asp-validation-for="Payment.PaymentInvoice.FirstName" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.PaymentInvoice.PatientId" class="ms-2">Patient Name</label>
+							<select asp-for="Payment.PaymentInvoice.FirstName" asp-items="@Model.PatientList" class="form-control">
+								<option disabled selected>-Select Patient-</option>
+							</select>
+							<span asp-validation-for="Payment.PaymentInvoice.PatientId" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.Department">Department</label>
+							<select asp-for="Payment.Department" class="form-control">
+								<option disabled selected>-Select Department-</option>
+							</select>
+							<span asp-validation-for="Payment.Department" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.AdmissionDate">Admission Date</label>
+							<input asp-for="Payment.AdmissionDate" placeholder="Admission Date" class="form-control">
+							<span asp-validation-for="Payment.AdmissionDate" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.DischargeDate">Discharge Date</label>
+							<input asp-for="Payment.DischargeDate" placeholder="Discharge Date" class="form-control">
+							<span asp-validation-for="Payment.DischargeDate" class="text-danger"></span>
+						</div>
+
+						 <hr/>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.ServiceName">Service Name</label>
+							<input asp-for="Payment.ServiceName" class="form-control" placeholder="Discount">
+							<span asp-validation-for="Payment.ServiceName" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.CostOfTreatment">Cost Of Treatment</label>
+							<input asp-for="Payment.CostOfTreatment" class="form-control" placeholder="Discount">
+							<span asp-validation-for="Payment.CostOfTreatment" class="text-danger"></span>
+						</div>
+
+						<hr class="color: color-red"/>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.Discount">Payment Discount</label>
+							<input asp-for="Payment.Discount" class="form-control" placeholder="Discount">
+							<span asp-validation-for="Payment.Discount" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.AdvancePaid">Advance Paid</label>
+							<input asp-for="Payment.AdvancePaid" placeholder="Advance Paid" class="form-control">
+							<span asp-validation-for="Payment.AdvancePaid" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.PaymentType">Payment Type</label>
+							<select asp-for="Payment.PaymentType" class="form-control">
+								<option disabled selected>-Select Payment Type-</option>
+							</select>
+							<span asp-validation-for="Payment.PaymentType" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.PaymentType" class="ms-2">Payment Type</label>
+							<select asp-for="Payment.PaymentType" asp-items="@Model.DoctorList" class="form-control">
+								<option disabled selected>-Select A Doctor-</option>
+							</select>
+							<span asp-validation-for="Payment.PaymentInvoice.FirstName" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Payment.PaymentPaid">Payment</label>
+							<input asp-for="Payment.PaymentPaid" class="form-control" placeholder="Payment">
+							<span asp-validation-for="Payment.PaymentPaid" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-12">
+							<label asp-for="Payment.ImageUrl">File</label>
+							<input type="file" name="file" class="form-control border-0 shadow">
+						</div>
+
+						<div class="form-check col-md-12 mb-2">
+							<div class="text-left">
+								<div class="custom-control custom-checkbox">
+									<input class="custom-control-input" type="checkbox" id="ex-check-2">
+									<label class="custom-control-label" for="ex-check-2">Please Confirm</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group col-md-6 mb-3">
+							<button type="submit" class="btn btn-primary btn-lg">Submit</button>
+						</div>
+					</div>
+				</form>
+				<!-- Alerts-->
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+					<strong>Successfully Done!</strong> Please add payment now
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="alert alert-warning alert-dismissible fade show" role="alert">
+					<strong>Holy guacamole!</strong> You should check in on some of those fields below.
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<!-- /Alerts-->
+			</div>
+		</div>
+		<!-- /Widget Item -->
+	</div>
+</div>

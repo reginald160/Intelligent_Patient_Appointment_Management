@@ -44,7 +44,7 @@
 		<span class="theme-color theme-default" data-color="green"></span>
 		<span class="theme-color theme-blue" data-color="blue"></span>
 		<span class="theme-color theme-red theme-active" data-color="red"></span>
-		<span class="theme-color theme-violet" data-color="violet"></span>
+		<span class="theme-color theme-violet" data-color="blue"></span>
 		<span class="theme-color theme-yellow" data-color="yellow"></span>
 	</div>
 
@@ -78,19 +78,25 @@
 					<ul class="collapse list-unstyled" id="nav-patients">
 						<li>
 							@* <a href="new-patient">Add Patientf</a>  *@
-							<NavLink class="nav-link" href="new-patient" Match="NavLinkMatch.All">
-								Add Patient
-							</NavLink>
+						<li>
+							<a asp-controller="Patient" asp-action="Upsert">Add Patient</a>
+						</li>
 
 						</li>
 						<li>
-							<a href="patients.html">All Patients</a>
+					        <a asp-controller="Patient" asp-action="Index">All Patient</a>
 						</li>
 						<li>
 							<a href="about-patient.html">Patient Details</a>
 						</li>
+				@* <li>
+					<a asp-controller="Patient" asp-action="Detail">Patient Details</a>
+				</li> *@
 						<li>
-							<a href="edit-patient.html">Edit Patient</a>
+							<a asp-controller="Patient" asp-action="Edit"></a>
+						</li>
+						<li>
+							<a asp-controller="Patient" asp-action="Delete"></a>
 						</li>
 					</ul>
 				</li>
@@ -100,10 +106,13 @@
 					</a>
 					<ul class="collapse list-unstyled" id="nav-doctors">
 						<li>
-							<a href="add-doctor.html">Add Doctor</a>
+							<a asp-controller="Doctor" asp-action="Upsert">Add Doctor</a>
 						</li>
-						<li>
+						@* <li>
 							<a href="doctors.html">All Doctors</a>
+						</li> *@
+						<li>
+							<a asp-controller="Doctor" asp-action="Index">All Doctors</a>
 						</li>
 						<li>
 							<a href="about-doctor.html">Doctor Details</a>
@@ -137,14 +146,24 @@
 						<span class="ti-money"></span> Payments
 					</a>
 					<ul class="collapse list-unstyled" id="nav-payment">
-						<li>
+						@* <li>
 							<a href="add-payment.html">Add Payment</a>
+						</li> *@
+					<li>
+						<a asp-controller="Payment" asp-action="Upsert">Add Payment</a>
+					</li>
+					<li>
+							<a asp-controller="Payment" asp-action="Index">All Payment</a>
 						</li>
-						<li>
+						
+						@* <li>
 							<a href="payments.html">All Payments</a>
-						</li>
+						</li> *@
+						@* <li>
+							<a href="about-payment.html"></a>
+						</li> *@
 						<li>
-							<a href="about-payment.html">Payment Invoice</a>
+						<a asp-controller="PaymentInvoice" asp-action="Detail">Payment Invoice</a>
 						</li>
 					</ul>
 				</li>
@@ -389,8 +408,8 @@
 			<!-- /Top Navigation -->
 			<!-- Breadcrumb -->
 			<!-- Page Title -->
-			<div class="row no-margin-padding">
-				<div class="col-md-6">
+			@* <div class="row no-margin-padding">
+				 <div class="col-md-6">
 					<h3 class="block-title">Quick Statistics</h3>
 				</div>
 				<div class="col-md-6">
@@ -403,7 +422,7 @@
 						<li class="breadcrumb-item active">Dashboard</li>
 					</ol>
 				</div>
-			</div>
+			</div> *@
 
 			@RenderBody()
 
@@ -430,6 +449,8 @@
 
 
 	<script src="js/custom.js"></script>
+	<script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
+	<script src="https://cdn.tiny.cloud/1/d1fpkxihlzdu61yllazo0c9ehlxeuk04a3awulg82m1vo2b4/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </body>
 </html>
 @RenderSection("Scripts", required: false)
