@@ -1,4 +1,6 @@
 using HMS.Infrastructure.Persistence.DataContext;
+using HMS.Infrastructure.Repositories.IRepository;
+using HMS.Infrastructure.Repositories.Repository;
 using HMSPortal.Domain.Models;
 using HMSPortal.Models;
 using Microsoft.AspNetCore.Identity;
@@ -12,9 +14,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
 	.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

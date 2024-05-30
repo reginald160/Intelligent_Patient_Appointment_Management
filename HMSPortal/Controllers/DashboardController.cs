@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HMSPortal.Controllers
 {
-	[Authorize]
+	//[Authorize]
 	public class DashboardController : Controller
 	{
 		public IActionResult Index()

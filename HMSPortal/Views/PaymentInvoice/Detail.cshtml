@@ -1,0 +1,126 @@
+﻿@model List<HMSPortal.Domain.Models.Payment>
+
+<form method="post">
+    @foreach (var obj in Model)
+   {
+    //<input hidden asp-for="PaymentId" />
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-secondary bg-gradient text-light py-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="py-3">
+                <div class="row">
+                    <div class="col-3 col-md-2 offset-lg-1 pb-1">
+                        <p class="text-white-50 fw-semibold mb-0">by @obj.Address</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Address</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Address</p>
+
+                        <p class="text-white-50 font-weight-bolder mb-0">PATIENT DETIALS</p>
+                    </div>
+                    <div class="col-3 col-md-2 offset-lg-1 pb-1">
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.FirstName</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.DateOfBirth</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Address</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Phone</p>
+                    </div>
+                    <div class="col-3 col-md-2 offset-lg-1 pb-1">
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Address</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.PostalCode</p>
+                            <p class="text-white-50 fw-semibold mb-0">by @obj.Phone</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div action="container">
+                        <div class="row pt-4">
+
+                            <div class="col-12 text-end mb-4">
+                                <a asp-controller="Product" asp-action="Upsert" class="btn btn-primary mb-2">
+                                    <i class="bi bi-plus-circle"></i> Create New
+
+                                </a>
+                            </div>
+                        </div>
+                        <table id="tblTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        Service
+                                    </th>
+                                    <th>
+                                        Unit Cost
+                                    </th>
+                                    <th>
+                                        Discout
+                                    </th>
+                                    <th>
+                                        Total
+                                    </th>
+                                    
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            @* @foreach (var obj in Model)
+                            { *@
+                            <tr>
+                            <td>@obj.Id</td>
+                            <td>@obj.Address</td>
+                            <td>@obj.PaymentInvoice.UnitCost</td>
+                            <td>@obj.Discount</td>
+                             <td>@obj.Discount</td>
+                            </tr>
+                            @* } *@
+
+                            </tbody>
+
+                        </table>
+
+                            <table id="tblTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            #
+                                        </th>
+                                        <th>
+                                            Total
+                                        </th>
+                                        <th>
+                                            Tax
+                                        </th>
+                                        <th>
+                                            Discount
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @* @foreach (var obj in Model)
+                                { *@
+                                    <tr>
+                                        <td>@obj.Id</td>
+                                        <td>@obj.Total</td>
+                                        <td>@obj.PaymentInvoice.Tax</td>
+                                        <td>@obj.Discount</td>
+                                    </tr>
+                                    @* } *@
+
+                                </tbody>
+
+                            </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+   }
+</form>

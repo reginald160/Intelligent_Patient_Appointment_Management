@@ -36,6 +36,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HMS.Infrastructure\HMS.Infrastructure.csproj" />
     <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj" />
+    <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +44,7 @@
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
     <Folder Include="Areas\Patient\Views\" />
+    <Folder Include="wwwroot\images\patient\" />
   </ItemGroup>
 
 </Project>

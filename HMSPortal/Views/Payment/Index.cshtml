@@ -1,0 +1,55 @@
+﻿@model List<HMSPortal.Domain.Models.Payment>
+
+<div class="card shadow border-0 my-4">
+   
+    <div class="card-body p-4">
+        <div action="container">
+            <div class="row pt-4">
+
+                <div class="col-12 text-end mb-4">
+                    <a asp-controller="Payment" asp-action="Upsert" class="btn btn-primary mb-2">
+                        <i class="bi bi-plus-circle"></i> Create New
+                    </a>
+                </div>
+            </div>
+            <table id="myMblTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Doctor
+                        </th>
+                        <th>
+                            Patient
+                        </th>
+                        <th>
+                            Advance
+                        </th>
+                        <th>
+                            Discount
+                        </th>
+                        <th>
+                            Service
+                        </th>
+                        <th>
+                            Payment
+                        </th>
+                        
+                        <th>
+                            
+                        </th>
+                    </tr>
+                </thead>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/hmsproj-js/payment.js"></script>
+}
+
+
+
