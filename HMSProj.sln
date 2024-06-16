@@ -5,11 +5,13 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMSPortal", "HMSPortal\HMSPortal.csproj", "{F1CE1094-65AC-4BAB-9D1F-81114FE9EB05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSPortal.Domain", "HMSPortal.Domain\HMSPortal.Domain.csproj", "{5A45DBD3-7984-4ACB-855B-8EF9D44DEBFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMSPortal.Domain", "HMSPortal.Domain\HMSPortal.Domain.csproj", "{5A45DBD3-7984-4ACB-855B-8EF9D44DEBFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMS.Infrastructure", "HMS.Infrastructure\HMS.Infrastructure.csproj", "{53F12971-C8A8-464F-8D3B-4AEA0994A0C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMS.Infrastructure", "HMS.Infrastructure\HMS.Infrastructure.csproj", "{53F12971-C8A8-464F-8D3B-4AEA0994A0C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSPortal.Application", "HMSPortal.Application\HMSPortal.Application.csproj", "{137BA465-7BB2-4718-B0DF-F1D523FA0E97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMSPortal.Application", "HMSPortal.Application\HMSPortal.Application.csproj", "{137BA465-7BB2-4718-B0DF-F1D523FA0E97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMS.NTest", "HMS.UnitUnitest\HMS.NTest.csproj", "{7F4FD34E-C16F-4792-B73A-5D204BEDE5D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{137BA465-7BB2-4718-B0DF-F1D523FA0E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{137BA465-7BB2-4718-B0DF-F1D523FA0E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{137BA465-7BB2-4718-B0DF-F1D523FA0E97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F4FD34E-C16F-4792-B73A-5D204BEDE5D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F4FD34E-C16F-4792-B73A-5D204BEDE5D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F4FD34E-C16F-4792-B73A-5D204BEDE5D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F4FD34E-C16F-4792-B73A-5D204BEDE5D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -27,8 +27,8 @@ namespace HMS.Infrastructure.Persistence.DataContext
 
     
         public DbSet<Patient>? Patients { get; set; }
-
-        public DbSet<Doctor>? Doctors { get; set; }
+		public DbSet<SequenceContract>? SequenceContract { get; set; }
+		public DbSet<Doctor>? Doctors { get; set; }
         public DbSet<Payment>? Payments { get; set; }
         public DbSet<PaymentInvoice>? PaymentInvoices { get; set; }
        // public DbSet<InvoicePaymentDetail>? InvoicePaymentDetails { get; set; }
@@ -45,40 +45,45 @@ namespace HMS.Infrastructure.Persistence.DataContext
         #region Actions
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            var time = DateTime.UtcNow;
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity>().ToList())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.DateCreated = time;
-                        entry.Entity.CreatedBy = "";
-                        break;
 
-                    case EntityState.Modified:
-                        entry.Entity.LastUpdatedTime = time;
-                        entry.Entity.UpdatedBy = "";
-                        //if (entry.Entity is IConcurrencyCheck)
-                        //{
-                        //    ValidateConcurrency(entry.Entity);
-                        //    var concurrencyProperty = entry.Property("ConcurrencyToken");
-                        //    concurrencyProperty.OriginalValue = concurrencyProperty.CurrentValue;
-                        //    concurrencyProperty.IsModified = true;
-                        //}
-                        break;
-                }
-            }
-            bool isAuthenticated = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
-            if (userId == Guid.Empty.ToString())
-            {
-                return await base.SaveChangesAsync(cancellationToken);
-            }
-            else
-            {
-                return await base.SaveChangesAsync(userId);
-            }
-        }
+			return await base.SaveChangesAsync(cancellationToken);
+
+			//      var time = DateTime.UtcNow;
+			//      var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+			//      foreach (var entry in ChangeTracker.Entries<AuditableEntity>().ToList())
+			//      {
+			//          switch (entry.State)
+			//          {
+			//              case EntityState.Added:
+			//                  entry.Entity.DateCreated = time;
+			//                  entry.Entity.CreatedBy = "";
+			//entry.Entity.LastUpdatedTime = time;
+
+			//break;
+
+			//              case EntityState.Modified:
+			//                  entry.Entity.LastUpdatedTime = time;
+			//                  entry.Entity.UpdatedBy = "";
+			//                  //if (entry.Entity is IConcurrencyCheck)
+			//                  //{
+			//                  //    ValidateConcurrency(entry.Entity);
+			//                  //    var concurrencyProperty = entry.Property("ConcurrencyToken");
+			//                  //    concurrencyProperty.OriginalValue = concurrencyProperty.CurrentValue;
+			//                  //    concurrencyProperty.IsModified = true;
+			//                  //}
+			//                  break;
+			//          }
+			//      }
+			//      bool isAuthenticated = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+			//      if (userId == Guid.Empty.ToString())
+			//      {
+			//          return await base.SaveChangesAsync(cancellationToken);
+			//      }
+			//      else
+			//      {
+			//          return await base.SaveChangesAsync(userId);
+			//      }
+		}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

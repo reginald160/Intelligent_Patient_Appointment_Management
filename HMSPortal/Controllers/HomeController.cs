@@ -1,3 +1,4 @@
+using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Domain.Models;
 using HMSPortal.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +15,9 @@ namespace HMSPortal.Controllers
 			_logger = logger;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
+
 			return View();
 		}
 

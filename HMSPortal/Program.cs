@@ -1,6 +1,8 @@
 using HMS.Infrastructure.Persistence.DataContext;
 using HMS.Infrastructure.Repositories.IRepository;
 using HMS.Infrastructure.Repositories.Repository;
+using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.Core.Mapper.Automaper;
 using HMSPortal.Domain.Models;
 using HMSPortal.Models;
 using Microsoft.AspNetCore.Identity;
@@ -16,10 +18,16 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+	.AddRoles<IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IIdentityRespository, IdentityRespository>();
+builder.Services.AddScoped<IPatientServices, PatientRepository>();
+builder.Services.AddScoped<IDoctorServices, DoctorRepo>();
+// Add services to the container.
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 

@@ -10,5 +10,6 @@ namespace HMS.Infrastructure.Repositories.IRepository
     public interface IPatientRepository : IRepository<Patient>
     {
 		void Update(Patient obj);
-    }
+
+	}
 }

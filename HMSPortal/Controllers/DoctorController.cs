@@ -1,128 +1,140 @@
-﻿using HMS.Infrastructure.Repositories.IRepository;
+﻿using AutoMapper;
+using HMS.Infrastructure.Repositories.IRepository;
+using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Application.ViewModels;
+using HMSPortal.Application.ViewModels.Doctor;
+using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace HMSPortal.Controllers
 {
-    public class DoctorController : Controller
-    {
-		private readonly IUnitOfWork _unitOfWork;
+	public class DoctorController : Controller
+	{
 		private readonly IWebHostEnvironment _webHostEnvironment;
-		public DoctorController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+		private readonly IDoctorServices _DoctorServices;
+		private readonly IMapper _mapper;
+
+		public DoctorController(IWebHostEnvironment webHostEnvironment, IDoctorServices doctorServices, IMapper mapper)
 		{
-			_unitOfWork = unitOfWork;
-			_webHostEnvironment = webHostEnvironment;
+			_webHostEnvironment=webHostEnvironment;
+			_DoctorServices=doctorServices;
+			_mapper=mapper;
 		}
 
+		[HttpGet]
 		public IActionResult Index()
 		{
-			var obj = _unitOfWork.Doctor.GetAll().ToList();
-			return View(obj);
+            var doctors = _DoctorServices.GetAllDoctors();
+            var data = new GetAllDoctorsViewModel { Doctors = doctors };
+            return View(data);
+
+     
 		}
 
+        [HttpGet]
+        public IActionResult Detail(Guid id)
+        {
+            var doctor= _DoctorServices.GetDoctorById(id);
+            
+            return View(doctor);
 
-		[HttpGet]
-		public IActionResult Upsert(AddDoctorViewModel patient, Guid id)
+
+        }
+
+        [HttpGet]
+		public IActionResult Add()
 		{
-
-			if (id == Guid.Empty)
-			{
-				//Create
-				return View(patient);
-			}
-			else
-			{
-				//Edit
-				var obj = _unitOfWork.Doctor.Get(x => x.Id == id);
-
-				return View(obj);
-			}
-		}
+            return View();
+        }
 
 		[HttpPost]
-		public IActionResult Upsert(AddDoctorViewModel? prodVM, IFormFile file, Guid id)
+		[ValidateAntiForgeryToken]
+		public  async Task<IActionResult> Add(AddDoctorViewModel doctor)
 		{
-			//prodVM.Patient.Id = Guid.NewGuid();
-			//if (ModelState.IsValid)
-			//{
-			string wwwRoothPath = _webHostEnvironment.WebRootPath;
-			if (file != null)
+			if (!ModelState.IsValid)
 			{
-				string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-				string rootPath = Path.Combine(wwwRoothPath, @"images/patient");
+				List<string> errorMessages = new List<string>();
 
-				if (!string.IsNullOrEmpty(prodVM.Doctor.ImageUrl))
+				foreach (var error in ModelState)
 				{
-					var oldImg = Path.Combine(prodVM.Doctor.ImageUrl.TrimStart('\\'));
-
-					if (System.IO.File.Exists(oldImg))
-					{
-						System.IO.File.Delete(oldImg);
-					}
+					var sss = error.Value.Errors.Select(x => x.ErrorMessage).ToList();
+					errorMessages.AddRange(sss);
 				}
 
-				using (var fileStream = new FileStream(Path.Combine(rootPath, fileName), FileMode.Create))
+				// Combine all error messages into a single message
+				string allErrorMessages = string.Join("; ", errorMessages);
+
+				ModelState.AddModelError("error-V", allErrorMessages);
+				return View(doctor);
+			}
+
+			if (_DoctorServices.CheckExistingDoctor(doctor.Email))
+			{
+				ModelState.AddModelError("error-V", "User with email " + doctor.Email+ " already exist");
+
+				return View(doctor);
+			}
+
+			doctor.ImageUrl = FileUpload.UploadFile(doctor.Image);
+			doctor.Password = RandomHelper.GeneratePassword();
+			var result = await _DoctorServices.CreateDoctor(doctor);
+			if (!result.IsSuccessful)
+			{
+				ModelState.AddModelError("error-V", result.Message);
+				return View(doctor);
+			}
+			// Set a flag in TempData to indicate successful submission
+			TempData["Success"] = "Doctor record has been created successfully.";
+			var doctorId = Guid.Parse(result.Data.ToString());
+			return RedirectToAction("Detail", "Doctor", new {id = doctorId });
+
+		}
+
+		public async Task<IActionResult> Edit(Guid id)
+		{
+			var obj = _DoctorServices.GetDoctorById(id);
+			var doctor = _mapper.Map<EditDoctorViewModel>(obj);
+
+			return View(doctor);
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(EditDoctorViewModel doctor)
+		{
+			if (ModelState.IsValid)
+			{
+				if (doctor.Image != null)
 				{
-					file.CopyTo(fileStream);
+					doctor.ImageUrl = FileUpload.UploadFile(doctor.Image);
 				}
-				prodVM.Doctor.ImageUrl = @"images/patient" + fileName;
+				
+				 await _DoctorServices.UpdateDoctorAsync(doctor);
+				//_unitOfWork.Patient.Add(patientModel);
+				TempData["Success"] = "Doctor record has been updated successfully.";
+				return RedirectToAction("Edit", "Doctor", new {id = doctor.Id });
 			}
 
-			
-
-			if (prodVM.Doctor.Id == Guid.Empty)
-			{
-				_unitOfWork.Doctor.Add(prodVM.Doctor);
-				_unitOfWork.Save();
-
-				TempData["Success"] = "Patient created successfully";
-				return RedirectToAction("Index");
-			}
-			else
-			{
-
-				_unitOfWork.Doctor.Update(prodVM.Doctor);
-				_unitOfWork.Save();
-
-				TempData["Success"] = "Patient updated successfully";
-				return RedirectToAction("Index");
-			}
-
+			return View(doctor);
 		}
 
-		[HttpGet]
-		public IActionResult GetAll()
-		{
-			List<Doctor> prodList = _unitOfWork.Doctor.GetAll().ToList();
+		[HttpDelete]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var response = await _DoctorServices.DeleteDoctor(id);
 
-			return Json(new { data = prodList });
-		}
+            if (response.IsSuccessful)
+            {
+                return Json(new { success = true });
 
-		public IActionResult Delete(Guid id)
-		{
-			var prodToDelete = _unitOfWork.Doctor.Get(x => x.Id == id);
-			if (prodToDelete == null)
-			{
-				return Json(new { success = false, message = "Error while deleting" });
-			}
-			var oldImagPath = Path.Combine(_webHostEnvironment.WebRootPath, prodToDelete.ImageUrl.TrimStart('\\'));
+            }
+            else
+            {
+                return Json(new { success = false });
+            }
 
-			if (System.IO.File.Exists(oldImagPath))
-			{
-				System.IO.File.Delete(oldImagPath);
-			}
-			_unitOfWork.Doctor.Remove(prodToDelete);
-			_unitOfWork.Save();
-
-			return Json(new { success = true, message = "Delete Successful" });
-		}
-
-		public IActionResult Detail()
-		{
-			var obj = _unitOfWork.Doctor.GetAll();
-
-			return View(obj);
-		}
-	}
+        }
+    }
 }

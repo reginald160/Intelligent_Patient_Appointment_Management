@@ -207,6 +207,10 @@ namespace HMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Specialty")
                         .HasColumnType("nvarchar(max)");
 
@@ -332,6 +336,10 @@ namespace HMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -445,6 +453,10 @@ namespace HMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ServiceName")
                         .HasColumnType("nvarchar(max)");
 
@@ -550,6 +562,10 @@ namespace HMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("StreetAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -580,6 +596,26 @@ namespace HMS.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PaymentInvoices");
+                });
+
+            modelBuilder.Entity("HMSPortal.Domain.Models.SequenceContract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("AdminCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("DoctorCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PatientCount")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SequenceContract");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

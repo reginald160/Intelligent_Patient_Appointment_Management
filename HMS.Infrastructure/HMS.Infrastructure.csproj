@@ -9,6 +9,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj" />
     <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
 	  <Folder Include="Services\" />
 	  <PackageReference Include="DHTMLX.Scheduler.NET" Version="4.0.3" />

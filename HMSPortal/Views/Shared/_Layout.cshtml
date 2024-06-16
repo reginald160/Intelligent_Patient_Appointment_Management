@@ -1,4 +1,4 @@
-﻿
+﻿@using HMSPortal.Application.Core.Extensions
 <!DOCTYPE html>
 <html lang="en">
 @* <head>
@@ -66,50 +66,33 @@
 						<span class="ti-wheelchair"></span> Patients
 					</a>
 					<ul class="collapse list-unstyled" id="nav-patients">
-						<li>
-							@* <a href="new-patient">Add Patientf</a>  *@
-						<li>
-							<a asp-controller="Patient" asp-action="Upsert">Add Patient</a>
+						
+							
 						</li>
-
+						<a asp-controller="Patient" asp-action="Add">Add Patient</a>
 						</li>
 						<li>
-					        <a asp-controller="Patient" asp-action="Index">All Patient</a>
+					        <a asp-controller="Patient" asp-action="Index">All Patients</a>
 						</li>
-						<li>
-							<a href="about-patient.html">Patient Details</a>
-						</li>
-				@* <li>
-					<a asp-controller="Patient" asp-action="Detail">Patient Details</a>
-				</li> *@
-						<li>
-							<a asp-controller="Patient" asp-action="Edit"></a>
-						</li>
-						<li>
-							<a asp-controller="Patient" asp-action="Delete"></a>
-						</li>
+	
+						
 					</ul>
+
 				</li>
+				
 				<li>
 					<a href="#nav-doctors" data-toggle="collapse" aria-expanded="false">
 						<span class="ti-user"></span> Doctors
 					</a>
 					<ul class="collapse list-unstyled" id="nav-doctors">
 						<li>
-							<a asp-controller="Doctor" asp-action="Upsert">Add Doctor</a>
+							<a asp-controller="Doctor" asp-action="Add">Add Doctor</a>
 						</li>
-						@* <li>
-							<a href="doctors.html">All Doctors</a>
-						</li> *@
+						
 						<li>
 							<a asp-controller="Doctor" asp-action="Index">All Doctors</a>
 						</li>
-						<li>
-							<a href="about-doctor.html">Doctor Details</a>
-						</li>
-						<li>
-							<a href="edit-doctor.html">Edit Doctor</a>
-						</li>
+					
 					</ul>
 				</li>
 				<li>
@@ -395,24 +378,23 @@
 
 				</div>
 			</nav>
-			<!-- /Top Navigation -->
-			<!-- Breadcrumb -->
-			<!-- Page Title -->
-			@* <div class="row no-margin-padding">
-				 <div class="col-md-6">
-					<h3 class="block-title">Quick Statistics</h3>
+			<div class="row no-margin-padding">
+				<div class="col-md-6">
+					<h3 class="block-title">@ViewData["Title"]</h3>
 				</div>
 				<div class="col-md-6">
 					<ol class="breadcrumb">
 						<li class="breadcrumb-item">
-							<a href="index.html">
+							<a asp-action="Index" asp-controller="Dashboard">
 								<span class="ti-home"></span>
 							</a>
 						</li>
-						<li class="breadcrumb-item active">Dashboard</li>
+						<li class="breadcrumb-item">@Html.GetControllerDisplayName()</li>
+						<li class="breadcrumb-item active">@ViewData["Title"]</li>
 					</ol>
 				</div>
-			</div> *@
+			</div>
+		
 
 			@RenderBody()
 
@@ -431,6 +413,8 @@
 	<script src="charts/js/raphael-min.js"></script>
 	<script src="charts/js/morris.min.js"></script>
 	<script src="js/custom-morris.js"></script>
+	<script src="js/modernizr.min.js"></script>
+
 	<script>
 		function reloadPage() {
 			location.reload();

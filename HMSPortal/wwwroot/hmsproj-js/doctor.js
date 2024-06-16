@@ -1,32 +1,55 @@
 ﻿$(document).ready(function () {
-    loaddatatable();
+    $('#tblTable').DataTable();
 });
 
-function loaddatatable() {
+function confirmDelete(id) {
 
-    dataTable = $('#tblTable').DataTable({
-        "ajax": { url: '/doctor/getall' },
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deletePatient(id);
+        }
+    });
+}
 
-        "columns": [
-            { data: 'firstName', "width": "15%" },
-            { data: 'lastName', "width": "15%" },
-            { data: 'phone', "width": "10%" },
-            { data: 'address', "width": "15%" },
-            { data: 'specialty', "width": "10%" },
-            { data: 'yearsOfExperience', "width": "15%" },
-
-            {
-                data: 'id',//myMblTable
-
-                "render": function (data) {
-                    return `<div class="w-75 btn-group" role="group">
-                        <a href="/doctor/upsert?id=${data}" class="btn btn-primary mx-2"> <i class="bi bi-pencil-squar"></i>Edit</a>
-                        <a href="/doctor/delete?id=${data}" class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i>Delete</a>
-                    </div>`
-                },
-
-                "width": "20%"
+function deletePatient(id) {
+    $.ajax({
+        url: "/Doctor/delete/",
+        data:
+        {
+            "id": id
+        },
+        type: "DELETE",
+        success: function (response) {
+            if (response.success) {
+                Swal.fire(
+                    'Deleted!',
+                    response.message,
+                    'success'
+                ).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire(
+                    'Error!',
+                    response.message,
+                    'error'
+                );
             }
-        ]
+        },
+        error: function () {
+            Swal.fire(
+                'Error!',
+                'There was an error deleting the doctor.',
+                'error'
+            );
+        }
     });
 }

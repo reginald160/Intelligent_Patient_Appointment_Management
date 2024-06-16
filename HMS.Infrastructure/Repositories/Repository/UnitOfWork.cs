@@ -23,7 +23,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 		public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
-            Patient = new PatientRepository(_db);
+        /*    Patient = new PatientRepository(_db)*/;
 			Doctor = new DoctoreRepository(_db);
 			Payment = new PaymentRepository(_db);
 			PaymentInvoice = new PaymentInvoiceRepository(_db);
