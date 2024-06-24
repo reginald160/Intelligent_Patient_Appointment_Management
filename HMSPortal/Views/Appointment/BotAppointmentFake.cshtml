@@ -1,0 +1,214 @@
+﻿@using HMSPortal.Application.Core
+@using HMSPortal.Application.Core.Cache
+@using HMSPortal.Domain.Models
+@using Microsoft.AspNetCore.Identity
+@using Newtonsoft.Json
+@model HMSPortal.Application.ViewModels.Chat.BotMessage
+@inject IHttpContextAccessor _httpContextAccessor;
+@inject UserManager<ApplicationUser> _userManager
+@inject ICacheService _cache;
+@{
+    ViewData["Title"] = "Chatbot";
+    var userId = string.Empty;
+    var cacheKey = CoreValiables.LoginUser;
+    var userCache = new CacheUserModel();
+    var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(cacheKey);
+
+    var user = _httpContextAccessor.HttpContext.User;
+    if (user.Identity.IsAuthenticated)
+    {
+        var currentUser = await _userManager.GetUserAsync(user);
+        if (currentUser != null)
+        {
+            userId = currentUser.Id;
+        }
+    }
+    else
+    {
+        var currentUser = _userManager.Users.FirstOrDefault(x => x.Email == "ozougwuifeanyi160@gmail.com");
+        if (currentUser != null)
+        {
+            userId = currentUser.Id;
+        }
+    }
+}
+
+
+<div class="container py-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+            <div class="card" id="chat2">
+                <div class="card-header d-flex justify-content-between align-items-center p-3">
+                    <h5 class="mb-0">Chat</h5>
+                    <button type="button" class="btn btn-primary btn-sm">AI Appointment Chat App</button>
+                </div>
+                <input id="userId" value="@userId" hidden="hidden" />
+                <div class="card-body" id="chat-box" style="position: relative; height: 400px; overflow-y: scroll;">
+                    @foreach (var message in Model.Messages)
+                    {
+                        if(message.Type == CoreValiables.ChatRecieved)
+                        {
+                            <div class="d-flex flex-row mb-4 pt-1 justify-content-end">
+                                <div class="">
+                                    <p class="small p-2 me-3 mb-1 text-white  user-message">@message.Content</p>
+                                    <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">@message.SentAt.ToString("h:mm:ss tt");</p>
+                                </div>
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                <div>
+                                    <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">@message.Content</p>
+                                    <p class="small ms-3 mb-3 rounded-3 text-muted">@message.SentAt.ToString("h:mm:ss tt")</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                <div id="typing-indicator" style="display: none;" class="text-center mt-2">Bot is typing...</div>
+                <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
+                         alt="avatar 3" style="width: 40px; height: 100%;">
+                    <input type="text" class="form-control form-control-lg" id="userMessage" placeholder="Type your message">
+                    <button onclick="sendMessage()" class="btn btn-primary ms-3">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #chat2 .form-control {
+        border-color: transparent;
+    }
+
+        #chat2 .form-control:focus {
+            border-color: transparent;
+            box-shadow: inset 0px 0px 0px 1px transparent;
+        }
+
+    .divider:after,
+    .divider:before {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eee;
+    }
+
+    .message {
+        padding: 5px;
+        margin: 5px;
+        border-radius: 5px;
+    }
+
+    .user-message {
+        text-align: right;
+        background-color: #1A76D1;
+        position: relative;
+        clear: both;
+        display: inline-block;
+        padding: 16px 40px 16px 20px;
+        margin: 0 0 20px 0;
+        font: 16px/20px 'Noto Sans', sans-serif;
+        border-radius: 10px;
+    }
+
+    .bot-message {
+        text-align: left;
+        background-color: #DC6C97;
+        position: relative;
+        clear: both;
+        display: inline-block;
+        padding: 16px 40px 16px 20px;
+        margin: 0 0 20px 0;
+        font: 16px/20px 'Noto Sans', sans-serif;
+        border-radius: 10px;
+    }
+
+    @@media (max-width: 450px) {
+        .card {
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+<script>
+     
+    const chatBox = document.getElementById('chat-box');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const userMessageInput = document.getElementById('userMessage');
+    const userIdValue = document.getElementById('userId');
+
+   
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", function (user, message) {
+        const messageClass = user === 'You' ? 'user-message' : 'bot-message';
+        appendMessage(user, message, "bot-message");
+
+    });
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    async function sendMessage() {
+        const userMessage = userMessageInput.value.trim();
+        const userId = userIdValue.value.trim();
+        
+        if (userMessage === '') return;
+
+        appendMessage('You', userMessage, 'user-message');
+
+        typingIndicator.style.display = 'block';
+
+        try {
+            await connection.invoke("SendMessage", userId, userMessage);
+            typingIndicator.style.display = 'none';
+            userMessageInput.value = '';
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function appendMessage(sender, message, className) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1');
+
+        if (className === 'user-message') {
+            messageElement.classList.add('justify-content-end');
+            messageElement.innerHTML = `
+                                <div class="">
+                                    <p class="small p-2 me-3 mb-1 text-white  user-message">${message}</p>
+                                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">${new Date().toLocaleTimeString()}</p>
+                            </div>
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        `;
+        } else {
+            messageElement.classList.add('justify-content-start');
+            messageElement.innerHTML = `
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                            <div>
+                                        <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">${message}</p>
+                                <p class="small ms-3 mb-3 rounded-3 text-muted">${new Date().toLocaleTimeString()}</p>
+                            </div>
+                        `;
+        }
+
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  
+
+   
+
+    
+</script>

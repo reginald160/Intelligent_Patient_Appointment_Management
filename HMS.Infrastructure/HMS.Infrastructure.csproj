@@ -13,6 +13,8 @@
     <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
 	  <Folder Include="Services\" />
 	  <PackageReference Include="DHTMLX.Scheduler.NET" Version="4.0.3" />
+	  <PackageReference Include="Hangfire" Version="1.8.14" />
+	  <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
 	  <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.3" />
 	  <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.3" />

@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-color: #D86896;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+            .email-header img {
+                max-width: 100px;
+                margin-bottom: 10px;
+            }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+        }
+
+        .appointment-details {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #D86896;
+            border-radius: 5px;
+            background-color: #fdf1f4;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #D86896;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .doctor-section {
+            background: url('{{bgImageUrl}}') no-repeat center center;
+            background-size: cover;
+            padding: 50px 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+            .doctor-section h2 {
+                margin: 0;
+            }
+
+            .doctor-section p {
+                margin: 5px 0 0 0;
+            }
+
+        .google-calendar {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #D86896;
+            border-radius: 5px;
+            background-color: #fdf1f4;
+            text-align: center;
+        }
+
+            .google-calendar a {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #4285F4;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <img src="{{LogoURL}}" alt="Clinic Logo">
+            <h1>Appointment Scheduled</h1>
+        </div>
+        <div class="email-body">
+            <p>Dear {{PatientName}},</p>
+            <p>We are pleased to inform you that your appointment has been scheduled. Here are the details:</p>
+            <div class="appointment-details">
+                <p><strong>Date:</strong> {{AppointmentDate}}</p>
+                <p><strong>Time:</strong> {{AppointmentTime}}</p>
+                <p><strong>Location:</strong> {{ClinicLocation}}</p>
+            </div>
+            <p>Please make sure to arrive at least 15 minutes before your scheduled time. If you need to reschedule or cancel your appointment, please click the button below or contact our office.</p>
+            <a href="[Reschedule Link]" class="button">Reschedule or Cancel</a>
+            <div class="google-calendar">
+                <p>Add this appointment to your Google Calendar:</p>
+                <a href="{{GoogleCalendarLink}}" target="_blank">Add to Google Calendar</a>
+            </div>
+        </div>
+        <div class="doctor-section">
+            <h2>Dr. [Doctor Name]</h2>
+            <p>[Specialization]</p>
+        </div>
+        <div class="email-footer">
+            <p>Thank you for choosing our clinic.</p>
+            <p>&copy; 2024 Your Clinic Name. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

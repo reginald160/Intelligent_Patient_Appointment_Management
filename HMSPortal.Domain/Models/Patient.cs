@@ -12,7 +12,8 @@ namespace HMSPortal.Domain.Models
         public int Weight { get; set; }
         public int Height { get; set; }
         [NotMapped]
-        public Double BMI { get; set; }
-        
-    }
+        public double BMI { get; set; }
+		public ICollection<AppointmentModel>? Appointments { get; set; } 
+
+	}
 }

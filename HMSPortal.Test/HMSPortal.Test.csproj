@@ -5,11 +5,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E00D229D-06A6-49C3-BCE0-C146A7E8AAD6}</ProjectGuid>
+    <ProjectGuid>{E4BEBAA0-7AB0-4743-98C8-14C80D8EDBD0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HMS.Test</RootNamespace>
-    <AssemblyName>HMS.Test</AssemblyName>
+    <RootNamespace>HMSPortal.Test</RootNamespace>
+    <AssemblyName>HMSPortal.Test</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -54,12 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj">
-      <Project>{137ba465-7bb2-4718-b0df-f1d523fa0e97}</Project>
-      <Name>HMSPortal.Application</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

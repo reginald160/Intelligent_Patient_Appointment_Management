@@ -10,8 +10,19 @@ namespace HMSPortal.Application.Core.Helpers
 	public class RandomHelper
 	{
 		private static readonly Random random = new Random();
+        public static string GenerateAppointmentReferenceNumber()
+        {
+            // Use current date and time as a base
+            var dateTimePart = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
 
-		public static string GeneratePassword()
+            // Add a random component to ensure uniqueness
+            var randomPart = new Random().Next(1000, 9999).ToString();
+
+            // Combine both parts to form the reference number
+            return $"{dateTimePart}-{randomPart}";
+        }
+
+        public static string GeneratePassword()
 		{
 			const string upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 			const string lowerCase = "abcdefghijklmnopqrstuvwxyz";

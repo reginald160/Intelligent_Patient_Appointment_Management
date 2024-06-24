@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HMSPortal.Application.ViewModels;
+using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Doctor;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,9 @@ namespace HMSPortal.Application.Core.Mapper.Automaper
 		public MappingProfile()
 		{
 			CreateMap<GetDoctorViewModel, EditDoctorViewModel>();
-			
-			// Add other mappings here
-		}
+    
+
+            // Add other mappings here
+        }
 	}
 }

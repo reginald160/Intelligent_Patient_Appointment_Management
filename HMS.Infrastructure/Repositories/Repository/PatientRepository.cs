@@ -9,6 +9,7 @@ using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Enums;
 using HMSPortal.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,14 @@ namespace HMS.Infrastructure.Repositories.Repository
 	{
         private readonly ApplicationDbContext _db;
         private readonly IIdentityRespository _identityRespository;
+		private readonly IMemoryCache _memoryCache;
 
 
-		public PatientRepository(ApplicationDbContext db, IIdentityRespository identityRespository) : base()
+		public PatientRepository(ApplicationDbContext db, IIdentityRespository identityRespository, IMemoryCache memoryCache) : base()
 		{
 			_db = db;
 			_identityRespository=identityRespository;
+			_memoryCache=memoryCache;
 		}
 		public GetPatientViewModel GetPatientById(Guid id)
 		{
@@ -84,6 +87,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 				patient.IsDeleted = true;
 				_db.Patients.Update(patient);
 				await _db.SaveChangesAsync();
+				UpdatePatientCountCache();
 				return new AppResponse { IsSuccessful = true };
 			}
 			catch (Exception ex)
@@ -153,6 +157,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 				var patient = await _db.Patients.AddAsync(patientModel);
 				await _db.SaveChangesAsync();
 				await new SequenceContractHelper().UpdateSequence(seqNumber, 1);
+				UpdatePatientCountCache();
 				return new AppResponse
 				{
 					IsSuccessful = true,
@@ -175,6 +180,15 @@ namespace HMS.Infrastructure.Repositories.Repository
 		public bool CheckExistingPatient(string email)
 		{
 			return _identityRespository.ExistingUserEmail(email);
+		}
+
+		private void UpdatePatientCountCache()
+		{
+			var patientCount = _db.Patients.Count(x => !x.IsDeleted).ToString();
+			var cacheEntryOptions = new MemoryCacheEntryOptions()
+				.SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Set the cache expiration time
+
+			_memoryCache.Set(CoreValiables.PatientCountCacheKey, patientCount, cacheEntryOptions);
 		}
 	}
 }

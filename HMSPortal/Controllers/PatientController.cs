@@ -24,6 +24,7 @@ namespace HMSPortal.Controllers
 		private readonly IPatientServices _patientServices;
 
 		private readonly IWebHostEnvironment _webHostEnvironment;
+
 		public PatientController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IPatientServices patientServices)
 		{
 			_unitOfWork = unitOfWork;

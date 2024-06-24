@@ -102,7 +102,7 @@ namespace HMSPortal.Application.Core.Helpers
 					throw new ArgumentException("Invalid input. Please provide an integer between 1 and 3.");
 			}
 		}
-		private async Task<bool> SequenceHasValue()
+		public async Task<bool> SequenceHasValue()
 		{
 			string query = "SELECT COUNT(*) FROM SequenceContract";
 			int count = 0;
