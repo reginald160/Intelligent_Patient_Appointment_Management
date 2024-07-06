@@ -35,11 +35,13 @@ namespace HMS.Infrastructure.Persistence.DataContext
 		public DbSet<AppointmentJobScheduleModel>? appointmentJobScheduleModels { get; set; }
 		public DbSet<AppointmentEvents>? AppointmentEvents { get; set; }
 		public DbSet<ChatModel>? ChatModels { get; set; }
+        public DbSet<BrockerMessage>? BrockerMessages { get; set; }
+        public DbSet<BrockerSubscription>? BrockerSubscriptions { get; set; }
 
-		//public IDbConnection Connection => throw new NotImplementedException();
+        //public IDbConnection Connection => throw new NotImplementedException();
 
 
-		public override EntityEntry Remove(object entity)
+        public override EntityEntry Remove(object entity)
         {
 
             return base.Remove(entity);

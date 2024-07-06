@@ -33,7 +33,9 @@
     }
 }
 
-
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <div class="container py-5">
     <div class="row d-flex justify-content-center">
         <div class="col-md-10 col-lg-8 col-xl-6">
@@ -154,6 +156,13 @@
         appendMessage(user, message, "bot-message");
 
     });
+    connection.on("ReceiveOptions", function (user, options) {
+        appendOptions(user, options);
+    });
+
+    connection.on("ShowDatePicker", function () {
+        showDatePicker();
+    });
 
     connection.start().catch(function (err) {
         return console.error(err.toString());
@@ -173,6 +182,27 @@
             await connection.invoke("SendMessage", userId, userMessage);
             typingIndicator.style.display = 'none';
             userMessageInput.value = '';
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function showDatePicker() {
+        $("#datePickerInput").datepicker({
+            onSelect: function (dateText) {
+                appendMessage('You', `Selected Date: ${dateText}`, 'user-message');
+                // Here you can handle the selected date as needed
+                sendDateToBot(dateText);
+            }
+        }).datepicker("show");
+    }
+
+    async function sendDateToBot(dateText) {
+        const userId = userIdValue.value.trim();
+
+        try {
+            await connection.invoke("SendMessage", userId, `Selected Date: ${dateText}`);
         } catch (err) {
             console.error(err.toString());
             appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');

@@ -14,6 +14,11 @@ namespace HMSPortal.Application.ViewModels.Chat
         public string Type { get; set; }
         public string Response { get; set; }
         public DateTime SentAt { get; set; }
+        public bool HasOptions { get; set; }
+        public string Options { get; set; }
+        public string? UserIntent { get; set; }
+        public string? BotMessage { get; set; }
+        public string? APIResponse { get; set; }
 
 
     }

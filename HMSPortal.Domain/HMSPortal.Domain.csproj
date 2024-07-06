@@ -22,4 +22,16 @@
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
 	</ItemGroup>
 
+
+
+	<ItemGroup>
+	  <EditorConfigFiles Remove="C:\Users\windo\source\repos\HMSProj\HMSPortal.Domain\Models\.editorconfig" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <None Include="C:\Users\windo\source\repos\HMSProj\HMSPortal.Domain\Models\.editorconfig" />
+	</ItemGroup>
+
 </Project>

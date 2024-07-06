@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +59,21 @@ builder.Services.AddHangfire(configuration => configuration
 
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
+
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    //.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    //.MinimumLevel.Override("System", LogEventLevel.Warning)
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Clear default logging providers
+builder.Logging.ClearProviders();
 
 var app = builder.Build();
 

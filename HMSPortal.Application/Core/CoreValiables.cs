@@ -15,5 +15,8 @@ namespace HMSPortal.Application.Core
 		public const string CacheUserEmail = "UserEmail";
         public const string ChatSent = "Response";
         public const string ChatRecieved = "Request";
+        public const string ChatTextEndpoint = "ReceiveMessage";
+        public const string ChatOptionsEndpoint = "ReceiveOptions";
+        public const string BootAppointmentTopic = "BookAppointment";
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core.Cache;
+using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ namespace HMSPortal.Controllers
         private readonly IAppointmentServices _appointmentServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
+       
 
 
         public AppointmentController(IWebHostEnvironment webHostEnvironment,
@@ -23,9 +25,12 @@ namespace HMSPortal.Controllers
             _mapper=mapper;
             _cacheService=cacheService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var response =  await _appointmentServices.GetAllAppointment();
+            var apponitments = response.Data as List<AllAppointmentViewModel>;
+
+            return View(apponitments);
         }
         public async Task<IActionResult> Add()
 		{
@@ -55,6 +60,17 @@ namespace HMSPortal.Controllers
         {
             await _appointmentServices.CreateAppointmentByAdmin(viewModel);
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public JsonResult GetAvailableTimeSlots(string date)
+        {
+            // Logic to fetch available time slots based on the date.
+            // This is just a sample. Replace it with your actual logic.
+            var dateObject = DateTime.Parse(date);
+            var timeSlots = _appointmentServices.GetAvailableSlotsForDateToString(dateObject);
+
+            return Json(timeSlots);
         }
 
         [NonAction]

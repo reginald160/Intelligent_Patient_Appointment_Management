@@ -22,5 +22,8 @@ namespace HMSPortal.Application.ViewModels.Appointment
 		public string? Department { get; set; }
         public List<SelectListItem>? Patients { get; set; }
         public List<SelectListItem>? Doctors { get; set; }
+
+
+
     }
 }

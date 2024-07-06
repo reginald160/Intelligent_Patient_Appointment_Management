@@ -8,8 +8,6 @@
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-
-
 <!-- Main Content -->
 <div class="container-fluid">
     <div class="row">
@@ -20,13 +18,12 @@
                 <form method="post">
                     @Html.AntiForgeryToken()
                     <input asp-for="Patients" hidden="hidden" />
-                    <input asp-for="Patients" hidden="hidden" />
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="patient-name">Patient Name</label>
                             <select class="form-control" id="patient-name" asp-for="PatientId">
                                 <option value="">Select Patient</option>
-                                @if(Model.Patients != null)
+                                @if (Model.Patients != null)
                                 {
                                     @foreach (var patient in Model.Patients)
                                     {
@@ -54,7 +51,7 @@
                                         <option value="@doctor.Value">@doctor.Text</option>
                                     }
                                 }
-                                
+
                             </select>
                         </div>
                         <div class="form-group col-md-6">
@@ -64,15 +61,8 @@
                         <div class="form-group col-md-6">
                             <label for="time-slot">Time Slot</label>
                             <select asp-for="TimeSlot" class="form-control" id="time-slot" required>
-                                <option>10AM-11AM</option>
-                                <option>11AM-12PM</option>
-                                <option>12PM-01PM</option>
-                                <option>2PM-3PM</option>
-                                <option>3PM-4PM</option>
-                                <option>4PM-5PM</option>
-                                <option>6PM-7PM</option>
-                                <option>7PM-8PM</option>
-                                <option>8PM-9PM</option>
+                                <option value="">Select Time Slot</option>
+                                <!-- Time slots will be populated here based on the selected date -->
                             </select>
                         </div>
                         <div class="form-group col-md-6">
@@ -118,36 +108,36 @@
 
 <script>
     $(document).ready(function () {
- 
-        $('#time-slot').select2({
-            width: '522px' // Correct way to set width
-        
-        });
-        $('#patient-name').select2({
-            width: '522px' // Correct way to set width
+        $('#patient-name').select2({ width: '522px' });
+        $('#doctor-name').select2({ width: '522px' });
+        $('#department').select2({ width: '522px' });
 
-        });
-        $('#doctor-name').select2({
-            width: '522px' // Correct way to set width
+        // Set the min attribute for the appointment-date input to today's date
+        var today = new Date().toISOString().split('T')[0];
+        $('#appointment-date').attr('min', today);
 
+        $('#appointment-date').on('change', function () {
+            var selectedDate = $(this).val();
+            if (selectedDate) {
+                $.ajax({
+                    url: '@Url.Action("GetAvailableTimeSlots", "Appointment")', // Adjust controller and action method as needed
+                    type: 'GET',
+                    data: { date: selectedDate },
+                    success: function (data) {
+                        var timeSlotSelect = $('#time-slot');
+                        timeSlotSelect.empty();
+                        timeSlotSelect.append('<option value="">Select Time Slot</option>');
+                        $.each(data, function (index, timeSlot) {
+                            timeSlotSelect.append('<option value="' + timeSlot + '">' + timeSlot + '</option>');
+                        });
+                        timeSlotSelect.select2({ width: '522px' });
+                    }
+                });
+            }
         });
-        $('#department').select2({
-            width: '522px' // Correct way to set width
-
-        });
-        
-        
     });
-
-</script>
-
-<script>
-    function reloadPage() {
-        location.reload();
-    }
 </script>
 
 <script src="~/js/custom.js"></script>
 <script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
 <script src="https://cdn.tiny.cloud/1/d1fpkxihlzdu61yllazo0c9ehlxeuk04a3awulg82m1vo2b4/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-

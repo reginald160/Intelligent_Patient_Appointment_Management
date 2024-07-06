@@ -4,6 +4,7 @@ using HMS.Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240627091635_chat_added_inten_and_RecievedMessage")]
+    partial class chat_added_inten_and_RecievedMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -339,46 +342,6 @@ namespace HMS.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AuditLogs");
-                });
-
-            modelBuilder.Entity("HMSPortal.Domain.Models.BrockerMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Delivered")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Topic")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BrockerMessages");
-                });
-
-            modelBuilder.Entity("HMSPortal.Domain.Models.BrockerSubscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Subscriber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Topic")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BrockerSubscriptions");
                 });
 
             modelBuilder.Entity("HMSPortal.Domain.Models.Contract.ChatModel", b =>

@@ -12,6 +12,7 @@
     <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj" />
     <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
 	  <Folder Include="Services\" />
+	  <PackageReference Include="Confluent.Kafka" Version="2.4.0" />
 	  <PackageReference Include="DHTMLX.Scheduler.NET" Version="4.0.3" />
 	  <PackageReference Include="Hangfire" Version="1.8.14" />
 	  <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
@@ -26,6 +27,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+	  <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+	  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

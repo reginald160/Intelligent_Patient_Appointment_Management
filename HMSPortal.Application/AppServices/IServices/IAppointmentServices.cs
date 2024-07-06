@@ -14,6 +14,9 @@ namespace HMSPortal.Application.AppServices.IServices
     public interface IAppointmentServices
     {
         Task<AppResponse> CreateAppointmentByAdmin(AddAppointmentViewModel viewModel);
+        Task<AppResponse> CreateAppointmentByPatient(AddAppointmentViewModel viewModel);
+        Task<AppResponse> GetAllAppointment();
+		List<string> GetAvailableSlotsForDateToString(DateTime date);
         Task<(List<SelectListItem> Patients, List<SelectListItem> Doctors)> GetPatientAndDoctor();
         Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages);
         Task<AppResponse> SaveChat(BotMessageViewModel viewModel);

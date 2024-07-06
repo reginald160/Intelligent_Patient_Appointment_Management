@@ -11,6 +11,12 @@ using HMSPortal.Application.Core.Notification;
 using HMSPortal.Application.AppSettings;
 using Microsoft.Extensions.Options;
 using HMSPortal.Application.Core.Cache;
+using HMSPortal.Application.Core.Chat.Api;
+using HMSPortal.Application.Core.Chat.Bot;
+using HMS.Infrastructure.Schedulers.Appointment;
+using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
+using System.Configuration;
+using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
 
 namespace HMSPortal.AppConfig
 {
@@ -45,7 +51,11 @@ namespace HMSPortal.AppConfig
             services.AddTransient<INotificatioServices, NotificationRepository>();
             services.AddScoped<ICryptographyService, CryptographyService>();
 			services.AddScoped<ICacheService, CacheRepository>();
-			services.AddSignalR();
+            services.AddScoped<ResponseModerator>();
+            services.AddScoped<AppointmentScheduler>();
+            
+            services.AddScoped<IlemaApiRequest>();
+            services.AddSignalR();
             services.AddMemoryCache();
             services.AddHttpContextAccessor();
 			services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
@@ -62,6 +72,16 @@ namespace HMSPortal.AppConfig
             // If needed, also register it as a singleton
             services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AppSetting>>().Value);
             services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<SMTPSettings>>().Value);
+            services.AddSingleton<IMessageBroker, MessageBroker>();
+            services.AddHostedService<MessageBrokerHostedService>();
+
+            //var brokerList = configuration["Kafka:BrokerList"];
+            //var groupId = configuration["Kafka:GroupId"];
+            //var topics = configuration.GetSection("Kafka:Topics").Get<List<string>>();
+
+            //services.AddSingleton(sp => new KafkaQueueService(sp.GetRequiredService<ILogger<KafkaQueueService>>(), brokerList, groupId, topics));
+
+            //services.AddHostedService(sp => sp.GetRequiredService<KafkaQueueService>());
         }
     }
 }

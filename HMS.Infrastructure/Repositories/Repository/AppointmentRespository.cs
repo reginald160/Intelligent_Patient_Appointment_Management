@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HMS.Infrastructure.Persistence.DataContext;
+using HMS.Infrastructure.Schedulers.Appointment;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core.CryptoGraphy;
 using HMSPortal.Application.Core.Helpers;
@@ -34,19 +35,21 @@ namespace HMS.Infrastructure.Repositories.Repository
 		private readonly INotificatioServices _notificatioServices;
 		private readonly ICryptographyService _cryptographyService;
 		private readonly IHttpContextAccessor contextAccessor;
-		public string rootPath { get; set; }
-		public AppointmentRespository(ApplicationDbContext dbContext, IMapper mapper, IConfiguration configuration, IHostingEnvironment hostingEnvironment, INotificatioServices notificatioServices, ICryptographyService cryptographyService, IHttpContextAccessor contextAccessor)
-		{
-			_dbContext=dbContext;
-			_mapper=mapper;
-			_configuration=configuration;
-			_hostingEnvironment=hostingEnvironment;
-			_notificatioServices=notificatioServices;
-			_cryptographyService=cryptographyService;
-			this.contextAccessor=contextAccessor;
-			rootPath = _hostingEnvironment.ContentRootPath;
-		}
-		public async Task<(List<SelectListItem> Patients, List<SelectListItem> Doctors)> GetPatientAndDoctor()
+        private readonly AppointmentScheduler _appointmentScheduler;
+        public string rootPath { get; set; }
+        public AppointmentRespository(ApplicationDbContext dbContext, IMapper mapper, IConfiguration configuration, IHostingEnvironment hostingEnvironment, INotificatioServices notificatioServices, ICryptographyService cryptographyService, IHttpContextAccessor contextAccessor, AppointmentScheduler appointmentScheduler)
+        {
+            _dbContext=dbContext;
+            _mapper=mapper;
+            _configuration=configuration;
+            _hostingEnvironment=hostingEnvironment;
+            _notificatioServices=notificatioServices;
+            _cryptographyService=cryptographyService;
+            this.contextAccessor=contextAccessor;
+            rootPath = _hostingEnvironment.ContentRootPath;
+            _appointmentScheduler=appointmentScheduler;
+        }
+        public async Task<(List<SelectListItem> Patients, List<SelectListItem> Doctors)> GetPatientAndDoctor()
         {
             var patients = await _dbContext.Patients
                                            .Where(p => !p.IsDeleted)
@@ -71,16 +74,17 @@ namespace HMS.Infrastructure.Repositories.Repository
 
         public async Task<AppResponse> CreateAppointmentByAdmin(AddAppointmentViewModel viewModel)
         {
-           
+
             AppointmentModel appointment = new AppointmentModel
             {
                 Id = Guid.NewGuid(),
                 Date = viewModel.Date,
-                DoctorId = Guid.Parse(viewModel.DoctorId),
-                PatientId = Guid.Parse(viewModel.PatientId),
+                DoctorId = !string.IsNullOrEmpty(viewModel.DoctorId) ? Guid.Parse(viewModel.DoctorId) : null,
+                PatientId =  !string.IsNullOrEmpty(viewModel.PatientId) ? Guid.Parse(viewModel.PatientId) : null,
                 ProblemDescrion = viewModel.ProblemDescrion,
                 Department = viewModel.Department,
                 TimeSlot = viewModel.TimeSlot,
+                Status = "Up coming",
                 DateCreated = DateTimeOffset.Now,
                 AppointmentType = AppointmentType.ByAdmin.ToString(),
                 ReferenceNumber = RandomHelper.GenerateAppointmentReferenceNumber(),
@@ -110,8 +114,90 @@ namespace HMS.Infrastructure.Repositories.Repository
             }
 
         }
+        public async Task<AppResponse> CreateAppointmentByPatient(AddAppointmentViewModel viewModel)
+        {
 
-        public async Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages)
+            AppointmentModel appointment = new AppointmentModel
+            {
+                Id = Guid.NewGuid(),
+                Date = viewModel.Date,
+                DoctorId = !string.IsNullOrEmpty(viewModel.DoctorId) ? Guid.Parse(viewModel.DoctorId) : null,
+                PatientId =  !string.IsNullOrEmpty(viewModel.PatientId) ? Guid.Parse(viewModel.PatientId) : null,
+                ProblemDescrion = viewModel.ProblemDescrion,
+                Department = viewModel.Department,
+                TimeSlot = viewModel.TimeSlot,
+                Status = "Up coming",
+                DateCreated = DateTimeOffset.Now,
+                AppointmentType = AppointmentType.ByPatient.ToString(),
+                ReferenceNumber = RandomHelper.GenerateAppointmentReferenceNumber(),
+
+
+            };
+            var patient = _dbContext.Patients.FirstOrDefault(x => x.Id == appointment.PatientId);
+
+            try
+            {
+                await _dbContext.Appointments.AddAsync(appointment);
+                //await  _dbContext.SaveChangesAsync();
+
+                //await _notificatioServices.SendAppointmentConfirmationEmail(viewModel);
+
+
+
+                return new AppResponse
+                {
+                    IsSuccessful = true,
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new AppResponse();
+            }
+
+        }
+
+        public async Task<AppResponse> GetAllAppointment()
+		{
+           
+			try
+			{
+				var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted)
+				.Select(x => new AllAppointmentViewModel
+				{
+					Id = x.Id,
+					Date = x.Date,
+					DoctorComment = x.DoctorComment,
+					DoctorId = x.DoctorId,
+                    PatientRef = x.Patient.PatientCode,
+					PatientId = x.PatientId,
+					PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+					StartTime = x.StartTime,
+					Status = x.Status,
+					ReferenceNumber = x.ReferenceNumber,
+					ProblemDescrion = x.ProblemDescrion,
+					TimeSlot = x.TimeSlot,
+					AppointmentType = x.AppointmentType
+
+				}).ToListAsync();
+
+
+
+				return new AppResponse
+				{
+					IsSuccessful = true,
+                    Data = appointments
+				};
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.ToString());
+				return new AppResponse();
+			}
+
+		}
+
+		public async Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages)
         {
             return await _dbContext.ChatModels
                 .OrderBy(cm => cm.SentAt)
@@ -120,7 +206,10 @@ namespace HMS.Infrastructure.Repositories.Repository
                     UserId = x.UserId,
                     SentAt = x.SentAt,
                     Type = x.MessageType,
-                    Content = x.Message
+                    Content = x.Message,
+                    Options = x.Options,
+                    HasOptions = x.HasOptions
+
                 })
                 .ToListAsync();
         }
@@ -133,7 +222,9 @@ namespace HMS.Infrastructure.Repositories.Repository
                     SentAt = DateTime.UtcNow,
                     Message = viewModel.Content,
                     UserId = viewModel.UserId,
-                    MessageType = viewModel.Type
+                    MessageType = viewModel.Type,
+                    HasOptions = viewModel.HasOptions,
+                    Options = string.IsNullOrEmpty(viewModel.Options) ? "" : viewModel.Options ,
                 };
                await  _dbContext.ChatModels.AddAsync(model);
                await _dbContext.SaveChangesAsync();
@@ -148,6 +239,19 @@ namespace HMS.Infrastructure.Repositories.Repository
             }
 
         }
+
+        public List<string> GetAvailableSlotsForDateToString(DateTime date)
+        {
+            return _appointmentScheduler.GetAvailableSlotsForDateToString(date);
+        }
+        //public async Task<bool> CancelAppointmentAsync(string reference)
+        //{
+        //    var appointment = _dbContext.Appointments.FirstOrDefault(x => x.ReferenceNumber == reference);
+        //    if (appointment != null)
+        //    {
+
+        //    }
+        //}
 
     }
 }

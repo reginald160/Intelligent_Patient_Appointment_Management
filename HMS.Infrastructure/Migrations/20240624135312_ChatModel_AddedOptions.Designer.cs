@@ -4,6 +4,7 @@ using HMS.Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240624135312_ChatModel_AddedOptions")]
+    partial class ChatModel_AddedOptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -341,57 +344,11 @@ namespace HMS.Infrastructure.Migrations
                     b.ToTable("AuditLogs");
                 });
 
-            modelBuilder.Entity("HMSPortal.Domain.Models.BrockerMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Delivered")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Topic")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BrockerMessages");
-                });
-
-            modelBuilder.Entity("HMSPortal.Domain.Models.BrockerSubscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Subscriber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Topic")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BrockerSubscriptions");
-                });
-
             modelBuilder.Entity("HMSPortal.Domain.Models.Contract.ChatModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("APIResponse")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BotMessage")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("ConcurrencyToken")
                         .IsConcurrencyToken()
@@ -436,9 +393,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserIntent")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

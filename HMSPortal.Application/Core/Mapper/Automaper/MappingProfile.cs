@@ -15,6 +15,7 @@ namespace HMSPortal.Application.Core.Mapper.Automaper
 		public MappingProfile()
 		{
 			CreateMap<GetDoctorViewModel, EditDoctorViewModel>();
+
     
 
             // Add other mappings here
