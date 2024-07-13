@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HMSPortal.Application.ViewModels
@@ -26,6 +27,7 @@ namespace HMSPortal.Application.ViewModels
 		public int YearsOfExperience { get; set; }
 		public int Age { get; set; }
 		public string? DoctorDetails { get; set; }
+		[JsonIgnore]
 		public IFormFile? Image { get; set; }
 		public string? Password { get; set; }
 		public string? ImageUrl { get; set; }

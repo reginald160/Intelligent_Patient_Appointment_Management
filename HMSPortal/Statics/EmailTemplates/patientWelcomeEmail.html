@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-color: #D86896;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+            .email-header img {
+                max-width: 100px;
+                margin-bottom: 10px;
+            }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #D86896;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <img src="{{LogoURL}}" alt="Clinic Logo">
+            <h1>Welcome to Medi-Smart!</h1>
+        </div>
+        <div class="email-body">
+            <p>Dear {{Name}},</p>
+
+            <p>We are thrilled to welcome you to the Medi-Smart Appointment System! Your health and well-being are our top priorities, and we are committed to providing you with the best possible care and service.</p>
+
+            <p><strong>Here's what you can expect from your Medi-Smart experience:</strong></p>
+
+            <ol>
+                <li><strong>Convenient Appointment Scheduling:</strong> Easily book, reschedule, or cancel your appointments online at your convenience.</li>
+                <li><strong>Personal Health Dashboard:</strong> Access your health records, view test results, and track your medical history all in one place.</li>
+                <li><strong>Secure Communication:</strong> Communicate securely with your healthcare providers through our messaging system.</li>
+                <li><strong>Timely Reminders:</strong> Receive reminders for upcoming appointments and important health check-ups.</li>
+                <li><strong>Health Resources:</strong> Access a wealth of health information and resources tailored to your needs.</li>
+            </ol>
+
+            <p>To get started start accessing our online service, please activate your online account by clicking the button below:</p>
+
+            <a href="{{Link}}" class="button">Activate Account</a>
+
+            <p>We recommend that you take a few moments to explore the portal and familiarize yourself with the various features available to you. If you have any questions or need assistance, our support team is here to help.</p>
+
+            <p><strong>Need Help?</strong></p>
+            <p>If you have any questions or need assistance, feel free to contact our support team at support@medismart.com or call us at [support phone number]. We're here to ensure you have a smooth and positive experience with Medi-Smart.</p>
+
+            <p>Once again, welcome to Medi-Smart! We look forward to supporting your health journey.</p>
+
+            <p>
+                <strong>Best Regards,</strong><br>
+                The Medi-Smart Team
+            </p>
+        </div>
+        <div class="email-footer">
+            <p>Thank you for choosing our clinic.</p>
+            <p>&copy; 2024 Your Clinic Name. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -37,6 +37,8 @@ namespace HMS.Infrastructure.Persistence.DataContext
 		public DbSet<ChatModel>? ChatModels { get; set; }
         public DbSet<BrockerMessage>? BrockerMessages { get; set; }
         public DbSet<BrockerSubscription>? BrockerSubscriptions { get; set; }
+        public DbSet<AuthenticationToken>? AuthenticationTokens { get; set; }
+        
 
         //public IDbConnection Connection => throw new NotImplementedException();
 

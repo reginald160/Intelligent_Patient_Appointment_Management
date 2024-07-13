@@ -23,6 +23,7 @@ namespace HMSPortal.Application.Core.MessageBrocker.EmmaBrocker
         public  async Task StartAsync(CancellationToken cancellationToken)
         {
              await   _messageBroker.SubscribeToAppoitmentAsync("Client");
+            await _messageBroker.SubscribeDoctorSignUp("Client");
             _logger.LogInformation("MessageBrokerHostedService is starting.");
             // Any initialization code for the message broker can go here.
             //return Task.CompletedTask;

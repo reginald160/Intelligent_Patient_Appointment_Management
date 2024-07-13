@@ -15,6 +15,10 @@ using HMS.Infrastructure.Persistence.DataContext;
 using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Application.ViewModels.Doctor;
 using Microsoft.EntityFrameworkCore;
+using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
+using Newtonsoft.Json;
+using HMSPortal.Application.Core.Notification;
+using HMSPortal.Application.Core.Notification.Email;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -22,14 +26,18 @@ namespace HMS.Infrastructure.Repositories.Repository
 	{
 		private readonly ApplicationDbContext _db;
 		private readonly IIdentityRespository _identityRespository;
+		private readonly IMessageBroker _messageBroker;
+		private readonly INotificatioServices notificatioServices;
 
-		public DoctorRepo(ApplicationDbContext db, IIdentityRespository identityRespository)
-		{
-			_db=db;
-			_identityRespository=identityRespository;
-		}
+        public DoctorRepo(ApplicationDbContext db, IIdentityRespository identityRespository, IMessageBroker messageBroker, INotificatioServices notificatioServices)
+        {
+            _db=db;
+            _identityRespository=identityRespository;
+            _messageBroker=messageBroker;
+            this.notificatioServices=notificatioServices;
+        }
 
-		public bool CheckExistingDoctor ( string email)
+        public bool CheckExistingDoctor ( string email)
 		{
 			return _identityRespository.ExistingUserEmail(email);
 		}
@@ -127,6 +135,9 @@ namespace HMS.Infrastructure.Repositories.Repository
 
 				};
 			}
+
+
+
 			var userId = await _identityRespository.CreateUser(viewModel.Email ?? "Admin@gmail.com", viewModel.Password, Roles.Doctor);
 			var seqNumber = await new SequenceContractHelper().GenerateNextPatientNumberAsync(3);
 
@@ -156,7 +167,25 @@ namespace HMS.Infrastructure.Repositories.Repository
 				var response = await _db.Doctors.AddAsync(doctorModel);
 				await _db.SaveChangesAsync();
 				await new SequenceContractHelper().UpdateSequence(seqNumber, 3);
-				return new AppResponse
+				var token = await _identityRespository.GenerateEmailConfirmationLinkAsync(doctorModel.Email);
+				viewModel.ImageUrl = token;
+                var emailModel = new DoctorSignupEmailModel
+                {
+                    Specialization = viewModel.Specialty,
+                    SetPasswordLink =token ,
+                    DoctorName = viewModel.FirstName,
+                    LogoUrl = "https://res.cloudinary.com/dukd0jnep/image/upload/v1718523325/ehxwqremdpkwqvshlhhy.jpg",
+                    BGImageUrl = "https://res.cloudinary.com/dukd0jnep/image/upload/v1718523325/ehxwqremdpkwqvshlhhy.jpg",
+                };
+                var brockerMessage = JsonConvert.SerializeObject(emailModel);
+
+                //await Task.Run(async () =>
+                //{
+                //    await notificatioServices.SendDoctorSignUpEmail(emailModel);
+                //});
+                await _messageBroker.PublishAsync(CoreValiables.ConifrmDoctorSignUp, brockerMessage);
+
+                return new AppResponse
 				{
 					IsSuccessful = true,
 					Data  = response.Entity.Id

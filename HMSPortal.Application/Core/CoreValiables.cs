@@ -18,5 +18,6 @@ namespace HMSPortal.Application.Core
         public const string ChatTextEndpoint = "ReceiveMessage";
         public const string ChatOptionsEndpoint = "ReceiveOptions";
         public const string BootAppointmentTopic = "BookAppointment";
+        public const string ConifrmDoctorSignUp = "DoctorSignUp";
     }
 }

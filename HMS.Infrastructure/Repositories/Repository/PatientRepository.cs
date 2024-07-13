@@ -3,6 +3,8 @@ using HMS.Infrastructure.Repositories.IRepository;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core;
 using HMSPortal.Application.Core.Helpers;
+using HMSPortal.Application.Core.Notification;
+using HMSPortal.Application.Core.Notification.Email;
 using HMSPortal.Application.Core.Response;
 using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Patient;
@@ -24,15 +26,16 @@ namespace HMS.Infrastructure.Repositories.Repository
         private readonly ApplicationDbContext _db;
         private readonly IIdentityRespository _identityRespository;
 		private readonly IMemoryCache _memoryCache;
+        private readonly INotificatioServices _notificatioServices;
 
-
-		public PatientRepository(ApplicationDbContext db, IIdentityRespository identityRespository, IMemoryCache memoryCache) : base()
-		{
-			_db = db;
-			_identityRespository=identityRespository;
-			_memoryCache=memoryCache;
-		}
-		public GetPatientViewModel GetPatientById(Guid id)
+        public PatientRepository(ApplicationDbContext db, IIdentityRespository identityRespository, IMemoryCache memoryCache, INotificatioServices notificatioServices) : base()
+        {
+            _db = db;
+            _identityRespository=identityRespository;
+            _memoryCache=memoryCache;
+            _notificatioServices=notificatioServices;
+        }
+        public GetPatientViewModel GetPatientById(Guid id)
 		{
 			var viewModel = _db.Patients.FirstOrDefault(x => x.Id == id) ;
 			if(viewModel == null)
@@ -158,7 +161,21 @@ namespace HMS.Infrastructure.Repositories.Repository
 				await _db.SaveChangesAsync();
 				await new SequenceContractHelper().UpdateSequence(seqNumber, 1);
 				UpdatePatientCountCache();
-				return new AppResponse
+
+				var patientEmailModel = new PatientEmailModel
+				{
+					Email = patientModel.Email,
+                    LogoUrl = "https://res.cloudinary.com/dukd0jnep/image/upload/v1718523325/ehxwqremdpkwqvshlhhy.jpg",
+                    Link =  await _identityRespository.GenerateEmailConfirmationLinkAsync(patientModel.Email),
+					Name = viewModel.FirstName,
+				};
+                Task.Run(async () =>
+                {
+                    await _notificatioServices.SendPatientSignUpEmail(patientEmailModel);
+
+
+                });
+                return new AppResponse
 				{
 					IsSuccessful = true,
 					Data = patient.Entity.Id

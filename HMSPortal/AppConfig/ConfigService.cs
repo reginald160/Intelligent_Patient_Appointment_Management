@@ -17,6 +17,11 @@ using HMS.Infrastructure.Schedulers.Appointment;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using System.Configuration;
 using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using HMS.Infrastructure.Persistence.DataContext;
+using HMSPortal.Domain.Models;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace HMSPortal.AppConfig
 {
@@ -57,17 +62,16 @@ namespace HMSPortal.AppConfig
             services.AddScoped<IlemaApiRequest>();
             services.AddSignalR();
             services.AddMemoryCache();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
             services.AddHttpContextAccessor();
 			services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
-			services.AddSession(options =>
-			{
-				options.IdleTimeout = TimeSpan.FromMinutes(30); // Set the session timeout
-				options.Cookie.HttpOnly = true;
-				options.Cookie.IsEssential = true;
-			});
 
+         
+		
+			//services.AddHttpContextAccessor();
 
-			services.Configure<SMTPSettings>(configuration.GetSection("SmtpConfiguration"));
+			services.Configure<SMTPSettings>(configuration.GetSection("SMTPSettings"));
             services.Configure<AppSetting>(configuration.GetSection("AppSettings"));
             // If needed, also register it as a singleton
             services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<AppSetting>>().Value);

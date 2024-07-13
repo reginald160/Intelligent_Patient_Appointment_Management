@@ -10,6 +10,7 @@ namespace HMSPortal.Application.Core.MessageBrocker.EmmaBrocker
     {
         Task PublishAsync(string topic, string message);
         Task SubscribeAsync(string topic, string subscriber, Func<string, Task> handler);
+        Task SubscribeDoctorSignUp(string subscriber);
         Task SubscribeToAppoitmentAsync(string subscriber);
         Task UnsubscribeAsync(string topic, string subscriber);
     }

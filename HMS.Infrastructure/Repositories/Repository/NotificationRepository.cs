@@ -19,6 +19,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using HMSPortal.Domain.Models;
 using HMS.Infrastructure.Persistence.DataContext;
+using System.Net;
+using System.Net.Mail;
+using Microsoft.Extensions.Logging;
+using DHTMLX.Scheduler.Settings;
+using HMSPortal.Application.ViewModels;
+using Microsoft.Extensions.Options;
+using HMS.Infrastructure.Repositories.IRepository;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -32,95 +39,228 @@ namespace HMS.Infrastructure.Repositories.Repository
 		private readonly  IWebHostEnvironment  _hostingEnvironment;
 		private readonly IHttpContextAccessor contextAccessor;
 		private readonly ApplicationDbContext _dbContext;
-		public string rootPath { get; set; }
+        private readonly ILogger<NotificationRepository> _logger;
+        private readonly IIdentityRespository _identityRespository;
 
-		public NotificationRepository(IConfiguration configuration,
-			ICryptographyService cryptographyService,
-			SMTPSettings sMTPSettings,
-			ApplicationDbContext dbContext,
-			IWebHostEnvironment hostingEnvironment)
-		{
-			this.configuration=configuration;
-			_cryptographyService=cryptographyService;
-			_smtpConfiguration=sMTPSettings;
-			_dbContext=dbContext;
-			_hostingEnvironment=hostingEnvironment;
+        public string rootPath { get; set; }
 
-		}
+        public NotificationRepository(IConfiguration configuration,
+            ICryptographyService cryptographyService,
+            IOptions<SMTPSettings> sMTPSettings,
+            ApplicationDbContext dbContext,
+            IWebHostEnvironment hostingEnvironment,
+            ILogger<NotificationRepository> logger,
+            IIdentityRespository identityRespository)
+        {
+            this.configuration=configuration;
+            _cryptographyService=cryptographyService;
+            _smtpConfiguration=sMTPSettings.Value;
+            _dbContext=dbContext;
+            _hostingEnvironment=hostingEnvironment;
+            _logger=logger;
+            _identityRespository=identityRespository;
+        }
 
-		public void SendNotification(string message, DateTime appointmentDate)
+
+
+        public void SendNotification(string message, DateTime appointmentDate)
 		{
 			// Logic to send notification
 			Console.WriteLine($"{message} for appointment at {appointmentDate}");
 		}
 
-		public async Task<bool> SendMail(EmailRequest emailRequest)
-		{
-			try
-			{
-		
-				//var key1 = Environment.GetEnvironmentVariable("NAME_OF_THE_ENVIRONMENT_VARIABLE_FOR_YOUR_SENDGRID_KEY");
-				var sender = _cryptographyService.Base64Decode(_smtpConfiguration.sendgridSender);
-				var key = _cryptographyService.Base64Decode(_smtpConfiguration.sendgridKey);
-				using var message = new MailMessage();
-				message.From = new MailAddress(sender, _smtpConfiguration.sendgridName);
 
-				message.IsBodyHtml = true;
-				message.To.Add(new MailAddress(emailRequest.To, "Easy Medicare"));
-				message.Body = emailRequest.Body;
+        public  async Task SendgridEmail(EmailRequest emailRequest)
+        {
+            int SmtpPort = _smtpConfiguration.Port; // Using port 587 for TLS
+            string Username = _smtpConfiguration.Username;
+            string key = _cryptographyService.Base64Decode(_smtpConfiguration.Password);
+            string SmtpServer = _smtpConfiguration.Server;
+            using var message = new MailMessage();
+            message.From = new MailAddress("reginald.ozougwu@yorksj.ac.uk", "MediSmart");
 
-				message.Subject = emailRequest.Subject;
-				if (emailRequest.Attachments.Count > 0)
-				{
-					foreach (var attachment in emailRequest.Attachments)
-					{
-						string fileName = Path.GetFileName(attachment.FileName);
-						message.Attachments.Add(new System.Net.Mail.Attachment(attachment.OpenReadStream(), fileName));
-					}
-				}
+            message.IsBodyHtml = true;
+            message.To.Add(new MailAddress("reginald1149@gmail.com", "MediSmart"));
+            message.Body = emailRequest.Body;
+            message.Subject = emailRequest.Subject;
 
-				using var client = new SmtpClient(host: "smtp.sendgrid.net", port: 587);
-				client.Credentials = new NetworkCredential(
-					userName: "apikey",
-					password: key
-					);
+            using var client = new SmtpClient(host: "smtp.sendgrid.net", port: SmtpPort);
+            client.Credentials = new NetworkCredential(
+                userName: Username,
+                password: key
+                );
 
 
-				await client.SendMailAsync(message);
-				return true;
-			}
-			catch (Exception ex)
-			{
+            client.Send(message);
 
-				//var model = $"{JsonConvert.SerializeObject(emailRequest)}";
-				//var message = $"{"internal server occured while sending email"}{" - "}{ex}{" - "}{model}{DateTime.Now}";
-				//_adminLogger.LogRequest(message, true);
-				//var fialedMessage = new FailedEmailRequest
-				//{
-				//	To = emailRequest.To,
-				//	Body = emailRequest.Body,
-				//	Subject = emailRequest.Subject
-				//};
-				try
-				{
+        }
 
-					//await _bounceDbContext.AddAsync(fialedMessage);
-					//await _bounceDbContext.SaveChangesAsync();
+        public async Task<bool> SendMail(EmailRequest emailRequest)
+        {
+            try
+            {
+                int SmtpPort = _smtpConfiguration.Port; // Using port 587 for TLS
+                string Username = _smtpConfiguration.Username;
+                string Password = _cryptographyService.Base64Decode(_smtpConfiguration.Password);
+                string SmtpServer = _smtpConfiguration.Server;
+
+                string from = "reginald.ozougwu@yorksj.ac.uk";
+                emailRequest.To = "reginald1149@gmail.com";
+
+                using (var client = new SmtpClient(SmtpServer, SmtpPort))
+                {
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new NetworkCredential(Username, Password);
+                    client.EnableSsl = true;
 
 
-				}
-				catch (Exception exp)
-				{
-					///var failedMessageModel = $"{JsonConvert.SerializeObject(fialedMessage)}";
-					//var Failedmessage = $"{"internal server occured while Saving FailedEmailRequest data "}{" - "}{exp}{" - "}{model}{DateTime.Now}";
-					//_adminLogger.LogRequest(Failedmessage, true);
-				}
+                    using (var message = new MailMessage(
+						from,
+						emailRequest.To,
+						emailRequest.Subject,
+                        emailRequest.Body))
+                    {
+                        message.IsBodyHtml = true;
+                       await  client.SendMailAsync(message);
+                    }
+                }
+                _logger.LogInformation($"Email with subject: {emailRequest.Subject} sent successfully to " + emailRequest.To);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error occured while sending email with Subject: {emailRequest.Subject} to {emailRequest.To}");
 
-				return false;
-			}
-		}
+                return false;
+            }
+        }
 
-		public async Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment)
+        public async Task<bool> SendDoctorSignUpEmail(DoctorSignupEmailModel model)
+        {
+            try
+            {
+                rootPath = _hostingEnvironment.ContentRootPath;
+                Dictionary<string, string> replacements = new Dictionary<string, string>
+                {
+                    { "bgImageUrl", model.BGImageUrl },
+                    { "LogoURL", model.LogoUrl },
+                    { "link", model.SetPasswordLink },
+                    { "Specialization", model.DoctorName },
+                    { "Name", model.DoctorName }
+                };
+                var emailRequest = new EmailRequest
+                {
+                    To = model.To,
+                    Body = EmailFormatter.GenerateEmailTemplate(rootPath, "doctorSignUp.html", replacements),
+                    Subject = "SignUp Confirmation"
+                };
+
+                await SendgridEmail(emailRequest);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+
+        }
+        public async Task<bool> SendPatientSignUpEmail(PatientEmailModel model)
+        {
+            try
+            {
+                rootPath = _hostingEnvironment.ContentRootPath;
+                Dictionary<string, string> replacements = new Dictionary<string, string>
+                {
+
+                    { "LogoURL", model.LogoUrl },
+                    { "Link", model.Link },
+                    { "Name", model.Name }
+                };
+                var emailRequest = new EmailRequest
+                {
+                    To = model.Email,
+                    Body = EmailFormatter.GenerateEmailTemplate(rootPath, "patientWelcomeEmail.html", replacements),
+                    Subject = "SignUp Confirmation"
+                };
+
+                await SendgridEmail(emailRequest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+
+        public async Task<bool> SendForgetPasswordEmail(DoctorSignupEmailModel model)
+        {
+            try
+            {
+                rootPath = _hostingEnvironment.ContentRootPath;
+               
+                var emailRequest = new EmailRequest
+                {
+                    To = model.To,
+                    Body = EmailFormatter.FrorgotPassword(rootPath, model),
+                    Subject = "Password Reset"
+                };
+
+                await SendgridEmail(emailRequest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+        //public async Task<bool> PatientWelcomeMessage(PatientEmailModel model)
+        //{
+        //    try
+        //    {
+        //        rootPath = _hostingEnvironment.ContentRootPath;
+        //        var emailRequest = new EmailRequest
+        //        {
+        //            To = model.Email,
+        //            Body = EmailFormatter.FormatDoctorAccountActivation(rootPath, model),
+        //            Subject = "Account Confirmation"
+        //        };
+
+        //        await SendgridEmail(emailRequest);
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+
+        //}
+
+
+        public async Task<bool> SendDoctorAcountConfirmation(DoctorSignupEmailModel model)
+        {
+            try
+            {
+                rootPath = _hostingEnvironment.ContentRootPath;
+                var emailRequest = new EmailRequest
+                {
+                    To = model.To,
+                    Body = EmailFormatter.FormatDoctorAccountActivation(rootPath, model),
+                    Subject = "Account Confirmation"
+                };
+
+                await SendgridEmail(emailRequest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+
+        public async Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment)
 		{
 			try
 			{
@@ -151,5 +291,6 @@ namespace HMS.Infrastructure.Repositories.Repository
 			}
 		}
 
-	}
+   
+    }
 }

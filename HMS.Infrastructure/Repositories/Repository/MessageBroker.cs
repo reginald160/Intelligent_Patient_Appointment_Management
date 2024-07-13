@@ -15,6 +15,9 @@ using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.Core;
 using Microsoft.Extensions.DependencyInjection;
 using HMSPortal.Application.Core.Chat.Bot;
+using HMSPortal.Application.Core.Notification;
+using HMSPortal.Application.ViewModels;
+using HMSPortal.Application.Core.Notification.Email;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -126,6 +129,21 @@ namespace HMS.Infrastructure.Repositories.Repository
                 {
                     var _appServices = scope.ServiceProvider.GetRequiredService<IAppointmentServices>();
                     await _appServices.CreateAppointmentByPatient(appointment);
+
+                }
+
+                // Simulate sending notification
+            });
+        }
+        public async Task SubscribeDoctorSignUp(string subscriber)
+        {
+            await SubscribeAsync(CoreValiables.ConifrmDoctorSignUp, subscriber, async (msg) =>
+            {
+                var doctorModel = JsonConvert.DeserializeObject<DoctorSignupEmailModel>(msg);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var _appServices = scope.ServiceProvider.GetRequiredService<INotificatioServices>();
+                    await _appServices.SendDoctorSignUpEmail(doctorModel);
 
                 }
 

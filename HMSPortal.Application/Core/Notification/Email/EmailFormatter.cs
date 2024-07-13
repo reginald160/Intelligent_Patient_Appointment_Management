@@ -12,12 +12,15 @@ namespace HMSPortal.Application.Core.Notification.Email
 	{
 		public static string MailPath = "Statics\\EmailTemplates";
 		public static string AppointmentPath = "newAppointment.html";
-		public static string ConfirmationEmail = "EmailConfirmation.html";
+		public static string DoctorConfirmSignUpPath = "doctorSignUp.html";
+
+        public static string ConfirmationEmail = "EmailConfirmation.html";
 		public static string EmailResponse = "EmailResponse.html";
 		public static string TokenEmail = "Token.html";
 		public static string genericEmail = "GenericEmail.html";
+        private static object appointment;
 
-		public static string FormatEmaiConfimation(string url, string rootPath)
+        public static string FormatEmaiConfimation(string url, string rootPath)
 		{
 			string templateRootPath = CombinePath(rootPath, ConfirmationEmail);
 			string content = string.Empty;
@@ -44,7 +47,71 @@ namespace HMSPortal.Application.Core.Notification.Email
 			content = content.Replace("{{GoogleCalendarLink}}", googleCalenderLink);
 			return content;
 		}
-		public static string FormatGenericEmail(string message, string rootPath, string subject = "")
+
+        public static string FormatDoctorAccountActivation(string rootPath, DoctorSignupEmailModel model)
+        {
+
+            string templateRootPath = CombinePath(rootPath, "DoctorAccountConfirmation.html");
+            string content = string.Empty;
+            using var sr = new StreamReader(templateRootPath);
+            content = sr.ReadToEnd();
+            content = content.Replace("{{bgImageUrl}}", model.BGImageUrl);
+            content = content.Replace("{{LogoURL}}", model.LogoUrl);
+            content = content.Replace("{{Link}}", model.SetPasswordLink);
+            content = content.Replace("{{Name}}", model.DoctorName);
+            return content;
+        }
+
+        public static  string GenerateEmailTemplate(string rootPath, string htmlPath,  Dictionary<string, string> replacements)
+        {
+            string templateRootPath = CombinePath(rootPath, htmlPath);
+            string content = string.Empty;
+
+            using (var sr = new StreamReader(templateRootPath))
+            {
+                content = sr.ReadToEnd();
+            }
+
+            // Perform replacements based on the dictionary
+            foreach (var replacement in replacements)
+            {
+                content = content.Replace("{{"+replacement.Key +"}}", replacement.Value);
+            }
+
+            return content;
+        }
+
+        public static string FrorgotPassword(string rootPath, DoctorSignupEmailModel model)
+        {
+
+            string templateRootPath = CombinePath(rootPath, "ForgetPassword.html");
+            string content = string.Empty;
+            using var sr = new StreamReader(templateRootPath);
+            content = sr.ReadToEnd();
+
+            content = content.Replace("{{LogoURL}}", model.LogoUrl);
+            content = content.Replace("{{Link}}", model.SetPasswordLink);
+            content = content.Replace("{{Name}}", model.DoctorName);
+            return content;
+        }
+
+        public static string FormatDoctorSignUpEmail(string rootPath, DoctorSignupEmailModel model)
+        {
+
+            string templateRootPath = CombinePath(rootPath, DoctorConfirmSignUpPath);
+            string content = string.Empty;
+            using var sr = new StreamReader(templateRootPath);
+            content = sr.ReadToEnd();
+            content = content.Replace("{{bgImageUrl}}", model.BGImageUrl);
+            content = content.Replace("{{LogoURL}}", model.LogoUrl);
+            content = content.Replace("{{link}}", model.SetPasswordLink);
+            content = content.Replace("{{Specialization}}", model.Specialization);
+            content = content.Replace("{{Name}}", model.DoctorName);
+            return content;
+        }
+
+
+        public static string FormatGenericEmail(string message, string rootPath, string subject = "")
 		{
 			string templateRootPath = CombinePath(rootPath, genericEmail);
 			string content = string.Empty;

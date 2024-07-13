@@ -1,163 +1,75 @@
-﻿//using HMS.Infrastructure.Repositories.IRepository;
-//using HMSPortal.Application.ViewModels;
-//using HMSPortal.Domain.Models;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using HMS.Infrastructure.Repositories.IRepository;
+using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.ViewModels;
+using HMSPortal.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-//using Microsoft.EntityFrameworkCore.Metadata.Internal;
-////using HMSPortal.Domain.Enums;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+//using HMSPortal.Domain.Enums;
 
-//namespace HMSPortal.Controllers
-//{
-//	public class PaymentController : Controller
-//	{
-//		private readonly IUnitOfWork _unitOfWork;
-//		private readonly IWebHostEnvironment _webHostEnvironment;
-//		public PaymentController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
-//		{
-//			_unitOfWork = unitOfWork;
-//			_webHostEnvironment = webHostEnvironment;
-//		}
+namespace HMSPortal.Controllers
+{
+	public class PaymentController : Controller
+	{
+		private readonly IDoctorServices _doctorServices;
 
-//		public IActionResult Index()
-//		{
-//			var obj = _unitOfWork.Payment.GetAll().ToList();
-//			return View(obj);
-//		}
+        public PaymentController(IDoctorServices doctorServices)
+        {
+            _doctorServices=doctorServices;
+        }
 
-
-//		[HttpGet]
-//		public IActionResult Upsert( Guid id)
-//		{
-//			AddPaymentViewModel payment = new AddPaymentViewModel()
-//			{
-//				DoctorList = _unitOfWork.Doctor.GetAll().Select(c => new SelectListItem
-//				{
-//					Text = c.FirstName,
-//					Value = c.Id.ToString(),
-//				}),
-
-//                PatientList = _unitOfWork.Patient.GetAll().Select(c => new SelectListItem
-//                {
-//                    Text = c.FirstName,
-//                    Value = c.Id.ToString(),
-//                }),
-//                Payment = new Payment()
-
-//            };
-
-//            var dept = Enum.GetValues(typeof(Department)).Cast<Department>();
-//            var deptList = dept.Select(e => new SelectListItem
-//            {
-//                Value = ((int)e).ToString(),
-//                Text = e.ToString()
-//            }).ToList();
-
-//            var PaymtType = Enum.GetValues(typeof(PaymentType)).Cast<PaymentType>();
-//            var PaymtList = PaymtType.Select(e => new SelectListItem
-//            {
-//                Value = ((int)e).ToString(),
-//                Text = e.ToString()
-//            }).ToList();
-
-//            if (id == Guid.Empty)
-//			{
-
-//				//Create
-//				return View(payment);
-//			}
-//			else
-//			{
-//				//Edit
-//				var obj = _unitOfWork.Payment.Get(x => x.Id == id);
-
-//				return View(obj);
-//			}
-//		}
-		
-//		[HttpPost]
-//		public IActionResult Upsert(AddPaymentViewModel? paymentVM, IFormFile file)
-//		{
-//			//prodVM.Patient.Id = Guid.NewGuid();
-//			//if (ModelState.IsValid)
-//			//{
-//			string wwwRoothPath = _webHostEnvironment.WebRootPath;
-//			if (file != null)
-//			{
-//				string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-//				string rootPath = Path.Combine(wwwRoothPath, @"images/patient");
-
-//				if (!string.IsNullOrEmpty(paymentVM.Payment.ImageUrl))
-//				{
-//					var oldImg = Path.Combine(paymentVM.Payment.ImageUrl.TrimStart('\\'));
-
-//					if (System.IO.File.Exists(oldImg))
-//					{
-//						System.IO.File.Delete(oldImg);
-//					}
-//				}
-
-//				using (var fileStream = new FileStream(Path.Combine(rootPath, fileName), FileMode.Create))
-//				{
-//					file.CopyTo(fileStream);
-//				}
-//				paymentVM.Payment.ImageUrl = @"images/patient" + fileName;
-//			}
+        public async Task<IActionResult> Index()
+		{
+            await _doctorServices.CreateDoctor(GenerateFakeDoctor());
+			return View();
+		}
 
 
+        private static IFormFile CreateFakeImage()
+        {
+            var content = "This is a fake file content";
+            var fileName = "doctor-image.jpg";
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(content);
+            writer.Flush();
+            stream.Position = 0;
 
-//			if (paymentVM.Payment.Id == Guid.Empty)
-//			{
-//				_unitOfWork.Payment.Add(paymentVM.Payment);
-//				_unitOfWork.Save();
+            return new FormFile(stream, 0, stream.Length, "image", fileName);
+        }
+        public static AddDoctorViewModel GenerateFakeDoctor()
+        {
+            var random = new Random();
 
-//				TempData["Success"] = "Patient created successfully";
-//				return RedirectToAction("Index");
-//			}
-//			else
-//			{
+            return new AddDoctorViewModel
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Email = DateTime.Now.Ticks.ToString()+ ".doe@example.com",
+                Phone = "1234567890",
+                PostalCode = "12345",
+                HouseNumber = "42",
+                Address = "123 Main St, Anytown, USA",
+                DateOfBirth = DateTime.Now.AddYears(-35).AddDays(-random.Next(365)),
+                Gender = random.Next(2) == 0 ? "Male" : "Female",
+                DoctorCode = "DOC" + random.Next(1000, 9999).ToString(),
+                BackgroundHistory = "Graduated from Medical University with honors. Residency at City Hospital.",
+                Specialty = "Cardiology",
+                YearsOfExperience = random.Next(1, 20),
+                Age = 35,
+                DoctorDetails = "Specializes in non-invasive cardiac procedures. Published research on heart disease prevention.",
+                Image = CreateFakeImage(),
+                Password = "P@ssw0rd123!",
+                ImageUrl = "https://example.com/doctor-image.jpg"
+            };
+        }
 
-//				_unitOfWork.Payment.Update(paymentVM.Payment);
-//				_unitOfWork.Save();
+        // Assuming you have the necessary using statements for your project
 
-//				TempData["Success"] = "Patient updated successfully";
-//				return RedirectToAction("Index");
-//			}
+  
 
-//		}
-
-//		[HttpGet]
-//		public IActionResult GetAll()
-//		{
-//			List<Payment> prodList = _unitOfWork.Payment.GetAll().ToList();
-//			return Json(new { data = prodList });
-//		}
+}
 
 
-//		public IActionResult Delete(Guid id)
-//		{
-//			var prodToDelete = _unitOfWork.Payment.Get(x => x.Id == id);
-//			if (prodToDelete == null)
-//			{
-//				return Json(new { success = false, message = "Error while deleting" });
-//			}
-//			var oldImagPath = Path.Combine(_webHostEnvironment.WebRootPath, prodToDelete.ImageUrl.TrimStart('\\'));
-
-//			if (System.IO.File.Exists(oldImagPath))
-//			{
-//				System.IO.File.Delete(oldImagPath);
-//			}
-//			_unitOfWork.Payment.Remove(prodToDelete);
-//			_unitOfWork.Save();
-
-//			return Json(new { success = true, message = "Delete Successful" });
-//		}
-
-//		public IActionResult Detail()
-//		{
-//			var obj = _unitOfWork.Payment.GetAll();
-
-//			return View(obj);
-//		}
-//	}
-//}
+}

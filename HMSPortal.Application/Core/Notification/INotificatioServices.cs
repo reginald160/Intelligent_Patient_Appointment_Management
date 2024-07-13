@@ -1,4 +1,5 @@
 ﻿using HMSPortal.Application.Core.Notification.Email;
+using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Appointment;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,11 @@ namespace HMSPortal.Application.Core.Notification
     public interface INotificatioServices
     {
 		Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment);
-		Task<bool> SendMail(EmailRequest emailRequest);
+        Task<bool> SendDoctorAcountConfirmation(DoctorSignupEmailModel model);
+        Task<bool> SendDoctorSignUpEmail(DoctorSignupEmailModel model);
+        Task<bool> SendForgetPasswordEmail(DoctorSignupEmailModel model);
+        Task<bool> SendMail(EmailRequest emailRequest);
 		void SendNotification(string message, DateTime appointmentDate);
+        Task<bool> SendPatientSignUpEmail(PatientEmailModel model);
     }
 }

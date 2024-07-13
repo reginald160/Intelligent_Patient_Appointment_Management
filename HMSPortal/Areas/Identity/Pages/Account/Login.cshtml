@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>ProClinic-Bootstrap4 Hospital Admin</title>
+    <title>Medi-Smart</title>
     <!-- Fav  Icon Link -->
     <link rel="shortcut icon" type="image/png" href="images/fav.png">
     <!-- Bootstrap core CSS -->
@@ -41,17 +41,7 @@
         </div>
     </div>
     <!--/Pre Loader -->
-    <!-- Color Changer -->
-    <div class="theme-settings" id="switcher">
-        <span class="theme-click">
-            <span class="ti-settings"></span>
-        </span>
-        <span class="theme-color theme-default theme-active" data-color="green"></span>
-        <span class="theme-color theme-blue" data-color="blue"></span>
-        <span class="theme-color theme-red" data-color="red"></span>
-        <span class="theme-color theme-violet" data-color="violet"></span>
-        <span class="theme-color theme-yellow" data-color="yellow"></span>
-    </div>
+   
     <!-- /Color Changer -->
     @* <div class="wrapper">
         <!-- Page Content  -->
@@ -66,14 +56,8 @@
 
                             
                             <div class=" card shadow proclinic-box-shadow">
-                                <div class="col-md-12 card-header bg-secondary bg-gradient ml-0 py-4">
-                                    <div class="row">
-                                        <div class="col-12 text-center">
-                                            <h2 class="py-2 text-white">Login</h2>
-                                        </div>
-                                    </div>
-                                </div>
-                                <h3 class="widget-title">Login using local account</h3>
+                                
+                                <h3 class="widget-title">Login</h3>
                                 <p><StatusMessage Message="Input.Message" /></p>
                                 <form class="widget-form" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                                     <!-- form-group -->
@@ -100,7 +84,7 @@
                                         <div class="col-sm-12 text-left">
                                             <div class="custom-control custom-checkbox">
                                                 <input class="custom-control-input" type="checkbox" id="ex-check-2">
-                                                <label class="custom-control-label" for="ex-check-2">Remember Me</label>
+                                                <label class="custom-control-label" asp-for="Input.RememberMe">Remember Me</label>
                                             </div>
                                         </div>
                                     </div>

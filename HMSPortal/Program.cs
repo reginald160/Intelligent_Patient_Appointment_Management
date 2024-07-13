@@ -32,12 +32,34 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-	.AddRoles<IdentityRole>()
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+{
+	options.SignIn.RequireConfirmedAccount = false;
+	options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(20);
+	options.Lockout.MaxFailedAccessAttempts = 5;
+}).AddRoles<IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
 
-builder.Services.AddMemoryCache(); // Register the memory cache
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/Identity/Account/Login";
+	options.LogoutPath = "/Identity/Account/Logout";
+	options.AccessDeniedPath = "/Dashboard/AccessDenied";
+	options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+	options.SlidingExpiration = true;
+});
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+	options.IdleTimeout = TimeSpan.FromMinutes(20);
+	options.Cookie.HttpOnly = true;
+	options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddControllersWithViews();
+// Register the memory cache
 ConfigService.ConfigureDIServices(builder.Services, configuration);
 
 ConfigService.ConfigureBotServices(builder.Services, configuration);
@@ -89,16 +111,17 @@ else
 	app.UseHsts();
 }
 
+app.UseRouting();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseHangfireDashboard();
 app.UseHangfireServer();
 
 
-app.UseRouting();
-
-app.UseAuthorization();
 app.UseSession();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 //app.MapControllerRoute(
 //	name: "default",

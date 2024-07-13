@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-color: #D86896;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .email-header img {
+            max-width: 100px;
+            margin-bottom: 10px;
+        }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #D86896;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .doctor-section {
+            background: url('{{bgImageUrl}}') no-repeat center center;
+            background-size: cover;
+            padding: 50px 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .doctor-section h2 {
+            margin: 0;
+        }
+
+        .doctor-section p {
+            margin: 5px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <img src="{{LogoURL}}" alt="Clinic Logo">
+            <h3>Account Created on MediSmart</h3>
+        </div>
+        <div class="email-body">
+            <p>Dear Dr. {{Name}},</p>
+            <p>An account has been created for you on Medi-Smart Appointment System. Please confirm and set your account password by clicking the button below:</p>
+            <a href="{{link}}" class="button">Confirm Account</a>
+        </div>
+        
+        <div class="email-footer">
+            <p>Thank you for choosing our clinic.</p>
+            <p>&copy; 2024 MediSmart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

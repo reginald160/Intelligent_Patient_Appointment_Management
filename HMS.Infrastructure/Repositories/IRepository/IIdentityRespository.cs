@@ -12,5 +12,10 @@ namespace HMS.Infrastructure.Repositories.IRepository
 		Task<string> CreateUser(string username, string password, Roles role);
 		Task DeleteUser(string email);
 		bool ExistingUserEmail(string email);
-	}
+        Task<string> GenerateEmailConfirmationLinkAsync(string email);
+        Task<string> GenerateForgtPasswordLinkAsync(string email);
+        string GenerateLink(string conroller, string action);
+        bool IsValideToken(string token);
+        void LogToken(string token, string userId);
+    }
 }
