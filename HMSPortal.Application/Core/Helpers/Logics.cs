@@ -18,5 +18,22 @@ namespace HMSPortal.Application.Core.Helpers
 
             return new Tuple<DateTime, string>(dt, rep1[0]);
         }
+
+        public static string GetGreeting()
+        {
+            var currentTime = DateTime.UtcNow;
+            if (currentTime.Hour < 12)
+            {
+                return "Good Morning";
+            }
+            else if (currentTime.Hour < 18)
+            {
+                return "Good Afternoon";
+            }
+            else
+            {
+                return "Good Evening";
+            }
+        }
     }
 }

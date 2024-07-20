@@ -1,6 +1,7 @@
 ﻿using DHTMLX.Scheduler;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core.Chat.Api;
+using HMSPortal.Application.Core.Chat.Message;
 using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
@@ -20,16 +21,46 @@ namespace HMSPortal.Application.Core.Chat.Bot
     {
         private readonly IAppointmentServices _appointmentServices;
         private readonly IlemaApiRequest _ilema;
+        private readonly IPatientServices _petientServices;
 
         private readonly IMessageBroker _messageBroker;
 
-        public ResponseModerator(IAppointmentServices appointmentServices, IlemaApiRequest ilema, IMessageBroker messageBroker)
+        public ResponseModerator(IAppointmentServices appointmentServices, IlemaApiRequest ilema, IMessageBroker messageBroker, IPatientServices petientServices)
         {
             _appointmentServices=appointmentServices;
             _ilema=ilema;
             _messageBroker=messageBroker;
+            _petientServices=petientServices;
         }
 
+        public async Task<ChatResponse> GetGreeing(string message, string UserId)
+        {
+
+            try
+            {
+                var patient = _petientServices.GetPatientById(Guid.Parse(UserId));
+                var greeting = ChatHelper.SayGreeting(patient.FirstName);
+                var chatResponse = new ChatResponse
+                {
+                    Endpoint = CoreValiables.ChatTextEndpoint,
+
+                };
+                var receievdChat = new BotMessageViewModel
+                {
+                    Content = greeting,
+                    UserId = UserId,
+                    Type = CoreValiables.ChatRecieved,
+
+                };
+                await _appointmentServices.SaveChat(receievdChat);
+
+                return new ChatResponse { Message = greeting};
+            }
+            catch (Exception ex)
+            {
+                return new ChatResponse();
+            }
+        }
         public async Task<ChatResponse> ReadMessageAsync(string message, string UserId)
         {
             try

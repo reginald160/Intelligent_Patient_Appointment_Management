@@ -1,0 +1,92 @@
+﻿
+<ul class="list-unstyled components">
+	<li class="active">
+		<a asp-action="Index" asp-controller="Dashboard" data-toggle="collapse" aria-expanded="true">
+			<span class="ti-home"></span> Home
+		</a>
+
+	</li>
+	
+	<li>
+		<a href="#nav-patients" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-wheelchair"></span> Patients
+		</a>
+		<ul class="collapse list-unstyled" id="nav-patients">
+
+
+			<li>
+				<a asp-controller="Patient" asp-action="Add">Add Patient</a>
+			</li>
+			<li>
+				<a asp-controller="Patient" asp-action="Index">All Patients</a>
+			</li>
+
+
+		</ul>
+
+	</li>
+
+	<li>
+		<a href="#nav-doctors" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-user"></span> Doctors
+		</a>
+		<ul class="collapse list-unstyled" id="nav-doctors">
+			<li>
+				<a asp-controller="Doctor" asp-action="Add">Add Doctor</a>
+			</li>
+
+			<li>
+				<a asp-controller="Doctor" asp-action="Index">All Doctors</a>
+			</li>
+
+		</ul>
+	</li>
+	<li>
+		<a href="#nav-appointment" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-pencil-alt"></span> Appointments
+		</a>
+		<ul class="collapse list-unstyled" id="nav-appointment">
+			<li>
+				<a asp-controller="Appointment" asp-action="Add">Add Appointment</a>
+			</li>
+			<li>
+				<a href="appointments.html">All Appointments</a>
+			</li>
+			<li>
+				<a href="about-appointment.html">Appointment Details</a>
+			</li>
+			<li>
+				<a href="edit-appointment.html">Edit Appointment</a>
+			</li>
+		</ul>
+	</li>
+	<li>
+		<a href="#nav-payment" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-money"></span> Settings
+		</a>
+		<ul class="collapse list-unstyled" id="nav-payment">
+			@* <li>
+			<a href="add-payment.html">Add Payment</a>
+			</li> *@
+			<li>
+				<a asp-controller="Payment" asp-action="Upsert">Add Payment</a>
+			</li>
+			<li>
+				<a asp-controller="Payment" asp-action="Index">All Payment</a>
+			</li>
+
+			@* <li>
+			<a href="payments.html">All Payments</a>
+			</li> *@
+			@* <li>
+			<a href="about-payment.html"></a>
+			</li> *@
+			<li>
+				<a asp-controller="PaymentInvoice" asp-action="Detail">Payment Invoice</a>
+			</li>
+		</ul>
+	</li>
+	
+
+	
+</ul>

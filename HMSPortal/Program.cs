@@ -138,6 +138,7 @@ app.UseEndpoints(endpoints =>
 
     // Register SignalR hubs
     endpoints.MapHub<ChatHub>("/chatHub");
+	endpoints.MapHub<UserHub>("/userHub");
 });
 app.MapRazorPages();
 

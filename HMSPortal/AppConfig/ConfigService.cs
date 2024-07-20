@@ -56,7 +56,9 @@ namespace HMSPortal.AppConfig
             services.AddTransient<INotificatioServices, NotificationRepository>();
             services.AddScoped<ICryptographyService, CryptographyService>();
 			services.AddScoped<ICacheService, CacheRepository>();
-            services.AddScoped<ResponseModerator>();
+			services.AddScoped<IAdminServices, AdminRepository>();
+
+			services.AddScoped<ResponseModerator>();
             services.AddScoped<AppointmentScheduler>();
             
             services.AddScoped<IlemaApiRequest>();

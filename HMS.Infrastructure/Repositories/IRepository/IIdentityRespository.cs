@@ -16,6 +16,8 @@ namespace HMS.Infrastructure.Repositories.IRepository
         Task<string> GenerateForgtPasswordLinkAsync(string email);
         string GenerateLink(string conroller, string action);
         bool IsValideToken(string token);
+        Task LockUser(string email);
         void LogToken(string token, string userId);
+        Task UnLockUser(string email);
     }
 }

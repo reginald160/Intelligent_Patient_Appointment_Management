@@ -11,6 +11,7 @@ namespace HMSPortal.Application.Core.Notification
 {
     public interface INotificatioServices
     {
+		Task<bool> SendAdminSignUpEmail(PatientEmailModel model);
 		Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment);
         Task<bool> SendDoctorAcountConfirmation(DoctorSignupEmailModel model);
         Task<bool> SendDoctorSignUpEmail(DoctorSignupEmailModel model);

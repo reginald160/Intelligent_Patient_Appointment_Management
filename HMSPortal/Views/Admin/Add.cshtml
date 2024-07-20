@@ -1,0 +1,100 @@
+﻿@model HMSPortal.Application.ViewModels.Admin.AddAdminViewModel
+@{
+	ViewData["Title"] = "New";
+	var successMessage = TempData["Success"] as string;
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="container-fluid">
+
+	<div class="row">
+		<!-- Widget Item -->
+		<div class="col-md-12">
+			<div class="widget-area-2 proclinic-box-shadow">
+				<h3 class="widget-title">Add Admin</h3>
+				@if (ViewData.ModelState["error-V"] != null && ViewData.ModelState["error-V"].Errors.Count > 0)
+				{
+
+					<div class="alert alert-warning alert-dismissible fade show" role="alert">
+						<strong>Validation Error!</strong> @ViewData.ModelState["error-V"].Errors[0].ErrorMessage.
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+					</div>
+				}
+				<form method="post" class="row" enctype="multipart/form-data">
+					@Html.AntiForgeryToken()
+					@* <div asp-validation-summary="All" class="text-danger"></div> *@
+					<div class="form-row">
+
+						<div class="form-group col-md-6">
+							<label asp-for="FirstName">Admin First Name</label>
+							<input asp-for="FirstName" class="form-control" placeholder="First name" required>
+							<span asp-validation-for="FirstName" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="LastName">Admin Last Name</label>
+							<input asp-for="LastName" class="form-control" placeholder="Last name" required>
+							<span asp-validation-for="LastName" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="DateOfBirth">Date Of Birth</label>
+							<input asp-for="DateOfBirth" type="date" placeholder="Date of Birth" class="form-control" id="dob" required>							<span asp-validation-for="DateOfBirth" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Phone">Phone</label>
+							<input asp-for="Phone" class="form-control" placeholder="Phone">
+							<span asp-validation-for="Phone" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Email">Email</label>
+							<input asp-for="Email" type="email" class="form-control" placeholder="email" required>
+							<span asp-validation-for="Email" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Gender">Gender</label>
+							<select asp-for="Gender" class="form-control">
+								<option>Male</option>
+								<option>Female</option>
+								<option>Other</option>
+							</select>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Role">Role</label>
+							<select asp-for="Role" class="form-control">
+								<option>Admin</option>
+								<option>SuperAdmin</option>
+							</select>
+						</div>
+								
+
+						<div class="form-group col-md-6">
+							<label asp-for="Image">Profile Image</label>
+							<input asp-for="Image" type="file" class="form-control border-0 shadow" accept="image/*" required>
+						</div>
+
+
+						<div class="form-check col-md-12 mb-2">
+							<div class="text-left">
+								<div class="custom-control custom-checkbox">
+									<input class="custom-control-input" type="checkbox" id="ex-check-2" required>
+									<label class="custom-control-label" for="ex-check-2">Please Confirm</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group col-md-6 mb-3">
+							<button type="submit" class="btn btn-primary btn-lg">Submit</button>
+						</div>
+					</div>
+				</form>
+
+			</div>
+		</div>
+		<!-- /Widget Item -->
+	</div>
+</div>
+<!-- /Main Content -->
+<script>
+	
+</script>

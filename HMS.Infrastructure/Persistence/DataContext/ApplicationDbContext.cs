@@ -38,12 +38,13 @@ namespace HMS.Infrastructure.Persistence.DataContext
         public DbSet<BrockerMessage>? BrockerMessages { get; set; }
         public DbSet<BrockerSubscription>? BrockerSubscriptions { get; set; }
         public DbSet<AuthenticationToken>? AuthenticationTokens { get; set; }
-        
-
-        //public IDbConnection Connection => throw new NotImplementedException();
+		public DbSet<AdminModel>? AdminModels { get; set; }
 
 
-        public override EntityEntry Remove(object entity)
+		//public IDbConnection Connection => throw new NotImplementedException();
+
+
+		public override EntityEntry Remove(object entity)
         {
 
             return base.Remove(entity);

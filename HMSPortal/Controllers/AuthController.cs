@@ -127,6 +127,7 @@ namespace HMSPortal.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetPassword(SetPasswordViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -192,6 +193,7 @@ namespace HMSPortal.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgetPassword(TokenViewModel viewModel)
         {
             var user = await _userManager.FindByEmailAsync(viewModel.Token);
@@ -249,6 +251,7 @@ namespace HMSPortal.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(SetPasswordViewModel viewModel)
         {
             if (!ModelState.IsValid)

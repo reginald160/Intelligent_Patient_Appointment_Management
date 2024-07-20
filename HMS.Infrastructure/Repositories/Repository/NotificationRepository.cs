@@ -192,8 +192,36 @@ namespace HMS.Infrastructure.Repositories.Repository
             }
 
         }
+		public async Task<bool> SendAdminSignUpEmail(PatientEmailModel model)
+		{
+			try
+			{
+				rootPath = _hostingEnvironment.ContentRootPath;
+				Dictionary<string, string> replacements = new Dictionary<string, string>
+				{
 
-        public async Task<bool> SendForgetPasswordEmail(DoctorSignupEmailModel model)
+					{ "LogoURL", model.LogoUrl },
+					{ "Link", model.Link },
+					{ "Name", model.Name }
+				};
+				var emailRequest = new EmailRequest
+				{
+					To = model.Email,
+					Body = EmailFormatter.GenerateEmailTemplate(rootPath, "adminAccountConfirmation.html", replacements),
+					Subject = "SignUp Confirmation"
+				};
+
+				await SendgridEmail(emailRequest);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				return false;
+			}
+
+		}
+
+		public async Task<bool> SendForgetPasswordEmail(DoctorSignupEmailModel model)
         {
             try
             {

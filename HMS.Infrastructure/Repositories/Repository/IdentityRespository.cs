@@ -3,15 +3,20 @@ using CloudinaryDotNet;
 using Confluent.Kafka;
 using HMS.Infrastructure.Persistence.DataContext;
 using HMS.Infrastructure.Repositories.IRepository;
+using HMSPortal.Application.Core.Chat.SignalR;
 using HMSPortal.Domain.Enums;
 using HMSPortal.Domain.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using NuGet.Protocol.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,19 +37,21 @@ namespace HMS.Infrastructure.Repositories.Repository
         private readonly UrlEncoder _urlEncoder;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApplicationDbContext _applicationDbContext;
+		private readonly IHubContext<UserHub> _hubContext;
 
-        public IdentityRespository(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, UrlEncoder urlEncoder, IHttpContextAccessor httpContextAccessor, ApplicationDbContext applicationDbContext)
-        {
-            _roleManager=roleManager;
-            _userManager=userManager;
-            _urlHelperFactory=urlHelperFactory;
-            _actionContextAccessor=actionContextAccessor;
-            _urlEncoder=urlEncoder;
-            _httpContextAccessor=httpContextAccessor;
-            _applicationDbContext=applicationDbContext;
-        }
+		public IdentityRespository(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, UrlEncoder urlEncoder, IHttpContextAccessor httpContextAccessor, ApplicationDbContext applicationDbContext, IHubContext<UserHub> hubContext)
+		{
+			_roleManager=roleManager;
+			_userManager=userManager;
+			_urlHelperFactory=urlHelperFactory;
+			_actionContextAccessor=actionContextAccessor;
+			_urlEncoder=urlEncoder;
+			_httpContextAccessor=httpContextAccessor;
+			_applicationDbContext=applicationDbContext;
+			_hubContext=hubContext;
+		}
 
-        public string GenerateLink(string conroller, string action)
+		public string GenerateLink(string conroller, string action)
 		{
           
 
@@ -118,10 +125,48 @@ namespace HMS.Infrastructure.Repositories.Repository
             await _applicationDbContext.SaveChangesAsync();
         }
 
+        public async Task UnLockUser(string email)
+        {
+			ApplicationUser user = await _userManager.FindByEmailAsync(email) ?? throw new ArgumentNullException(nameof(email));
+
+			await _userManager.SetLockoutEnabledAsync(user, false);
+
+			// Reset access failed count
+			await _userManager.ResetAccessFailedCountAsync(user);
+			user.IsRestrited = false;
+            user.LockoutEnabled = false;
+			// Disable lockout for the user
+
+			await _userManager.UpdateAsync(user);
+            //await _applicationDbContext.SaveChangesAsync();
+        }
+        public async Task LockUser(string email)
+        {
+			using var transaction = await _applicationDbContext.Database.BeginTransactionAsync();
+
+			ApplicationUser user = await _userManager.FindByEmailAsync(email) ?? throw new ArgumentNullException(nameof(email));
+
+			await _userManager.SetLockoutEnabledAsync(user, true);
+			// Set access failed count to trigger lockout
+			await _userManager.AccessFailedAsync(user);
+			user.IsRestrited = true;
+            user.LockoutEnabled = true;
+	
+			var result = await _userManager.UpdateAsync(user);
+
+			if (result.Succeeded)
+			{
+				await transaction.CommitAsync();
+				await _hubContext.Clients.All.SendAsync("ForceLogout", user.Id);
+			}
+			
+			//await _applicationDbContext.SaveChangesAsync();
+		}
+
         public async Task DeleteUser(string email)
 		{
 			ApplicationUser user = await _userManager.FindByEmailAsync(email) ?? throw new ArgumentNullException(nameof(email));
-		 await _userManager.DeleteAsync(user);
+		     await _userManager.DeleteAsync(user);
 		}
 		public async Task<string> CreateUser(string username, string password, Roles role)
 		{

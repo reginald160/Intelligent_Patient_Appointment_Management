@@ -126,7 +126,13 @@ namespace HMSPortal.Areas.Identity.Pages.Account
 					ModelState.AddModelError(string.Empty, "User does not exist.");
 					return Page();
 				}
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+				if (user.IsRestrited)
+				{
+					ModelState.AddModelError(string.Empty, "your account has been restricted.");
+					return Page();
+				}
+				var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
 				if (result.IsLockedOut)
 				{

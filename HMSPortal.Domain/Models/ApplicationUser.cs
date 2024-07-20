@@ -6,5 +6,9 @@ namespace HMSPortal.Domain.Models
     {
         public bool IsRestrited { get; set; }
         public bool PasswordConfirmed { get; set; }
+
+        public bool IsLocked { get; set; }
+
+        public bool IsEnabled { get; set; }
     }
 }

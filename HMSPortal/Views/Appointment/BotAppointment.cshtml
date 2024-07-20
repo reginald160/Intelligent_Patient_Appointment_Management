@@ -203,6 +203,12 @@
         appendMessage(user, message, "bot-message");
 
     });
+    connection.on("ReceiveMenu", function (user, options) {
+        endpoint = "ReadMenu";
+        appendOptions(user, options);
+     
+
+    });
     connection.on("ReceiveDropDown", function (user, options) {
         endpoint = "BookAppointment";
         // appendMessage(user, message, "bot-message");

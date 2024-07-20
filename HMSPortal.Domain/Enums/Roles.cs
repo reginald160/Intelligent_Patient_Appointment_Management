@@ -8,6 +8,6 @@ namespace HMSPortal.Domain.Enums
 {
 	public enum Roles
 	{
-		Patient,Admin,Doctor,Nurse
+		Patient,Admin,Doctor,Nurse, SuperAdmin
 	}
 }

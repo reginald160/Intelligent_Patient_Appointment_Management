@@ -10,6 +10,7 @@ using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Enums;
 using HMSPortal.Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -27,6 +28,7 @@ namespace HMS.Infrastructure.Repositories.Repository
         private readonly IIdentityRespository _identityRespository;
 		private readonly IMemoryCache _memoryCache;
         private readonly INotificatioServices _notificatioServices;
+		
 
         public PatientRepository(ApplicationDbContext db, IIdentityRespository identityRespository, IMemoryCache memoryCache, INotificatioServices notificatioServices) : base()
         {
@@ -34,10 +36,11 @@ namespace HMS.Infrastructure.Repositories.Repository
             _identityRespository=identityRespository;
             _memoryCache=memoryCache;
             _notificatioServices=notificatioServices;
+    
         }
         public GetPatientViewModel GetPatientById(Guid id)
 		{
-			var viewModel = _db.Patients.FirstOrDefault(x => x.Id == id) ;
+			var viewModel = _db.Patients.FirstOrDefault(x => x.Id == id || x.UserId == id.ToString())  ;
 			if(viewModel == null)
 			{
 				return null;
@@ -86,11 +89,13 @@ namespace HMS.Infrastructure.Repositories.Repository
 		{
 			try
 			{
+				
 				var patient = _db.Patients.FirstOrDefault(x => x.Id ==id);
 				patient.IsDeleted = true;
 				_db.Patients.Update(patient);
 				await _db.SaveChangesAsync();
-				UpdatePatientCountCache();
+				await _identityRespository.LockUser(patient.Email);
+                UpdatePatientCountCache();
 				return new AppResponse { IsSuccessful = true };
 			}
 			catch (Exception ex)
