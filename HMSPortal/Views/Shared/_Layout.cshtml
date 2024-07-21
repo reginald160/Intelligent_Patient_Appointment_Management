@@ -67,6 +67,8 @@
 	}
 
 	idValue = userCache.Id;
+	var leftBarPartialView = "";
+
 
 }
 
@@ -121,19 +123,33 @@
 			<div class="sidebar-header">
 				<a asp-controller="Dashboard" asp-action="Index"><img src="mediplus-lite/img/logo.png" class="logo" alt="logo"></a>
 			</div>
-			@if (userCache.Role == adminName)
-			{
-				
-				@await Html.PartialAsync("_admiLeftBarPartial")
-				
-			}
-			@if (userCache.Role == superAdminName)
-			{	
+			@{
+				var role = userCache.Role;
 
-				
-				@await Html.PartialAsync("_superAdmiLeftBarPartial")
-			
-			}		
+				switch (role)
+				{
+					case var _ when role == PatientName:
+						@await Html.PartialAsync("_patientLeftBarPartial ")
+						;
+						break;
+
+					case var _ when role == superAdminName:
+						@await Html.PartialAsync("_superAdmiLeftBarPartial")
+						;
+						break;
+					case var _ when role == doctorName:
+						@await Html.PartialAsync("_doctorAdmiLeftBarPartial")
+						;
+						break;
+
+					// Add more cases if there are other roles
+					default:
+						// Optional: handle the default case if no roles match
+						@await Html.PartialAsync("_admiLeftBarPartial")
+						break;
+				}
+			}
+
 
 			<div class="nav-help animated fadeIn">
 				<h5><span class="ti-comments"></span> Need Help</h5>

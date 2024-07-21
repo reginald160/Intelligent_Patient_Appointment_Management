@@ -56,6 +56,43 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
             await Clients.All.SendAsync("ReceiveMenu", "Bot", stringList);
         }
+        public async Task SendSheduleCategory(string user, string message)
+        {
+            if(message == "Check-ups")
+            {
+
+                await Clients.All.SendAsync("ReceiveMessage", "Bot", "Please briefly describe the reason for your check-up, such as general wellness, routine monitoring, or follow-up on a previous condition");
+
+            }
+            else
+            {
+                await Clients.All.SendAsync("ReceiveMessage", "Bot", "Please describe the symptoms or health issues you are experiencing.\nInclude any relevant details such as the onset of symptoms, their severity, and how they have been affecting your daily life");
+
+            }
+        }
+        public async Task ValidateHealthCondition(string user, string message)
+        {
+            //var respo = await _responseModerator.ValideHealthCondition(message, user);
+            //await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Message);
+            var questions = new List<string> { "What is your name?", "How old are you?", "What is your email address?" };
+            //await Clients.Client(userId).SendAsync("ReceiveQuestions", "Bot", questions);
+            await Clients.All.SendAsync("ReceiveQuestions", "Bot", questions);
+
+        }
+
+        public async Task SubmitQuestions(string userId, string answersJson)
+        {
+            var answers = JsonConvert.DeserializeObject<Dictionary<string, string>>(answersJson);
+            // Process the answers as needed
+            await Clients.Client(userId).SendAsync("ReceiveMessage", "Bot", "Thank you for your responses.");
+        }
+
+        public async Task SendSymtoms(string user, string message)
+        {
+            var response = await _responseModerator.ValideHealthCondition(user, message);
+            await Clients.All.SendAsync("ReceiveMessage", "Bot", "Please describe the symptoms or health issues you are experiencing.\nInclude any relevant details such as the onset of symptoms, their severity, and how they have been affecting your daily life");
+
+        }
 
         public async Task ReadMenu(string user, string message)
         {
@@ -71,10 +108,25 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
                 await Clients.All.SendAsync("ReceiveMenu", "Bot", stringList);
             }
+           else if(message.Contains("Check-ups") || message.Contains("New Health Concerns"))
+            {
+                if (message == "Check-ups")
+                {
+
+                    await Clients.All.SendAsync("ReceieveSheduleCategory", "Bot", "Please briefly describe the reason for your check-up, such as general wellness, routine monitoring, or follow-up on a previous condition");
+
+
+                }
+                else
+                {
+                    await Clients.All.SendAsync("ReceieveSheduleCategory", "Bot", "Please describe the symptoms or health issues you are experiencing.\nInclude any relevant details such as the onset of symptoms, their severity, and how they have been affecting your daily life");
+
+                }
+            }
             else
             {
                 var response = GetMenu(message);
-                await Clients.All.SendAsync("ReceiveMessage", "Bot", response);
+                await Clients.All.SendAsync("ReceiveMenuMessage", "Bot", response);
 
 
             }
@@ -135,46 +187,12 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
         }
 
-
-        //public async Task<string> HandleMessage(string user, string message)
-        //{
-        //    // Determine which question to ask next based on the state
-        //    if (!_userResponses.ContainsKey(user))
-        //    {
-        //        _userResponses[user] = new Dictionary<string, string>();
-        //        return "What is the general reason for your appointment? (e.g., Consultation, Follow-up, Routine Check-up, etc.)";
-        //    }
-
-        //    var userState = _userResponses[user];
-
-        //    if (!userState.ContainsKey("generalReason"))
-        //    {
-        //        userState["generalReason"] = message;
-        //        return "Can you please describe any specific symptoms or concerns you have been experiencing?";
-        //    }
-
-        //    if (!userState.ContainsKey("symptoms"))
-        //    {
-        //        userState["symptoms"] = message;
-        //        return "How long have you been experiencing these symptoms or concerns, and how severe are they on a scale from 1 to 10?";
-        //    }
-
-        //    if (!userState.ContainsKey("durationAndSeverity"))
-        //    {
-        //        userState["durationAndSeverity"] = message;
-        //        return "Thank you for the information. We have recorded your reason for the appointment.";
-        //    }
-
-        //    // Further processing...
-        //    return "How can I assist you further?";
-        //}
-
         public string GetMenu(string message)
         {
             switch (message)
             {
                 case "Schedule":
-                    return "Schedule an Appointment:\nPlease provide Department/Doctor and Preferred Date/Time.";
+                    return "Schedule an Appointment:\nPlease select appointment category";
                 case "Cancel":
                     return "Cancel an Appointment:\nPlease provide Appointment ID or Patient ID.";
                 case "Reschedule":

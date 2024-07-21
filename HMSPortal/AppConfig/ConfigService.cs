@@ -61,7 +61,7 @@ namespace HMSPortal.AppConfig
 			services.AddScoped<ResponseModerator>();
             services.AddScoped<AppointmentScheduler>();
             
-            services.AddScoped<IlemaApiRequest>();
+            services.AddScoped<LLMApiRequest>();
             services.AddSignalR();
             services.AddMemoryCache();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

@@ -1,3 +1,4 @@
+using HMSPortal.Application.Core.Chat.Message;
 using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Domain.Models;
 using HMSPortal.Models;
@@ -17,8 +18,9 @@ namespace HMSPortal.Controllers
 
 		public async Task<IActionResult> Index()
 		{
+			var sssss = SystemContent.GetSymptonFilterpath();
 
-			return View();
+            return View();
 		}
 
 		public IActionResult Privacy()

@@ -7,6 +7,7 @@ using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,12 +21,12 @@ namespace HMSPortal.Application.Core.Chat.Bot
     public class ResponseModerator
     {
         private readonly IAppointmentServices _appointmentServices;
-        private readonly IlemaApiRequest _ilema;
+        private readonly LLMApiRequest _ilema;
         private readonly IPatientServices _petientServices;
 
         private readonly IMessageBroker _messageBroker;
 
-        public ResponseModerator(IAppointmentServices appointmentServices, IlemaApiRequest ilema, IMessageBroker messageBroker, IPatientServices petientServices)
+        public ResponseModerator(IAppointmentServices appointmentServices, LLMApiRequest ilema, IMessageBroker messageBroker, IPatientServices petientServices)
         {
             _appointmentServices=appointmentServices;
             _ilema=ilema;
@@ -61,6 +62,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 return new ChatResponse();
             }
         }
+
         public async Task<ChatResponse> ReadMessageAsync(string message, string UserId)
         {
             try
@@ -68,7 +70,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 var chatResponse = new ChatResponse
                 {
                     Endpoint = CoreValiables.ChatTextEndpoint,
-                    
+
                 };
                 var receievdChat = new BotMessageViewModel
                 {
@@ -84,7 +86,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 var cleansMessage = ExtractIntentAndCleanMessage(response.Message);
                 string chatContent = "";
                 chatResponse.Message = cleansMessage.cleanedMessage;
-                
+
                 if (cleansMessage.Intent == "BOOK_APPOINTMENT" || cleansMessage.Intent == "READY_APPOINTMENT")
                 {
                     chatResponse.Message = "I can help you schedule a new appointment. please select a date suitable for your appointment";
@@ -114,6 +116,76 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 };
 
                 await _appointmentServices.SaveChat(SentChat);
+
+                return chatResponse;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
+        public async Task<ChatResponse> ValideHealthCondition(string message, string UserId)
+        {
+            try
+            {
+                var chatResponse = new ChatResponse
+                {
+                    Endpoint = CoreValiables.ChatTextEndpoint,
+                    
+                };
+                //var receievdChat = new BotMessageViewModel
+                //{
+                //    Content = message,
+                //    UserId = UserId,
+                //    Type = CoreValiables.ChatRecieved,
+
+                //};
+                //await _appointmentServices.SaveChat(receievdChat);
+
+                var responseBody = await _ilema.ValidateHealthConditionAsync(message, UserId);
+                var response = JsonConvert.DeserializeObject<IlemaApiResponse>(responseBody);
+                string chatContent = "";                
+                if (response.Message.Contains("INVALID") || response.Message.Contains("OFFPOINT"))
+                {
+                    chatResponse.Message = $" '{message}' does not relate to any health description or condition" +
+                        $"\n Please describe the symptoms or health issues you are experiencing. \nInclude any relevant details such as the onset of symptoms, \n their severity, and how they have been affecting your daily life";
+                    
+                    chatResponse.Endpoint = "ReceieveSheduleCategory";
+                }
+                else if (response.Message.Contains("VALID")){
+
+                    var symptonResponse = await _ilema.RequestSymptomAsync(message, UserId);
+                    var responseMessage = JsonConvert.DeserializeObject<IlemaApiResponse>(symptonResponse);
+                    if (responseMessage.Message.Contains("VALID"))
+                    {
+                       var questions =  Logics.ExtractQuestions(responseMessage.Message);
+                        chatResponse.Endpoint = "ValidateMessage";
+                    }
+
+                }
+                else 
+                {
+                    chatResponse.Message = message + " does not relate to any health description or condition";
+                    chatResponse.Endpoint = "SendSymtoms";
+                    chatResponse.Endpoint = "SendSymtoms";
+                }
+                //var options = new List<string> { "Option 1", "Option 2", "Option 3" };
+
+                //var optionObject = JsonConvert.SerializeObject(options);
+                //var SentChat = new BotMessageViewModel
+                //{
+                //    Content = "Response from Bot",
+                //    Type = CoreValiables.ChatSent,
+                //    UserId=UserId,
+                //    HasOptions = false,
+                //    Options = "sss",
+                //    APIResponse = responseBody,
+                //    BotMessage = cleansMessage.cleanedMessage,
+                //    UserIntent = cleansMessage.Intent
+
+                //};
+
+                //await _appointmentServices.SaveChat(SentChat);
 
                 return chatResponse;
             }

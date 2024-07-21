@@ -13,6 +13,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
             Endpoint = CoreValiables.ChatTextEndpoint;
         }
         public string Message { get; set; }
+        public string NextEndpoint { get; set; }
         public string Endpoint { get; set; }
         public string Body { get; set; }
         public string NextAction { get; set; }

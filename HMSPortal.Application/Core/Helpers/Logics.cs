@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace HMSPortal.Application.Core.Helpers
@@ -35,5 +36,22 @@ namespace HMSPortal.Application.Core.Helpers
                 return "Good Evening";
             }
         }
+        public static List<string> ExtractQuestions(string input)
+        {
+            List<string> questions = new List<string>();
+            List<string> questionsg = new List<string>();
+            // Regular expression to match questions starting with Qn: and ending with ?
+            string pattern = @"Q\d+:.*?\?";
+
+            MatchCollection matches = Regex.Matches(input, pattern);
+
+            foreach (Match match in matches)
+            {
+                questions.Add(match.Value.Trim());
+            }
+
+            return questions;
+        }
+
     }
 }

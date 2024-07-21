@@ -54,7 +54,7 @@ namespace HMSPortal.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> BotAppointmentFake()
+        public async Task<IActionResult> PatientAppointment()
         {
             //var userId = _cacheService.GetCachedUser().Id;
             var model = new BotMessage
