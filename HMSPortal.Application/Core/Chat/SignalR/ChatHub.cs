@@ -2,6 +2,7 @@
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core.Cache;
 using HMSPortal.Application.Core.Chat.Bot;
+using HMSPortal.Application.Core.Chat.Message;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Chat;
 using Microsoft.AspNetCore.Http;
@@ -9,8 +10,10 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using NuGet.Protocol.Plugins;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,14 +21,31 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 {
     public class ChatHub : Hub
     {
-        private readonly ResponseModerator _responseModerator;
 
+        private readonly ResponseModerator _responseModerator;
+        private static readonly ConcurrentDictionary<string, ChatTempData> UserConnections = new ConcurrentDictionary<string,ChatTempData>();
         public ChatHub(ResponseModerator responseModerator)
         {
             _responseModerator=responseModerator;
  
         }
+        public static void AddOrUpdateUserConnection(string userId, string connectionId)
+        {
+            var userConnection = new ChatTempData { UserId = userId, ConnectionId = connectionId };
+            UserConnections.AddOrUpdate(userId, userConnection, (key, oldValue) => userConnection);
+        }
+        public override Task OnConnectedAsync()
+        {
+            var userId = Context.User.GetUserId();
+            if (userId != null)
+            {
+                // Store the connection ID associated with the user ID
+                AddOrUpdateUserConnection(userId, Context.ConnectionId);
+               
+            }
 
+            return base.OnConnectedAsync();
+        }
         public async Task SendGreeting(string user, string message)
         {
             var response = new ChatResponse();
@@ -43,24 +63,27 @@ namespace HMSPortal.Application.Core.Chat.SignalR
         }
         public async Task SendMessage(string user, string message)
         {
-            var menu = "Main Menu:\n1. Schedule\n2. Cancel\n3. Reschedule\n4. Exit";
 
-            List<string> stringList = new List<string>();
+            List<string> menu = new List<string> { "Schedule", "Cancel" , "Reschedule", "Exit" };
 
-            // Add some sample strings to the list
-            stringList.Add("Schedule");
-            stringList.Add("Cancel");
-            stringList.Add("Reschedule");
-            stringList.Add("Exit");
-            var response = GetMenu(message);
+            //var response = GetMenu(message);
 
-            await Clients.All.SendAsync("ReceiveMenu", "Bot", stringList);
+            await Clients.All.SendAsync("ReceiveMenu", "Bot", menu);
         }
         public async Task SendSheduleCategory(string user, string message)
         {
-            if(message == "Check-ups")
+            if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
             {
+                chatTempData.ScheduleType = message;
+                // Alternatively, if you want to add to existing questions:
+                // chatTempData.Questions.AddRange(newQuestions);
 
+                // Update the dictionary entry to reflect the changes
+                UserConnections[user] = chatTempData;
+            }
+            if (message == "Check-ups")
+            {
+                
                 await Clients.All.SendAsync("ReceiveMessage", "Bot", "Please briefly describe the reason for your check-up, such as general wellness, routine monitoring, or follow-up on a previous condition");
 
             }
@@ -72,19 +95,57 @@ namespace HMSPortal.Application.Core.Chat.SignalR
         }
         public async Task ValidateHealthCondition(string user, string message)
         {
-            //var respo = await _responseModerator.ValideHealthCondition(message, user);
-            //await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Message);
-            var questions = new List<string> { "What is your name?", "How old are you?", "What is your email address?" };
-            //await Clients.Client(userId).SendAsync("ReceiveQuestions", "Bot", questions);
-            await Clients.All.SendAsync("ReceiveQuestions", "Bot", questions);
+            var respo = await _responseModerator.ValideHealthCondition(message, user);
+            if(respo != null && respo.Messages.Any()) 
+            {
+                if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+                {
+                    chatTempData.HealthCondition = message;
+                    chatTempData.Questions = respo.Messages;
+                    // Alternatively, if you want to add to existing questions:
+                    // chatTempData.Questions.AddRange(newQuestions);
+
+                    // Update the dictionary entry to reflect the changes
+                    UserConnections[user] = chatTempData;
+                }
+                await Clients.All.SendAsync("ReceiveQuestions", "Bot", respo.Messages.ToList());
+            }
+            else
+            {
+                //await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Message);
+                var questions = new List<string> { "What is your name?", "How old are you?", "What is your email address?" };
+                //await Clients.Client(user).SendAsync("ReceiveQuestions", "Bot", questions);
+                await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Messages);
+
+            }
 
         }
 
         public async Task SubmitQuestions(string userId, string answersJson)
         {
-            var answers = JsonConvert.DeserializeObject<Dictionary<string, string>>(answersJson);
+            if (UserConnections.TryGetValue(userId, out ChatTempData chatTempData))
+            {
+
+                chatTempData.QuestionsAndAnswers = answersJson;
+                UserConnections[userId] = chatTempData;
+            }
+            var response = await _responseModerator.AnalyseSymmtonFeedback(answersJson, userId, chatTempData.HealthCondition);
+            if(response.validation_status.Contains("VALID"))
+            {
+                chatTempData.Result = response.message;
+                UserConnections[userId] = chatTempData;
+                var mesg = "Please select a date suitable for your appointment;";
+                await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
+
+                
+            }
+            else
+            {
+                var mesg = "Please select a date suitable for your appointment\";\r\n";
+                await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
+
+            }
             // Process the answers as needed
-            await Clients.Client(userId).SendAsync("ReceiveMessage", "Bot", "Thank you for your responses.");
         }
 
         public async Task SendSymtoms(string user, string message)
@@ -110,6 +171,16 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             }
            else if(message.Contains("Check-ups") || message.Contains("New Health Concerns"))
             {
+                if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+                {
+                    chatTempData.ScheduleType = message;
+                    // Alternatively, if you want to add to existing questions:
+                    // chatTempData.Questions.AddRange(newQuestions);
+
+                    // Update the dictionary entry to reflect the changes
+                    UserConnections[user] = chatTempData;
+                }
+
                 if (message == "Check-ups")
                 {
 
@@ -132,30 +203,19 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             }
 
         }
-        public async Task SendMessageM(string user, string message)
-        {
-            //var botResponse =  await _responseModerator.BookAppointmentAsyncFake(message, user);
-           var botResponse =  await _responseModerator.ReadMessageAsync(message, user);
-
-            await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
-            //await Clients.All.SendAsync("ShowDatePicker", user, message);
-            //List<string> stringList = new List<string>();
-
-            //// Add some sample strings to the list
-            //stringList.Add("Apple");
-            //stringList.Add("Banana");
-            //stringList.Add("Cherry");
-            //stringList.Add("Date");
-
-            //await Clients.All.SendAsync("ReceiveDropDown", user, stringList);
-
-
-        }
+      
         public async Task SendDate(string user, string message)
         {
             var resp =  await _responseModerator.GetAvaialbleSlotsAsync(message, user);
             if(resp.ResponseType == ResponseType.DropDown)
             {
+                var date = DateTime.Parse(message);
+                if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+                {
+
+                    chatTempData.Date = date;
+                    UserConnections[user] = chatTempData;
+                }
                 await Clients.All.SendAsync(resp.Endpoint, user, resp.Messages);
 
             }

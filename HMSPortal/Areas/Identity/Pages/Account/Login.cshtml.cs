@@ -172,8 +172,15 @@ namespace HMSPortal.Areas.Identity.Pages.Account
 				}
 				if (result.Succeeded)
 				{
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                    };
 
-					_logger.LogInformation($"User {User.Identity.Name} logged in.");
+                    var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
+                    await _signInManager.Context.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
+
+                    _logger.LogInformation($"User {User.Identity.Name} logged in.");
 
 					return LocalRedirect(returnUrl);
 				}

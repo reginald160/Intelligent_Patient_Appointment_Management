@@ -7,11 +7,14 @@ using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,15 +26,32 @@ namespace HMSPortal.Application.Core.Chat.Bot
         private readonly IAppointmentServices _appointmentServices;
         private readonly LLMApiRequest _ilema;
         private readonly IPatientServices _petientServices;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly IMessageBroker _messageBroker;
+        private static readonly ConcurrentDictionary<string, ChatTempData> UserConnections = new ConcurrentDictionary<string, ChatTempData>();
 
-        public ResponseModerator(IAppointmentServices appointmentServices, LLMApiRequest ilema, IMessageBroker messageBroker, IPatientServices petientServices)
+        public ResponseModerator(IAppointmentServices appointmentServices, LLMApiRequest ilema, IMessageBroker messageBroker, IPatientServices petientServices, IHttpContextAccessor httpContextAccessor)
         {
             _appointmentServices=appointmentServices;
             _ilema=ilema;
             _messageBroker=messageBroker;
             _petientServices=petientServices;
+            _httpContextAccessor=httpContextAccessor;
+            
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            AddOrUpdateUserConnection(userId, userId);
+        }
+
+        private static ChatTempData GetUserConnection(string userId)
+        {
+            UserConnections.TryGetValue(userId, out var userConnection);
+            return userConnection;
+        }
+        public static void AddOrUpdateUserConnection(string userId, string connectionId)
+        {
+            var userConnection = new ChatTempData { UserId = userId, ConnectionId = connectionId };
+            UserConnections.AddOrUpdate(userId, userConnection, (key, oldValue) => userConnection);
         }
 
         public async Task<ChatResponse> GetGreeing(string message, string UserId)
@@ -39,6 +59,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
 
             try
             {
+                AddOrUpdateUserConnection(UserId, Guid.NewGuid().ToString());
                 var patient = _petientServices.GetPatientById(Guid.Parse(UserId));
                 var greeting = ChatHelper.SayGreeting(patient.FirstName);
                 var chatResponse = new ChatResponse
@@ -124,6 +145,41 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 throw new Exception();
             }
         }
+        public async Task<HealtResponse> AnalyseSymmtonFeedback(string message, string UserId, string healthCondition)
+        {
+            try
+            {
+                var answers = JsonConvert.DeserializeObject<Dictionary<string, string>>(message);
+
+                var query = FormatQuestionsAndAnswers(answers);
+
+                var chatResponse = new ChatResponse
+                {
+                    Endpoint = CoreValiables.ChatTextEndpoint,
+
+                };
+                //var receievdChat = new BotMessageViewModel
+                //{
+                //    Content = message,
+                //    UserId = UserId,
+                //    Type = CoreValiables.ChatRecieved,
+
+                //};
+                //await _appointmentServices.SaveChat(receievdChat);
+
+                var responseBody = await _ilema.AnalyseHealthCondition(message, UserId, healthCondition);
+                var response = JsonConvert.DeserializeObject<HealtResponse>(responseBody);
+                string chatContent = "";
+                
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
+
         public async Task<ChatResponse> ValideHealthCondition(string message, string UserId)
         {
             try
@@ -154,12 +210,14 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 }
                 else if (response.Message.Contains("VALID")){
 
-                    var symptonResponse = await _ilema.RequestSymptomAsync(message, UserId);
+                    var symptonResponse = await _ilema.RequestSymptomAsync(message, DateTime.Now.Ticks.ToString());
                     var responseMessage = JsonConvert.DeserializeObject<IlemaApiResponse>(symptonResponse);
                     if (responseMessage.Message.Contains("VALID"))
                     {
                        var questions =  Logics.ExtractQuestions(responseMessage.Message);
                         chatResponse.Endpoint = "ValidateMessage";
+                        chatResponse.Messages = questions;
+                        chatResponse.Endpoint = "ReceiveQuestions";
                     }
 
                 }
@@ -233,27 +291,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 };
             }
         }
-        //private string CheckStringValue(string value)
-        // {
-        //     switch (value.ToLower())
-        //     {
-        //         case "READY_APPOINTMENT":
-        //             Console.WriteLine("You selected Apple.");
-        //             break;
-        //         case "BOOK_APPOINTMENT":
-        //             Console.WriteLine("You selected Banana.");
-        //             break;
-        //         case "cherry":
-        //             Console.WriteLine("You selected Cherry.");
-        //             break;
-        //         case "date":
-        //             Console.WriteLine("You selected Date.");
-        //             break;
-        //         default:
-        //             Console.WriteLine("Unknown selection.");
-        //             break;
-        //     }
-        // }
+    
         private MessageDescriptionResponse ExtractDescriptionAndCleanMessage(string response)
         {
             var message = "I'm sorry, the given health description is not provided in the message. Could you please provide the necessary information for analysis? Without sufficient symptoms or context, it's impossible to determine the appropriate department for treatment. Please respond with your symptoms for accurate analysis";
@@ -394,31 +432,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 return new ChatResponse();
             }
         }
-        //public async Task<ChatResponse> ValidateDesription(string message, string UserId)
-        //{
-        //    var responseBody = await _ilema.SendMessageAsync(message);
-        //    var response = JsonConvert.DeserializeObject<IlemaApiResponse>(responseBody);
-        //    var cleansMessage = ExtractDescriptionAndCleanMessage(response.Message);
-            
-        //    if(!string.IsNullOrEmpty(cleansMessage.NotEnough))
-        //    {
-        //        return new ChatResponse
-        //        {
-        //            Message = cleansMessage.NotEnough,
-        //            Endpoint = "ReceiveDescription"
-        //        };
-        //    }
-        //    if(!string.IsNullOrEmpty(cleansMessage.Department) || !string.IsNullOrEmpty(cleansMessage.Sympton))
-        //    {
-        //        return new ChatResponse
-        //        {
-        //            Message = "I can help you schedule a new appointment. please select a date suitable for your appointment",
-        //            Endpoint = "ReceiveDescription"
-        //        };
-        //    }
-
-
-        //}
+  
 
         static MessageDescriptionResponse ExtractSymptomAndDepartment(string content)
         {
@@ -452,6 +466,18 @@ namespace HMSPortal.Application.Core.Chat.Bot
             }
 
             return null;
+        }
+
+        static string FormatQuestionsAndAnswers(Dictionary<string, string> answers)
+        {
+            string formattedOutput = "Kindly review all the questions and answers and see if the each question is sufficient for the answer:\n";
+
+            foreach (var entry in answers)
+            {
+                formattedOutput += $"Question: {entry.Key}\nAnswer: {entry.Value}\n\n";
+            }
+
+            return formattedOutput;
         }
 
     }

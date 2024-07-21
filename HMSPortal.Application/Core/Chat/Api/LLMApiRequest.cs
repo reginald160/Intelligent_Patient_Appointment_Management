@@ -74,7 +74,7 @@ namespace HMSPortal.Application.Core.Chat.Api
                 return null;
             }
         }
-        public async Task<string> ValidateHealthConditionAsync(string query, string requestId)
+        public async Task<string> ValidateHealthConditionAsync(string query, string requestId )
         {
             var path = Path.Combine(rootPath, ParentPath, "HealthConditonFilter.txt");
             var system_Content = FileHelper.ReadFileContent(path);
@@ -138,6 +138,40 @@ namespace HMSPortal.Application.Core.Chat.Api
             {
                 Console.WriteLine($"Error: {e.Message}");
                 return null;
+            }
+        }
+
+        public async Task<string> AnalyseHealthCondition(string questions, string healthCondition,  string requestId)
+        {
+            try
+
+            {
+                var requestData = new
+                {
+                    questions_and_answers = questions,
+                    health_condition = healthCondition
+
+                };
+
+                var content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+
+                var symptonAnlyseUrlrl = _configuration["ChatBot:SymptonAnlyseUrl"];
+                var client = new HttpClient();
+                var request = PrepareChatPostRequest(requestId + "F", symptonAnlyseUrlrl);
+                request.Content = content;
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+                return responseBody;
+
+          
+
+
+
+            }
+            catch (Exception exp) {
+                return null;
+            
             }
         }
 

@@ -29,7 +29,8 @@ namespace HMSPortal.Domain.Models
 		public string? File { get; set; }
 		public string? Rating { get; set; }
 		public string? DoctorComment { get; set; }
-		public string? PatientComment { get; set; }
+        public string? ApointmentType { get; set; }
+        public string? PatientComment { get; set; }
 		public string? Department { get; set; }
         public virtual ICollection<AppointmentEvents> Events { get; set; }
     }

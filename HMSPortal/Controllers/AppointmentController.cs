@@ -4,6 +4,7 @@ using HMSPortal.Application.Core.Cache;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HMSPortal.Controllers
@@ -14,9 +15,9 @@ namespace HMSPortal.Controllers
         private readonly IAppointmentServices _appointmentServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
+
+
        
-
-
         public AppointmentController(IWebHostEnvironment webHostEnvironment,
             IAppointmentServices appointmentServices, IMapper mapper, ICacheService cacheService)
         {
@@ -25,6 +26,7 @@ namespace HMSPortal.Controllers
             _mapper=mapper;
             _cacheService=cacheService;
         }
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var response =  await _appointmentServices.GetAllAppointment();
@@ -55,6 +57,19 @@ namespace HMSPortal.Controllers
         }
 
         public async Task<IActionResult> PatientAppointment()
+        {
+            //var userId = _cacheService.GetCachedUser().Id;
+            var model = new BotMessage
+            {
+                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
+                //UserId =  userId
+            };
+
+            return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> SelfAppointment()
         {
             //var userId = _cacheService.GetCachedUser().Id;
             var model = new BotMessage

@@ -17,8 +17,9 @@ namespace HMSPortal.Application.ViewModels.Appointment
 		public string PatientId { get; set; }
 	
 		public string? TimeSlot { get; set; }
+        public string? AppointmentType { get; set; }
 
-		public string? ProblemDescrion { get; set; }
+        public string? ProblemDescrion { get; set; }
 		public string? Department { get; set; }
         public List<SelectListItem>? Patients { get; set; }
         public List<SelectListItem>? Doctors { get; set; }
