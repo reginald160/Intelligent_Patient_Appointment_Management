@@ -17,7 +17,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
         public string Endpoint { get; set; }
         public string Body { get; set; }
         public string NextAction { get; set; }
-        public bool IsAdditionA { get; set; }
+        public bool Success { get; set; }
         public ResponseType ResponseType { get; set; }
         public List<string> Messages { get; set; }
     }

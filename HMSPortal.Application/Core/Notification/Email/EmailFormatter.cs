@@ -36,14 +36,15 @@ namespace HMSPortal.Application.Core.Notification.Email
 			string templateRootPath = CombinePath(rootPath, AppointmentPath);
 			string content = string.Empty;
 			using var sr = new StreamReader(templateRootPath);
-			string googleCalenderLink = GenerateGoogleCalendarLink("Medical Apppointment", appointment.Date, appointment.Date.AddMinutes(30), "gdfdfdfdfdd", appointment.location);
+			string googleCalenderLink = GenerateGoogleCalendarLink("Medical Apppointment", appointment.Date, appointment.Date.AddMinutes(30), "Medical appointment", appointment.location);
 			content = sr.ReadToEnd(); 
 			content = content.Replace("{{bgImageUrl}}", appointment.BGImageUrl);
 			content = content.Replace("{{LogoURL}}", appointment.LogoUrl);
 			content = content.Replace("{{AppointmentDate}}", appointment.Date.ToString("dd/MMM/yyyy"));
 			content = content.Replace("{{AppointmentTime}}", appointment.Time);
 			content = content.Replace("{{PatientName}}", appointment.PatientName);
-			content = content.Replace("{{ClinicLocation}}", appointment.location);
+            content = content.Replace("{{RescheduleLink}}", appointment.RescheduleLink);
+            content = content.Replace("{{ClinicLocation}}", appointment.location);
 			content = content.Replace("{{GoogleCalendarLink}}", googleCalenderLink);
 			return content;
 		}

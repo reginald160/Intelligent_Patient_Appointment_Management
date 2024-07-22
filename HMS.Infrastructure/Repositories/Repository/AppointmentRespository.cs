@@ -21,8 +21,10 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static HMSPortal.Models.Enums;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -84,7 +86,7 @@ namespace HMS.Infrastructure.Repositories.Repository
                 ProblemDescrion = viewModel.ProblemDescrion,
                 Department = viewModel.Department,
                 TimeSlot = viewModel.TimeSlot,
-                Status = "Up coming",
+                Status = AppointmentStatus.UpComming.ToString(),
                 DateCreated = DateTimeOffset.Now,
                 AppointmentType = AppointmentType.ByAdmin.ToString(),
                 ReferenceNumber = RandomHelper.GenerateAppointmentReferenceNumber(),
@@ -116,31 +118,32 @@ namespace HMS.Infrastructure.Repositories.Repository
         }
         public async Task<AppResponse> CreateAppointmentByPatient(AddAppointmentViewModel viewModel)
         {
-
+            var patient = _dbContext.Patients.FirstOrDefault(x => x.UserId ==  viewModel.PatientId);
             AppointmentModel appointment = new AppointmentModel
             {
                 Id = Guid.NewGuid(),
                 Date = viewModel.Date,
                 DoctorId = !string.IsNullOrEmpty(viewModel.DoctorId) ? Guid.Parse(viewModel.DoctorId) : null,
-                PatientId =  !string.IsNullOrEmpty(viewModel.PatientId) ? Guid.Parse(viewModel.PatientId) : null,
+                PatientId =  patient.Id,
                 ProblemDescrion = viewModel.ProblemDescrion,
                 Department = viewModel.Department,
                 TimeSlot = viewModel.TimeSlot,
-                Status = "Up coming",
+                UserId = viewModel.PatientId,
+                //Status = "Up coming",
+                Status = AppointmentStatus.UpComming.ToString(),
                 DateCreated = DateTimeOffset.Now,
                 AppointmentType = AppointmentType.ByPatient.ToString(),
+                ApointmentType =  viewModel.AppointmentType,
                 ReferenceNumber = RandomHelper.GenerateAppointmentReferenceNumber(),
 
 
             };
-            var patient = _dbContext.Patients.FirstOrDefault(x => x.Id == appointment.PatientId);
 
             try
             {
                 await _dbContext.Appointments.AddAsync(appointment);
-                //await  _dbContext.SaveChangesAsync();
-
-                //await _notificatioServices.SendAppointmentConfirmationEmail(viewModel);
+                await  _dbContext.SaveChangesAsync();
+                await Task.Run(() => _notificatioServices.SendAppointmentConfirmationEmail(viewModel));
 
 
 
@@ -155,6 +158,48 @@ namespace HMS.Infrastructure.Repositories.Repository
                 return new AppResponse();
             }
 
+        }
+
+        public async Task<AppResponse> GetRecentAppointmentByPatient(string userId)
+        {
+            //Up coming
+            try
+            {
+               
+
+                var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted && x.UserId == userId)
+                .Select(x => new AllAppointmentViewModel
+                {
+                    Id = x.Id,
+                    Date = x.Date,
+                    DoctorComment = x.DoctorComment,
+                    DoctorId = x.DoctorId,
+                    PatientRef = x.Patient.PatientCode,
+                    PatientId = x.PatientId,
+                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                    StartTime = x.StartTime,
+                    Status = x.Status,
+                    ReferenceNumber = x.ReferenceNumber,
+                    ProblemDescrion = x.ProblemDescrion,
+                    TimeSlot = x.TimeSlot,
+                    AppointmentType = x.AppointmentType
+
+                }).ToListAsync();
+
+
+
+                return new AppResponse
+                {
+                    IsSuccessful = true,
+                    Data = appointments
+                };
+
+
+            }
+            catch(Exception ex)
+            {
+                return new AppResponse { IsSuccessful = false};
+            }
         }
 
         public async Task<AppResponse> GetAllAppointment()
@@ -244,14 +289,12 @@ namespace HMS.Infrastructure.Repositories.Repository
         {
             return _appointmentScheduler.GetAvailableSlotsForDateToString(date);
         }
-        //public async Task<bool> CancelAppointmentAsync(string reference)
-        //{
-        //    var appointment = _dbContext.Appointments.FirstOrDefault(x => x.ReferenceNumber == reference);
-        //    if (appointment != null)
-        //    {
 
-        //    }
-        //}
+        public Task<AppResponse> CreateAppointmentByPatient(string userId)
+        {
+            throw new NotImplementedException();
+        }
+      
 
     }
 }

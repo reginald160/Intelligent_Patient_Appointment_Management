@@ -15,9 +15,11 @@ namespace HMSPortal.Application.AppServices.IServices
     {
         Task<AppResponse> CreateAppointmentByAdmin(AddAppointmentViewModel viewModel);
         Task<AppResponse> CreateAppointmentByPatient(AddAppointmentViewModel viewModel);
+        Task<AppResponse> CreateAppointmentByPatient(string userId);
         Task<AppResponse> GetAllAppointment();
 		List<string> GetAvailableSlotsForDateToString(DateTime date);
         Task<(List<SelectListItem> Patients, List<SelectListItem> Doctors)> GetPatientAndDoctor();
+        Task<AppResponse> GetRecentAppointmentByPatient(string userId);
         Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages);
         Task<AppResponse> SaveChat(BotMessageViewModel viewModel);
     }

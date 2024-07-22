@@ -9,6 +9,7 @@ namespace HMSPortal.Application.Core.Notification.Email
 	public class AppointmentEmailModel
 	{
 		public string PatientName { get; set; }
+        public string RescheduleLink { get; set; }
         public string location { get; set; }
         public DateTime Date { get; set; }
 		public string Time { get; set; }

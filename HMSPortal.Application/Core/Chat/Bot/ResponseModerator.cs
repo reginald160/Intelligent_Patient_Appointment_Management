@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 
 namespace HMSPortal.Application.Core.Chat.Bot
 {
+
     public class ResponseModerator
     {
         private readonly IAppointmentServices _appointmentServices;
@@ -179,7 +180,77 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 throw new Exception();
             }
         }
+        public async Task<ChatResponse> ReadRescheduleAsync(string message, string userId)
+        {
+            try
+            {
+                var resp = await _appointmentServices.GetRecentAppointmentByPatient(userId);
+                var appointments = resp.Data as List<AllAppointmentViewModel>;
+                appointments = appointments.Where(x => x.Status == "Up coming" || x.Status == "UpComming").ToList();
+                if (appointments == null || !appointments.Any())
+                {
+                    return new ChatResponse
+                    {
+                        Message = "Your currently do not have an upcoming appointment,\n kindly go proceed to scheduling a new appointment",
+                        Endpoint = "ReceiveReschedule"
 
+                    };
+                }
+                else
+                {
+                    var responses = appointments.Select(x => x.ReferenceNumber).ToList();
+                    return new ChatResponse
+                    {
+                        //Message = "Please kindly scheduling select a date",
+                        Message = "RSC",
+                        Messages = responses,
+                        Endpoint = "ReceiveReschedule"
+
+                    };
+                }
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+
+        }
+        public async Task<List<string>> GetAppointmentByUser(string message, string userId)
+        {
+            var resp = await _appointmentServices.GetRecentAppointmentByPatient(userId);
+            var appointments = resp.Data as List<AllAppointmentViewModel>;
+            return appointments.Select(x => x.ReferenceNumber).ToList();
+        }
+        public async Task<ChatResponse> ReadMenuAsync(string message, string userId)
+        {
+            try
+            {
+                var response = new ChatResponse
+                {
+                    Message = message,
+                    Endpoint = "ReceiveMenuMessage"
+
+                };
+                message = GetMenu(message);
+                if (message.Contains("Reschedule"))
+                {
+                    var resp = await _appointmentServices.GetRecentAppointmentByPatient(userId);
+                    var appointments = resp.Data as List<AllAppointmentViewModel>;
+                    appointments = appointments.Where(x=> x.Status == "Up coming" || x.Status == "UpComming").ToList();
+                    if(appointments == null || !appointments.Any())
+                    {
+                        response.Message = "Your currently do not have an upcoming appointment,\\n kindly go proceed to scheduling a new appointment";
+                        response.Endpoint = "ReceiveRescheduleDefault";
+                    }
+                    
+                }
+                return response;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
         public async Task<ChatResponse> ValideHealthCondition(string message, string UserId)
         {
             try
@@ -227,23 +298,6 @@ namespace HMSPortal.Application.Core.Chat.Bot
                     chatResponse.Endpoint = "SendSymtoms";
                     chatResponse.Endpoint = "SendSymtoms";
                 }
-                //var options = new List<string> { "Option 1", "Option 2", "Option 3" };
-
-                //var optionObject = JsonConvert.SerializeObject(options);
-                //var SentChat = new BotMessageViewModel
-                //{
-                //    Content = "Response from Bot",
-                //    Type = CoreValiables.ChatSent,
-                //    UserId=UserId,
-                //    HasOptions = false,
-                //    Options = "sss",
-                //    APIResponse = responseBody,
-                //    BotMessage = cleansMessage.cleanedMessage,
-                //    UserIntent = cleansMessage.Intent
-
-                //};
-
-                //await _appointmentServices.SaveChat(SentChat);
 
                 return chatResponse;
             }
@@ -378,21 +432,20 @@ namespace HMSPortal.Application.Core.Chat.Bot
             }
         }
 
-        public async Task<ChatResponse> BookAppointmentAsync(string message, string UserId)
+        public async Task<ChatResponse> BookAppointmentAsync(string message, string UserId, ChatTempData data)
         {
-          
-            
+               
             try
             {
-      
                 var convert = Logics.ExtractDate(message);
                 var appointment = new AddAppointmentViewModel
                 {
                     Date = convert.Item1,
                     PatientId = UserId,
-                    ProblemDescrion = "sick patinece",
+                    ProblemDescrion = data.Result,
                     TimeSlot =convert.Item2,
-                    Department = "Dental"
+                    Department = "Dental",
+                    AppointmentType = data.ScheduleType
                 };
                 var appointmentMessage = JsonConvert.SerializeObject(appointment);
                 await _messageBroker.PublishAsync(CoreValiables.BootAppointmentTopic, appointmentMessage);
@@ -479,6 +532,23 @@ namespace HMSPortal.Application.Core.Chat.Bot
 
             return formattedOutput;
         }
+         string GetMenu(string message)
+        {
+            switch (message)
+            {
+                case "Schedule":
+                    return "Schedule an Appointment:\nPlease select appointment category";
+                case "Cancel":
+                    return "Cancel an Appointment:\nPlease provide Appointment ID or Patient ID.";
+                case "Reschedule":
+                    return "Reschedule an Appointment:\nPlease provide Appointment ID or Patient ID.";
+                case "Exit":
+                    return "Thank you for using our service. Goodbye!";
+                default:
+                    return "Invalid option. Please choose from the main menu.";
+            }
+        }
+
 
     }
 

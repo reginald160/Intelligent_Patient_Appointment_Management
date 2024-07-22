@@ -81,6 +81,20 @@ namespace HMSPortal.Controllers
             return View(model);
         }
 
+        [Authorize]
+        public async Task<IActionResult> SelfBotAppointment()
+        {
+            //var userId = _cacheService.GetCachedUser().Id;
+            var model = new BotMessage
+            {
+                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
+                //UserId =  userId
+            };
+
+            return View(model);
+        }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Add(AddAppointmentViewModel viewModel)

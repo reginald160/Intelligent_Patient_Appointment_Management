@@ -243,28 +243,6 @@ namespace HMS.Infrastructure.Repositories.Repository
             }
 
         }
-        //public async Task<bool> PatientWelcomeMessage(PatientEmailModel model)
-        //{
-        //    try
-        //    {
-        //        rootPath = _hostingEnvironment.ContentRootPath;
-        //        var emailRequest = new EmailRequest
-        //        {
-        //            To = model.Email,
-        //            Body = EmailFormatter.FormatDoctorAccountActivation(rootPath, model),
-        //            Subject = "Account Confirmation"
-        //        };
-
-        //        await SendgridEmail(emailRequest);
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return false;
-        //    }
-
-        //}
-
 
         public async Task<bool> SendDoctorAcountConfirmation(DoctorSignupEmailModel model)
         {
@@ -293,7 +271,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 			try
 			{
 				rootPath = _hostingEnvironment.ContentRootPath;
-				var patient = _dbContext.Patients.FirstOrDefault(x => x.Id.ToString() == appointment.PatientId);
+				var patient = _dbContext.Patients.FirstOrDefault(x => x.UserId == appointment.PatientId);
 				var template = new AppointmentEmailModel
 				{
 					PatientName = patient.FirstName,
@@ -301,16 +279,16 @@ namespace HMS.Infrastructure.Repositories.Repository
 					LogoUrl = "https://res.cloudinary.com/dukd0jnep/image/upload/v1718523325/ehxwqremdpkwqvshlhhy.jpg",
 					BGImageUrl = "https://res.cloudinary.com/dukd0jnep/image/upload/v1718523325/ehxwqremdpkwqvshlhhy.jpg",
 					Date = appointment.Date,
-					Time = "2:30 PM"
+					Time = appointment.TimeSlot
 				};
 				var emailRequest = new EmailRequest
 				{
-					To = "ozougwuifeanyi160@gmail.com",
+					To = patient.Email,
 					Body = EmailFormatter.FormatAppointment(rootPath, template),
 					Subject = "Appointment Confirmation"
 				};
 
-				await SendMail(emailRequest);
+				await SendgridEmail(emailRequest);
 				return true;
 			}
 			catch (Exception ex)
