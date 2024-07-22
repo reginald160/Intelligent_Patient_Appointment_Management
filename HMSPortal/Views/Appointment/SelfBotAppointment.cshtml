@@ -207,7 +207,7 @@
 
     });
     connection.on("ValidateMessage", function (user, message, nextEndpoint) {
-        alert(nextEndpoint);
+     
         endpoint = nextEndpoint
         appendMessage(user, message, "bot-message");
 
@@ -223,29 +223,28 @@
         endpoint = "ReadMenu";
         appendOptions(user, options);
     });
-    connection.on("ReceiveMenuMessage", function (user, message) {
+    connection.on("ReceiveMenuMessage", async function (user, message) {
 
+        const userId = userIdValue.value.trim();
         if (message.includes("Schedule an Appointment")) {
-
             endpoint = "ReadMenu";
             appendMessage(user, message, "bot-message");
             const options = ["Check-ups", "New Health Concerns"];
-            appendOptions(user, options)
-        }
-        else if (message.includes("Reschedule an Appointment")
-        {
-
+            appendOptions(user, options);
+        } else if (message.includes("Reschedule an Appointment")) {
+          
             appendMessage(user, message, "bot-message");
             try {
-                await connection.invoke("SendAppointments", user, "getAllAppointment");
+                await connection.invoke("SendAppointments", userId, "getAllAppointment");
             } catch (err) {
                 console.error(err.toString());
                 appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
             }
-
+        } else {
+            appendMessage(user, message, "bot-message");
         }
-
     });
+
     connection.on("ReceieveSheduleCategory", function (user, message) {
 
         console.log(message);
@@ -254,7 +253,7 @@
 
     });
     connection.on("ReceiveRescheduleDefault", function (user, message) {
-        
+       
         endpoint = "ReadMenu";
         appendMessage(user, message, "bot-message");
         const options = ["Schedule", "Cancel", "Reschedule", "Exit"];
@@ -263,14 +262,21 @@
        
     });
 
-    connection.on("ReceiveReschedule", function (user, messages) {
+    connection.on("ReceiveReschedule",  function (user, messages) {
 
-        endpoint = "ReadMenu";
-        appendDropdownAndButtons(messages);
+        endpoint = "SendRescheduleDate";
+        // appendMessage(user, message, "bot-message");
+        appendMessage(user, "select appointment ", "bot-message");
+         appendDropdownAndButtonsPro(messages, "appointment");
     });
 
     connection.on("ReceiveOptions", function (user, options) {
         appendOptions(user, options);
+    });
+    connection.on("ShowDatePickerDefault", function (user, message) {
+        endpoint = "SendDate";
+        appendMessage(user, message, "bot-message");
+        appendDatePicker('Bot');
     });
 
     connection.on("ShowDatePicker", function (user, message) {
@@ -465,6 +471,81 @@
         }
     }
 
+     function appendDropdownAndButtonsPro(options, titleName, userId, appointmentDate, connection) {
+
+        console.log("hello" + options);
+        const optionsElement = document.createElement('div');
+        optionsElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1', 'justify-content-start');
+
+        // Create unique IDs for elements
+        const dropdownId = 'doctorDropdown-' + Date.now();
+        const sendButtonId = 'sendDoctorButton-' + Date.now();
+        const cancelButtonId = 'cancelDoctorButton-' + Date.now();
+
+        // Create the dropdown HTML
+        let dropdownHtml = `
+            <select class="form-control" id="${dropdownId}">
+                <option value="">Select ${titleName}</option>
+        `;
+
+        // Add options to the dropdown based on the options array
+        options.forEach(option => {
+            dropdownHtml += `<option value="${option}">${option}</option>`;
+        });
+
+        dropdownHtml += `</select>`;
+
+        // Create the buttons HTML
+        let buttonsHtml = `
+            <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
+            <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
+        `;
+
+        // Combine dropdown and buttons into optionsElement
+        optionsElement.innerHTML = `
+            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+            ${dropdownHtml}
+            ${buttonsHtml}
+        `;
+
+        // Append optionsElement to chat box
+        const chatBox = document.getElementById('chat-box');
+        chatBox.appendChild(optionsElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Event listener for Send button
+        document.getElementById(sendButtonId).addEventListener('click', async function () {
+            const selectedDoctor = document.getElementById(dropdownId).value;
+
+          
+
+            if (selectedDoctor) {
+                // Append the selected doctor as a message in the chat
+                appendMessage('You', `Selected ${titleName}: ${selectedDoctor}`, 'user-message');
+
+                //appendMessage('You', "please select date", 'bot-message');
+
+              
+                // Send the selected doctor to the SignalR backend
+                sendDateAsync(selectedDoctor);
+            }
+
+            // Remove the optionsElement from the chat box
+            optionsElement.remove();
+        });
+
+        // Event listener for Cancel button
+        document.getElementById(cancelButtonId).addEventListener('click', function () {
+            // Remove the dropdown and buttons from the chat box
+            optionsElement.remove();
+        });
+    }
+
+    // Example usage:
+    // appendDropdownAndButtonsPro(['Dr. Smith', 'Dr. Jones'], 'Doctor', 'userId123', '2024-07-23', connection);
+
+
+
     function appendDropdownAndButtons(options) {
 
         console.log("heloo" + options);
@@ -475,6 +556,8 @@
         const dropdownId = 'doctorDropdown-' + Date.now();
         const sendButtonId = 'sendDoctorButton-' + Date.now();
         const cancelButtonId = 'cancelDoctorButton-' + Date.now();
+        const userId = document.getElementById('userId').value.trim();
+        appendMessage(userId, "please select appointment time", "bot-message");
 
         // Create the dropdown HTML
         let dropdownHtml = `
@@ -530,6 +613,16 @@
         });
     }
 
+    async function sendDateAsync(selectedDoctor) {
+        const userId = document.getElementById('userId').value.trim();
+       
+        try {
+            await connection.invoke("SendSyncDate", userId, ` ${selectedDoctor}`);
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
     // Example function to handle sending doctor selection to SignalR
     async function sendDoctorToBot(selectedDoctor) {
         const userId = document.getElementById('userId').value.trim();

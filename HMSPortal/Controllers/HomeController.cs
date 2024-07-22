@@ -1,6 +1,5 @@
 using HMSPortal.Application.Core.Chat.Message;
 using HMSPortal.Application.Core.Helpers;
-using HMSPortal.Domain.Models;
 using HMSPortal.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;

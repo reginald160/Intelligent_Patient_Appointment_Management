@@ -17,5 +17,6 @@ namespace HMSPortal.Domain.Models
         public string? Comment { get; set; }
 		public string? Actuator { get; set; }
 
+
 	}
 }

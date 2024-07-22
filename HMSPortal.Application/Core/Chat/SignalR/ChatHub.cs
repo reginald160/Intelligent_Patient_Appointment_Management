@@ -204,6 +204,24 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             var appontments = await _responseModerator.GetAppointmentByUser(message, user);
 
             // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
+            await Clients.All.SendAsync("ReceiveReschedule", user, appontments);
+
+
+        }
+        public async Task SendRescheduleDate(string user, string message)
+        {
+            if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+            {
+                chatTempData.MenuType = MenuType.Reschedule;
+                // Alternatively, if you want to add to existing questions:
+                // chatTempData.Questions.AddRange(newQuestions);
+
+                // Update the dictionary entry to reflect the changes
+                UserConnections[user] = chatTempData;
+            }
+            var appontments = await _responseModerator.GetAppointmentByUser(message, user);
+
+            // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
             await Clients.All.SendAsync("ReceiveReschedule", user, message);
 
 
@@ -233,6 +251,21 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
 
         }
+
+        public async Task SendSyncDate(string user, string message)
+        {
+            if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+            {
+                chatTempData.MenuType = MenuType.Reschedule;
+                chatTempData.AppointmentId = message;
+                UserConnections[user] = chatTempData;
+            }
+
+            // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
+            await Clients.All.SendAsync("ShowDatePicker", user, message);
+
+
+        }
         public async Task SendDescription(string user, string message)
         {
             var botResponse =  await _responseModerator.ReadMessageAsync(message, user);
@@ -259,10 +292,17 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                 UserConnections[user] = chatTempData;
             }
 
-            var botResponse =  await _responseModerator.BookAppointmentAsync(message, user, chatTempData);
+            if(chatTempData.MenuType == MenuType.Reschedule)
+            {
 
-            // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
-            await Clients.All.SendAsync("ShowDatePicker", user, message);
+            }
+            else
+            {
+                var botResponse = await _responseModerator.BookAppointmentAsync(message, user, chatTempData);
+
+                // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
+                await Clients.All.SendAsync("ShowDatePicker", user, message);
+            }
 
 
         }

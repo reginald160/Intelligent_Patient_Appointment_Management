@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using HMSPortal.Domain.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HMSPortal.Models
 {

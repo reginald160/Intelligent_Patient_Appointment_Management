@@ -160,14 +160,44 @@ namespace HMS.Infrastructure.Repositories.Repository
 
         }
 
+        public async Task<AppResponse> RescheduleAppointmentByPatient(AddAppointmentViewModel viewModel, string appointmentId)
+        {
+            var appointment = _dbContext.Appointments.FirstOrDefault(x => x.ReferenceNumber ==  appointmentId);
+           
+
+            try
+            {
+                appointment.TimeSlot = viewModel.TimeSlot;
+                appointment.Date = viewModel.Date;
+                appointment.ApointmentType = AppointmentType.ByPatient.ToString();
+                appointment.Status = AppointmentStatus.UpComming.ToString();
+                 _dbContext.Appointments.Update(appointment);
+                await _dbContext.SaveChangesAsync();
+                await Task.Run(() => _notificatioServices.SendAppointmentConfirmationEmail(viewModel));
+
+
+
+                return new AppResponse
+                {
+                    IsSuccessful = true,
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new AppResponse();
+            }
+
+        }
+
         public async Task<AppResponse> GetRecentAppointmentByPatient(string userId)
         {
             //Up coming
             try
             {
-               
+               var patient = _dbContext.Patients.Where(x=> x.UserId == userId).FirstOrDefault();
 
-                var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted && x.UserId == userId)
+                var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted && x.PatientId == patient.Id)
                 .Select(x => new AllAppointmentViewModel
                 {
                     Id = x.Id,

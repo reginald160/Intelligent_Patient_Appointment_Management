@@ -8,28 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="bin\**" />
-    <Compile Remove="Data\**" />
-    <Compile Remove="Models\**" />
-    <Content Remove="bin\**" />
-    <Content Remove="Data\**" />
-    <Content Remove="Models\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <EmbeddedResource Remove="Data\**" />
-    <EmbeddedResource Remove="Models\**" />
-    <None Remove="bin\**" />
-    <None Remove="Data\**" />
-    <None Remove="Models\**" />
+    <Compile Remove="Models\ApplicationUser.cs" />
   </ItemGroup>
+
 
   <ItemGroup>
     <Content Remove="Views\Appointment\SelfAppointment.cshtml" />
     <Content Remove="wwwroot\hmsproj-js\appointment.js" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\hmsproj-js\appointment.js" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
@@ -54,12 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HMS.Infrastructure\HMS.Infrastructure.csproj" />
-    <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj" />
-    <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
@@ -76,6 +58,12 @@
     <None Include="wwwroot\hmsproj-js\Appointment\appointment.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HMS.Infrastructure\HMS.Infrastructure.csproj" />
+    <ProjectReference Include="..\HMSPortal.Application\HMSPortal.Application.csproj" />
+    <ProjectReference Include="..\HMSPortal.Domain\HMSPortal.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

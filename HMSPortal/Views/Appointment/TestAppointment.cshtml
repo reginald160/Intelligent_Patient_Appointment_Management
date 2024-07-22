@@ -5,8 +5,8 @@
 @using Newtonsoft.Json
 @model HMSPortal.Application.ViewModels.Chat.BotMessage
 @inject IHttpContextAccessor _httpContextAccessor;
-@inject UserManager<ApplicationUser> _userManager
-@inject ICacheService _cache;
+@inject UserManager<ApplicationUser> _userManager;
+    @inject ICacheService _cache;
 @{
     ViewData["Title"] = "Chatbot";
     var userId = string.Empty;
@@ -62,26 +62,26 @@
                         }
                         else
                         {
-                            if(message.HasOptions && !string.IsNullOrEmpty(message.Options))
+                            if (message.HasOptions && !string.IsNullOrEmpty(message.Options))
                             {
-                                
-                                    var items = JsonConvert.DeserializeObject<List<string>>(message.Options);
+
+                                var items = JsonConvert.DeserializeObject<List<string>>(message.Options);
                                 <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
                                     <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-                                   @{
+                                    @{
                                         foreach (var item in items)
                                         {
-                                                    <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
+                                            <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
 
-                                                        <div>
-                                                            <button disabled class="btn btn-secondary m-1" onclick="sendOption('${option}')">@item</button>
-                                                        </div>
-                                                    </div>
+                                                <div>
+                                                    <button disabled class="btn btn-secondary m-1" onclick="sendOption('${option}')">@item</button>
+                                                </div>
+                                            </div>
                                         }
-                                   }
+                                    }
                                 </div>
-                                
-                               
+
+
                             }
                             else
                             {
@@ -185,8 +185,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
 <script>
 
-    alert("hello");
-   
+    $(document).ready(function () {
+
+        alert("hello");
+
+    });
+
+
+
     const chatBox = document.getElementById('chat-box');
     const typingIndicator = document.getElementById('typing-indicator');
     const userMessageInput = document.getElementById('userMessage');
@@ -232,19 +238,41 @@
             const options = ["Check-ups", "New Health Concerns"];
             appendOptions(user, options)
         }
-        else {
+        else if (message.includes("Reschedule an Appointment")
+            {
 
-            endpoint = "ReadMenu";
             appendMessage(user, message, "bot-message");
+            try {
+                await connection.invoke("SendAppointments", user, "getAllAppointment");
+            } catch (err) {
+                console.error(err.toString());
+                appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+            }
+
         }
 
     });
     connection.on("ReceieveSheduleCategory", function (user, message) {
-       
+
         console.log(message);
         endpoint = "ValidateHealthCondition";
         appendMessage(user, message, "bot-message");
 
+    });
+    connection.on("ReceiveRescheduleDefault", function (user, message) {
+
+        endpoint = "ReadMenu";
+        appendMessage(user, message, "bot-message");
+        const options = ["Schedule", "Cancel", "Reschedule", "Exit"];
+        appendOptions(user, options)
+
+
+    });
+
+    connection.on("ReceiveReschedule", function (user, messages) {
+
+        endpoint = "SendRescheduleDate";
+        appendDropdownAndButtons(messages);
     });
 
     connection.on("ReceiveOptions", function (user, options) {
@@ -264,6 +292,7 @@
     });
 
     connection.on("ReceiveQuestions", function (user, questions) {
+
         endpoint = "SubmitQuestions";
         appendQuestionsForm(questions);
     });
@@ -304,21 +333,21 @@
         if (className === 'user-message') {
             messageElement.classList.add('justify-content-end');
             messageElement.innerHTML = `
-                                    <div class="">
-                                        <p class="small p-2 me-3 mb-1 text-white  user-message">${message}</p>
-                                    <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">${new Date().toLocaleTimeString()}</p>
-                                </div>
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-                            `;
+                                                <div class="">
+                                                    <p class="small p-2 me-3 mb-1 text-white  user-message">${message}</p>
+                                                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">${new Date().toLocaleTimeString()}</p>
+                                            </div>
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                        `;
         } else {
             messageElement.classList.add('justify-content-start');
             messageElement.innerHTML = `
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-                                <div>
-                                            <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">${message}</p>
-                                    <p class="small ms-3 mb-3 rounded-3 text-muted">${new Date().toLocaleTimeString()}</p>
-                                </div>
-                            `;
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                            <div>
+                                                        <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">${message}</p>
+                                                <p class="small ms-3 mb-3 rounded-3 text-muted">${new Date().toLocaleTimeString()}</p>
+                                            </div>
+                                        `;
         }
 
         disablePreviousInputs();
@@ -338,9 +367,9 @@
         optionsHtml += '</div>';
 
         optionsElement.innerHTML = `
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-            ${optionsHtml}
-        `;
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${optionsHtml}
+                    `;
 
         chatBox.appendChild(optionsElement);
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -362,15 +391,15 @@
 
         // Create the date input and buttons HTML
         let optionsHtml = `
-            <input type="date" class="form-control" id="${dateInputId}">
-            <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
-            <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
-        `;
+                        <input type="date" class="form-control" id="${dateInputId}">
+                        <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
+                        <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
+                    `;
 
         optionsElement.innerHTML = `
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-            ${optionsHtml}
-        `;
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${optionsHtml}
+                    `;
 
         const chatBox = document.getElementById('chat-box');
         chatBox.appendChild(optionsElement);
@@ -379,11 +408,11 @@
         // Add event listener to the "Send" button
         // document.getElementById(sendButtonId).addEventListener('click', function () {
         //     const selectedDate = document.getElementById(dateInputId).value;
-           
+
         //     appendMessage(userIdValue, "Date: " + selectedDate, "user-message");
         //     sendDateToBot(selectedDate);
         //     optionsElement.remove();
-          
+
         // });
 
         document.getElementById(sendButtonId).addEventListener('click', function () {
@@ -409,7 +438,7 @@
 
     async function requestForMenu() {
         const userId = userIdValue.value.trim();
-     
+
 
         try {
             await connection.invoke("ReadMenu", userId, "Menu");
@@ -455,9 +484,9 @@
 
         // Create the dropdown HTML
         let dropdownHtml = `
-            <select class="form-control" id="${dropdownId}">
-                <option value="">Select Time</option>
-        `;
+                        <select class="form-control" id="${dropdownId}">
+                            <option value="">Select Time</option>
+                    `;
 
         // Add options to the dropdown based on the options array
         options.forEach(option => {
@@ -468,16 +497,16 @@
 
         // Create the buttons HTML
         let buttonsHtml = `
-            <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
-            <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
-        `;
+                        <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
+                        <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
+                    `;
 
         // Combine dropdown and buttons into optionsElement
         optionsElement.innerHTML = `
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-            ${dropdownHtml}
-            ${buttonsHtml}
-        `;
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${dropdownHtml}
+                        ${buttonsHtml}
+                    `;
 
         // Append optionsElement to chat box
         const chatBox = document.getElementById('chat-box');
@@ -526,21 +555,21 @@
         let formHtml = `<form id="questionsForm">`;
         questions.forEach((question, index) => {
             formHtml += `
-                    <div class="mb-3">
-                        <label for="question${index}" class="form-label">${question}</label>
-                        <input type="text" class="form-control" id="question${index}" name="question${index}" required>
-                    </div>
-                `;
+                                <div class="mb-3">
+                                    <label for="question${index}" class="form-label">${question}</label>
+                                        <input type="text" class="form-control" id="question${index}" name="question${question}" required>
+                                </div>
+                            `;
         });
         formHtml += `
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <button type="button" class="btn btn-secondary ms-2" id="cancelQuestionsFormButton">Cancel</button>
-            </form>`;
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-secondary ms-2" id="cancelQuestionsFormButton">Cancel</button>
+                        </form>`;
 
         formElement.innerHTML = `
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
-                <div>${formHtml}</div>
-            `;
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                            <div>${formHtml}</div>
+                        `;
 
         chatBox.appendChild(formElement);
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -576,26 +605,26 @@
     function storeString(key, val) {
         // Store a string in sessionStorage
         sessionStorage.setItem(key, val);
-        
+
     }
 
     function retrieveString(key) {
         // Retrieve the stored string from sessionStorage
         var myString = sessionStorage.getItem(key);
         return myString;
-        
+
     }
 
     function removeString() {
         // Remove the stored string from sessionStorage
         sessionStorage.removeItem(key);
-      
+
     }
 
     function disableInput() {
-    
+
         $("#senderPanel").hide();
-      
+
     }
 
     function enableInput() {

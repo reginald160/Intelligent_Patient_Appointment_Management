@@ -225,13 +225,14 @@ namespace HMSPortal.Application.Core.Chat.Bot
         {
             try
             {
+                message = GetMenu(message);
                 var response = new ChatResponse
                 {
                     Message = message,
                     Endpoint = "ReceiveMenuMessage"
 
                 };
-                message = GetMenu(message);
+             
                 if (message.Contains("Reschedule"))
                 {
                     var resp = await _appointmentServices.GetRecentAppointmentByPatient(userId);
@@ -239,8 +240,21 @@ namespace HMSPortal.Application.Core.Chat.Bot
                     appointments = appointments.Where(x=> x.Status == "Up coming" || x.Status == "UpComming").ToList();
                     if(appointments == null || !appointments.Any())
                     {
-                        response.Message = "Your currently do not have an upcoming appointment,\\n kindly go proceed to scheduling a new appointment";
-                        response.Endpoint = "ReceiveRescheduleDefault";
+                        return new ChatResponse
+                        {
+                            Endpoint = "ReceiveRescheduleDefault",
+                            Message = "Your currently do not have an upcoming appointment,\n kindly go proceed to scheduling a new appointment\";"
+                        };
+                        
+                    }
+                    else
+                    {
+                        return new ChatResponse
+                        {
+                            Endpoint = "ReceiveMenuMessage",
+                            Message = message,
+                        };
+                        
                     }
                     
                 }
@@ -539,9 +553,9 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 case "Schedule":
                     return "Schedule an Appointment:\nPlease select appointment category";
                 case "Cancel":
-                    return "Cancel an Appointment:\nPlease provide Appointment ID or Patient ID.";
+                    return "Cancel an Appointment:\nPlease provide Appointment ID or Patient ID";
                 case "Reschedule":
-                    return "Reschedule an Appointment:\nPlease provide Appointment ID or Patient ID.";
+                    return "Reschedule an Appointment:\nPlease select appointment";
                 case "Exit":
                     return "Thank you for using our service. Goodbye!";
                 default:

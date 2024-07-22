@@ -26,8 +26,44 @@ namespace HMS.Infrastructure.BackgroundJobs.Appointment
 			_dbContext=dbContext;
 		}
 
-	
-		public void ScheduleAppointment(AddAppointmentViewModel appointmentViewmodel)
+
+        public string ScheduleNotification(Action<string, DateTime> sendNotification, string message, DateTime appointmentDate)
+        {
+            // Schedule the notification one day before the appointment
+            var oneDayBeforeId = BackgroundJob.Schedule(
+                () => sendNotification(message, appointmentDate),
+                appointmentDate.AddDays(-1));
+
+            // Optionally, store the job ID in your database
+            // SaveJobIdToDatabase(oneDayBeforeId, appointmentDate);
+
+            return oneDayBeforeId;
+        }
+
+        // Method to update a scheduled job
+        public string UpdateScheduledJob(string oldJobId, Action<string, DateTime> sendNotification, string newMessage, DateTime newAppointmentDate)
+        {
+            // Delete the old job
+            BackgroundJob.Delete(oldJobId);
+
+            // Schedule a new job with updated parameters
+            var newJobId = BackgroundJob.Schedule(
+                () => sendNotification(newMessage, newAppointmentDate),
+                newAppointmentDate.AddDays(-1));
+
+            // Optionally, update the job ID in your database
+            // UpdateJobIdInDatabase(newJobId, newAppointmentDate);
+
+            return newJobId;
+        }
+
+        // Method to delete a scheduled job
+        public void DeleteScheduledJob(string jobId)
+        {
+            BackgroundJob.Delete(jobId);
+        }
+
+        public void ScheduleAppointment(AddAppointmentViewModel appointmentViewmodel)
 		{
 		
 			var appointmentDate = appointmentViewmodel.Date;
