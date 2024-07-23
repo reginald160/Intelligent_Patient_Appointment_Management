@@ -78,7 +78,7 @@ namespace HMSPortal.Application.Core.Chat.Api
         {
             var path = Path.Combine(rootPath, ParentPath, "HealthConditonFilter.txt");
             var system_Content = FileHelper.ReadFileContent(path);
-
+            requestId = DateTime.Now.Ticks.ToString();
             var requestData = new
             {
                 inputText = query,

@@ -13,6 +13,7 @@ namespace HMSPortal.Application.ViewModels.Appointment
 		public DateTime Date { get; set; }
 		public Guid? DoctorId { get; set; }
 		public string DoctorName { get; set; }
+		public string UserId { get; set; }
 		public Guid? PatientId { get; set; }
 		public string PatientName { get; set; }
 		public DateTime StartTime { get; set; }

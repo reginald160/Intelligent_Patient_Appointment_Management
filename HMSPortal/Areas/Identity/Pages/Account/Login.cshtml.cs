@@ -172,10 +172,12 @@ namespace HMSPortal.Areas.Identity.Pages.Account
 				}
 				if (result.Succeeded)
 				{
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-                    };
+					var roles = await _userManager.GetRolesAsync(user);
+					var claims = new List<Claim>
+					{
+						new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+						new Claim(ClaimTypes.Role, roles.FirstOrDefault())
+					};
 
                     var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
                     await _signInManager.Context.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));

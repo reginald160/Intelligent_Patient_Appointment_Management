@@ -85,6 +85,23 @@ namespace HMSPortal.Application.Core.Chat.Bot
             }
         }
 
+        public async Task<ChatResponse> RescheduleAppointment(string UserId, ChatTempData data)
+        {
+            var model = new AddAppointmentViewModel
+            {
+                TimeSlot = data.Slot,
+                Date = data.Date,
+                PatientId = UserId
+
+            };
+           await  _appointmentServices.RescheduleAppointmentByPatient(model, data.AppointmentId);
+
+            return new ChatResponse
+            {
+                Message = "Your appointment has been succesfully rescheduled",
+                Endpoint = "ReceiveRescheduleDefault"
+            };
+        }
         public async Task<ChatResponse> ReadMessageAsync(string message, string UserId)
         {
             try
@@ -180,6 +197,26 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 throw new Exception();
             }
         }
+        public async Task<ChatResponse> CancelAppointmentAsync(string appointmentId, string userId)
+        {
+            try
+            {
+                var resp = await _appointmentServices.CancelAppointment(userId,appointmentId);
+                return new ChatResponse
+                {
+                    Message = "Your appointment has been cancelled succesfully",
+                    Endpoint = "ReceiveSuccessMessage"
+
+                };
+            }
+            
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+        }
+
         public async Task<ChatResponse> ReadRescheduleAsync(string message, string userId)
         {
             try
@@ -258,6 +295,30 @@ namespace HMSPortal.Application.Core.Chat.Bot
                     }
                     
                 }
+                if(message.Contains("Cancel an Appointment"))
+                {
+                    var resp = await _appointmentServices.GetRecentAppointmentByPatient(userId);
+                    var appointments = resp.Data as List<AllAppointmentViewModel>;
+                    appointments = appointments.Where(x => x.Status == "Up coming" || x.Status == "UpComming").ToList();
+                    if (appointments == null || !appointments.Any())
+                    {
+                        return new ChatResponse
+                        {
+                            Endpoint = "ReceiveRescheduleDefault",
+                            Message = "Your currently do not have an upcoming appointment,\n kindly go proceed to scheduling a new appointment\";"
+                        };
+
+                    }
+                    else
+                    {
+                        return new ChatResponse
+                        {
+                            Endpoint = "ReceiveMenuMessage",
+                            Message = message,
+                        };
+
+                    }
+                }
                 return response;
             }
             catch(Exception ex)
@@ -317,7 +378,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
             }
             catch(Exception ex)
             {
-                throw new Exception();
+                return null;
             }
         }
 
@@ -553,7 +614,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 case "Schedule":
                     return "Schedule an Appointment:\nPlease select appointment category";
                 case "Cancel":
-                    return "Cancel an Appointment:\nPlease provide Appointment ID or Patient ID";
+                    return "Cancel an Appointment:\nPlease select appointment for cancellation";
                 case "Reschedule":
                     return "Reschedule an Appointment:\nPlease select appointment";
                 case "Exit":

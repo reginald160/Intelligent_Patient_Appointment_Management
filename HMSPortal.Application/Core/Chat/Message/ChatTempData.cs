@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HMSPortal.Application.Core.Chat.Message
 {
+    
     public enum MenuType
     {
         Schedule,
@@ -22,6 +23,7 @@ namespace HMSPortal.Application.Core.Chat.Message
         public MenuType MenuType { get; set; }
         public string AppointmentId { get; set; }
         public string ScheduleType { get; set; }
+      
         public string Result { get; set; }
         public string Slot { get; set; }
         public DateTime Date { get; set; }

@@ -26,6 +26,8 @@ using DHTMLX.Scheduler.Settings;
 using HMSPortal.Application.ViewModels;
 using Microsoft.Extensions.Options;
 using HMS.Infrastructure.Repositories.IRepository;
+using HMSPortal.Application.ViewModels.Notification;
+using Microsoft.EntityFrameworkCore;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -265,6 +267,63 @@ namespace HMS.Infrastructure.Repositories.Repository
             }
 
         }
+        public async Task<bool> SendGenricMessage(PatientGenericEmailModel template)
+        {
+            try
+            {
+                var emailSetting = _dbContext.EmailSettings.FirstOrDefault();
+                template.LogoUrl = emailSetting.Logo;
+                template.BGImageUrl = emailSetting.BackgroundImage;
+
+                rootPath = _hostingEnvironment.ContentRootPath;
+                var emailRequest = new EmailRequest
+                {
+                    To = template.Email,
+                    Body = EmailFormatter.FormatUserGeneric(rootPath, template),
+                    Subject = template.Subject
+                };
+
+                await SendgridEmail(emailRequest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> SendNotificationMessage(PatientGenericEmailModel template)
+        {
+            try
+            {
+                var emailSetting = _dbContext.EmailSettings.FirstOrDefault();
+                template.LogoUrl = emailSetting.Logo;
+                template.BGImageUrl = emailSetting.BackgroundImage;
+
+                rootPath = _hostingEnvironment.ContentRootPath;
+                var emailRequest = new EmailRequest
+                {
+                    To = template.Email,
+                    Body = EmailFormatter.FormatUserGeneric(rootPath, template),
+                    Subject = template.Subject
+                };
+
+                await SendgridEmail(emailRequest);
+
+               var notification = _dbContext.Notifications.FirstOrDefault(x => x.Id == Guid.Parse(template.NotificationId));
+                notification.Status = "Completed";
+                _dbContext.Notifications.Update(notification);
+               await _dbContext.SaveChangesAsync();
+
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
 
         public async Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment)
 		{
@@ -297,6 +356,26 @@ namespace HMS.Infrastructure.Repositories.Repository
 			}
 		}
 
+        public async Task<bool> CreateNotification(CreateNotificationViewmodel notification)
+        {
+
+           
+            // Create a new notification
+            var model = new Notification
+            {
+                DateCreated = notification.Date,
+                Date = notification.Date,
+                Message = notification.Message,
+                UserId = notification.UserId,
+               
+            };
+
+            _dbContext.Notifications.Add(model);
+           await  _dbContext.SaveChangesAsync();
+            
+
+            return true;
+        }
    
     }
 }

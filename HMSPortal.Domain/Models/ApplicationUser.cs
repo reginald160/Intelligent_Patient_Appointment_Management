@@ -10,5 +10,7 @@ namespace HMSPortal.Domain.Models
         public bool IsLocked { get; set; }
 
         public bool IsEnabled { get; set; }
+        //public bool FirstName { get; set; }
+        //public bool LastName { get; set; }
     }
 }

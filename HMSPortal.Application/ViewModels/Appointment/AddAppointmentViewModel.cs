@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace HMSPortal.Application.ViewModels.Appointment
 {
+
 	public class AddAppointmentViewModel
 	{
 		public DateTime Date { get; set; }

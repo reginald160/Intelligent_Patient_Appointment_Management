@@ -2,6 +2,7 @@ using Hangfire;
 using Hangfire.SqlServer;
 using HMS.Infrastructure.BackgroundJobs.Appointment;
 using HMS.Infrastructure.Persistence.DataContext;
+using HMS.Infrastructure.Persistence.Seed;
 using HMS.Infrastructure.Repositories.IRepository;
 using HMS.Infrastructure.Repositories.Repository;
 using HMSPortal.AppConfig;
@@ -81,6 +82,13 @@ builder.Services.AddHangfire(configuration => configuration
 
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+	options.AddPolicy("RequirePatientRole", policy => policy.RequireRole("Patient"));
+	options.AddPolicy("RequireSuperAdminRole", policy => policy.RequireRole("SuperAdmin"));
+	options.AddPolicy("RequireAdminOrSuperAdminRole", policy => policy.RequireRole("Admin", "SuperAdmin"));
+});
 
 
 // Configure Serilog
@@ -141,5 +149,5 @@ app.UseEndpoints(endpoints =>
 	endpoints.MapHub<UserHub>("/userHub");
 });
 app.MapRazorPages();
-
+SeedDataContext.SeeData(app);
 app.Run();

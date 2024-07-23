@@ -15,11 +15,11 @@
 
 
 			<li>
-				<a asp-controller="Patient" asp-action="Add">Add Patient</a>
+				<a asp-controller="Notification" asp-action="Index">Notifications</a>
 			</li>
-			<li>
+			@* <li>
 				<a asp-controller="Patient" asp-action="Index">All Patients</a>
-			</li>
+			</li> *@
 
 
 		</ul>
@@ -35,7 +35,7 @@
 				<a asp-controller="Appointment" asp-action="PatientAppointment"> Book Appointment</a>
 			</li>
 			<li>
-				<a asp-controller="Appointment" asp-action="BotAppointmentFake">All Appointments</a>
+				<a asp-controller="Appointment" asp-action="MyAppointments">My SeeAppointments</a>
 			</li>
 			<li>
 				<a href="about-appointment.html">Appointment Details</a>

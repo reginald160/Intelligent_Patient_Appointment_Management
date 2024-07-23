@@ -13,6 +13,7 @@ namespace HMSPortal.Application.Core.Notification.Email
 		public static string MailPath = "Statics\\EmailTemplates";
 		public static string AppointmentPath = "newAppointment.html";
 		public static string DoctorConfirmSignUpPath = "doctorSignUp.html";
+        public static string PatientGenericEmailPath = "patientGeneric.html";
 
         public static string ConfirmationEmail = "EmailConfirmation.html";
 		public static string EmailResponse = "EmailResponse.html";
@@ -48,6 +49,22 @@ namespace HMSPortal.Application.Core.Notification.Email
 			content = content.Replace("{{GoogleCalendarLink}}", googleCalenderLink);
 			return content;
 		}
+
+        public static string FormatUserGeneric(string rootPath, PatientGenericEmailModel message)
+        {
+
+            string templateRootPath = CombinePath(rootPath, EmailFormatter.PatientGenericEmailPath);
+            string content = string.Empty;
+            using var sr = new StreamReader(templateRootPath);
+            content = sr.ReadToEnd();
+            content = content.Replace("{{bgImageUrl}}", message.BGImageUrl);
+            content = content.Replace("{{LogoURL}}", message.LogoUrl);
+            content = content.Replace("{{Subject}}", message.Subject);
+            content = content.Replace("{{Name}}", message.Name);
+            content = content.Replace("{{Message}}", message.Message);
+         
+            return content;
+        }
 
         public static string FormatDoctorAccountActivation(string rootPath, DoctorSignupEmailModel model)
         {

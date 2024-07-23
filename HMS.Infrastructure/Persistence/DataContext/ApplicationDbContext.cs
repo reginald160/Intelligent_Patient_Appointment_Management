@@ -39,6 +39,8 @@ namespace HMS.Infrastructure.Persistence.DataContext
         public DbSet<BrockerSubscription>? BrockerSubscriptions { get; set; }
         public DbSet<AuthenticationToken>? AuthenticationTokens { get; set; }
 		public DbSet<AdminModel>? AdminModels { get; set; }
+        public DbSet<EmailSettings>? EmailSettings { get; set; }
+		public DbSet<Notification>? Notifications { get; set; }
 
 
 		//public IDbConnection Connection => throw new NotImplementedException();

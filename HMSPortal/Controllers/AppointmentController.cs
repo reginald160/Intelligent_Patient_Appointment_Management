@@ -1,11 +1,18 @@
 ﻿using AutoMapper;
 using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.Core;
+using HMSPortal.Application.Core.Attributes;
 using HMSPortal.Application.Core.Cache;
 using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
+using HMSPortal.Domain.Enums;
+using HMSPortal.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HMSPortal.Controllers
 {
@@ -15,18 +22,24 @@ namespace HMSPortal.Controllers
         private readonly IAppointmentServices _appointmentServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
+        public  string Patient = Roles.Patient.ToString();
+		private readonly UserManager<ApplicationUser> _userManager;
+
+        
 
 
-       
-        public AppointmentController(IWebHostEnvironment webHostEnvironment,
-            IAppointmentServices appointmentServices, IMapper mapper, ICacheService cacheService)
-        {
-            _webHostEnvironment=webHostEnvironment;
-            _appointmentServices=appointmentServices;
-            _mapper=mapper;
-            _cacheService=cacheService;
-        }
-        [Authorize]
+
+		public AppointmentController(IWebHostEnvironment webHostEnvironment,
+			IAppointmentServices appointmentServices, IMapper mapper, ICacheService cacheService,
+            UserManager<ApplicationUser> userManager)
+		{
+			_webHostEnvironment=webHostEnvironment;
+			_appointmentServices=appointmentServices;
+			_mapper=mapper;
+			_cacheService=cacheService;
+			_userManager=userManager;
+		}
+		[Authorize]
         public async Task<IActionResult> Index()
         {
             var response =  await _appointmentServices.GetAllAppointment();
@@ -44,7 +57,49 @@ namespace HMSPortal.Controllers
             };
             return View(appointment);
 		}
-        public async Task<IActionResult> BotAppointment()
+
+        [Authorize(Roles = RoleNames.Patient)]
+		public async Task<IActionResult> Reschedule(string Id)
+		{
+			
+			var appointment = new AddAppointmentViewModel
+			{
+				AppointmentType = Id,
+			};
+			return View(appointment);
+		}
+
+
+        [ValidateAntiForgeryToken]
+		[Authorize]
+        [HttpPost]
+		public async Task<IActionResult> Reschedule(AddAppointmentViewModel model)
+		{
+			var currentUser = await _userManager.GetUserAsync(User);
+			var roles =  await _userManager.GetRolesAsync(currentUser);
+			var schedule = new AddAppointmentViewModel
+			{
+				TimeSlot = model.TimeSlot,
+				Date = model.Date,
+			
+
+			};
+
+            await _appointmentServices.RescheduleAppointmentByPatient(schedule, model.AppointmentType);
+            if(roles.Contains(RoleNames.Patient))
+            {
+				return RedirectToAction("MyAppointments", "Appointment");
+            }
+            else
+            {
+				return RedirectToAction("Index", "Appointment");
+
+			}
+
+		}
+
+		[Authorize(Roles = RoleNames.Patient)]
+		public async Task<IActionResult> PatientAppointment()
         {
             //var userId = _cacheService.GetCachedUser().Id;
             var model = new BotMessage
@@ -56,67 +111,22 @@ namespace HMSPortal.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> PatientAppointment()
+
+		[Authorize(Roles = RoleNames.Patient)]
+		//[CustomAuthorize("Patient")]
+		public async Task<IActionResult> MyAppointments()
         {
-            //var userId = _cacheService.GetCachedUser().Id;
-            var model = new BotMessage
-            {
-                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
-                //UserId =  userId
-            };
-
-            return View(model);
+			var response = await _appointmentServices.GetAllAppointmentByUser(User.GetUserId());
+			var apponitments = response.Data as List<AllAppointmentViewModel>;
+			return View(apponitments);
         }
-
-        [Authorize]
-        public async Task<IActionResult> SelfAppointment()
-        {
-            //var userId = _cacheService.GetCachedUser().Id;
-            var model = new BotMessage
-            {
-                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
-                //UserId =  userId
-            };
-
-            return View(model);
-        }
-
-        [Authorize]
-        public async Task<IActionResult> SelfBotAppointment()
-        {
-            //var userId = _cacheService.GetCachedUser().Id;
-            var model = new BotMessage
-            {
-                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
-                //UserId =  userId
-            };
-
-            return View(model);
-        }
-
-       
-
-        [Authorize]
-        public async Task<IActionResult> TestAppointment()
-        {
-            //var userId = _cacheService.GetCachedUser().Id;
-            var model = new BotMessage
-            {
-                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
-                //UserId =  userId
-            };
-
-            return View(model);
-        }
-
-
-
         [HttpPost]
         public async Task<IActionResult> Add(AddAppointmentViewModel viewModel)
         {
             await _appointmentServices.CreateAppointmentByAdmin(viewModel);
             return View(viewModel);
         }
+
 
         [HttpGet]
         public JsonResult GetAvailableTimeSlots(string date)
@@ -152,5 +162,29 @@ namespace HMSPortal.Controllers
 
             return messages;
         }
-    }
+
+		[HttpDelete]
+
+		public async Task<IActionResult> Cancel(string id)
+		{
+			
+			var response = await _appointmentServices.CancelAppointmentById(id);
+			
+			if (response.IsSuccessful)
+			{
+				return Json(new { success = true });
+
+			}
+			else
+			{
+				return Json(new { success = false });
+			}
+
+		}
+	}
+
+	public static class RoleNames
+	{
+		public const string Patient = "Patient";
+	}
 }

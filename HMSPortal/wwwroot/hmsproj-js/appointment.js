@@ -26,16 +26,7 @@ $(document).ready(function () {
         ]
     });
 
-    //// Custom buttons for delete and edit
-    //$('.btn-danger').on('click', function () {
-    //    // Add your delete functionality here
-    //    alert('Delete functionality not implemented.');
-    //});
-
-    //$('.btn-primary').on('click', function () {
-    //    // Add your edit functionality here
-    //    alert('Edit functionality not implemented.');
-    //});
+ 
 });
 
 function confirmDelete(id) {
@@ -67,6 +58,59 @@ function deletePatient(id) {
             if (response.success) {
                 Swal.fire(
                     'Deleted!',
+                    response.message,
+                    'success'
+                ).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire(
+                    'Error!',
+                    response.message,
+                    'error'
+                );
+            }
+        },
+        error: function () {
+            Swal.fire(
+                'Error!',
+                'There was an error while canceling the appointment.',
+                'error'
+            );
+        }
+    });
+}
+
+
+function ConfirmCancelling(id) {
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            CancelAppointment(id);
+        }
+    });
+}
+
+function CancelAppointment(id) {
+    $.ajax({
+        url: "/Appointment/Cancel/",
+        data:
+        {
+            "id": id
+        },
+        type: "DELETE",
+        success: function (response) {
+            if (response.success) {
+                Swal.fire(
+                    'Appointment Cancelled!',
                     response.message,
                     'success'
                 ).then(() => {

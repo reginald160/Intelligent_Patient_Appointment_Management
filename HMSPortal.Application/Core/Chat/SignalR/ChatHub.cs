@@ -8,6 +8,7 @@ using HMSPortal.Application.ViewModels.Chat;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NuGet.Protocol.Plugins;
 using System;
 using System.Collections.Concurrent;
@@ -113,9 +114,6 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             }
             else
             {
-                //await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Message);
-                var questions = new List<string> { "What is your name?", "How old are you?", "What is your email address?" };
-                //await Clients.Client(user).SendAsync("ReceiveQuestions", "Bot", questions);
                 await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Messages);
 
             }
@@ -190,6 +188,16 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             }
             else
             {
+                if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+                {
+                    MenuType menu = (MenuType)Enum.Parse(typeof(MenuType), message);
+                    chatTempData.MenuType = menu;
+                    // Alternatively, if you want to add to existing questions:
+                    // chatTempData.Questions.AddRange(newQuestions);
+
+                    // Update the dictionary entry to reflect the changes
+                    UserConnections[user] = chatTempData;
+                }
                 var response = await _responseModerator.ReadMenuAsync(message, user);
                 
                 await Clients.All.SendAsync(response.Endpoint, "Bot", response.Message);
@@ -203,11 +211,37 @@ namespace HMSPortal.Application.Core.Chat.SignalR
         {
             var appontments = await _responseModerator.GetAppointmentByUser(message, user);
 
+            if( message == "Reschedule")
+            {
+                await Clients.All.SendAsync("ReceiveReschedule", user, appontments);
+
+            }
+            else
+            {
+                await Clients.All.SendAsync("ReceiveCancleSchedule", user, appontments);
+
+            }
+
             // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
-            await Clients.All.SendAsync("ReceiveReschedule", user, appontments);
 
 
         }
+
+        public async Task SendCancellation(string user, string message)
+        {
+            if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+            {
+                chatTempData.MenuType = MenuType.Cancel;
+          
+                UserConnections[user] = chatTempData;
+            }
+            var appontments = await _responseModerator.CancelAppointmentAsync(message, user);
+
+            // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
+            await Clients.All.SendAsync(appontments.Endpoint, user, appontments.Message);
+
+        }
+
         public async Task SendRescheduleDate(string user, string message)
         {
             if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
@@ -288,13 +322,17 @@ namespace HMSPortal.Application.Core.Chat.SignalR
         {
             if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
             {
+                if(message.Contains("@"))
+                {
+                    chatTempData.Slot = message.Split('@')[0];
+                }
 
                 UserConnections[user] = chatTempData;
             }
 
             if(chatTempData.MenuType == MenuType.Reschedule)
             {
-
+                await _responseModerator.RescheduleAppointment(user, chatTempData);
             }
             else
             {
@@ -307,22 +345,7 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
         }
 
-        string GetMenu(string message)
-        {
-            switch (message)
-            {
-                case "Schedule":
-                    return "Schedule an Appointment:\nPlease select appointment category";
-                case "Cancel":
-                    return "Cancel an Appointment:\nPlease select appointment an appointment.";
-                case "Reschedule":
-                    return "Reschedule an Appointment:\nPlease select appointment an appointment..";
-                case "Exit":
-                    return "Thank you for using our service. Goodbye!";
-                default:
-                    return "Invalid option. Please choose from the main menu.";
-            }
-        }
+       
 
     }
 }

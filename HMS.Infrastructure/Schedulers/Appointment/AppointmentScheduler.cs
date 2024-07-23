@@ -2,6 +2,7 @@
 using HMSPortal.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -135,6 +136,40 @@ namespace HMS.Infrastructure.Schedulers.Appointment
             }
             return false;
         }
+
+        public  DateClass ConvertToDateTimeRange(string timeSlot, DateTime appointmentDate)
+        {
+            // Split the time slot into start and end parts
+            var times = timeSlot.Split('-');
+            if (times.Length != 2)
+            {
+                throw new ArgumentException("Invalid time slot format. Expected format: 'hh:mmtt-hh:mmtt'.");
+            }
+
+            var startTime = DateTime.Parse(times[0].Trim());
+            // Parse end time
+            var endTime = DateTime.Parse(times[1].Trim());
+
+            // Combine the parsed times with the appointment date
+            var startDateTime = new DateTime(appointmentDate.Year, appointmentDate.Month, appointmentDate.Day,
+                                             startTime.Hour, startTime.Minute, 0);
+            var endDateTime = new DateTime(appointmentDate.Year, appointmentDate.Month, appointmentDate.Day,
+                                           endTime.Hour, endTime.Minute, 0);
+
+            return new DateClass
+            {
+                StartTime = startDateTime,
+                StopTime = endDateTime,
+            };
+        }
+
+
+        public class DateClass
+        {
+            public DateTime StartTime { get; set; }
+            public DateTime StopTime { get; set; }
+        }
     }
+   
 
 }
