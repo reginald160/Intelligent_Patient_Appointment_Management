@@ -6,6 +6,9 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Net.Mail;
 using System.Net;
 using HMSPortal.Application.ViewModels.Dashboard;
+using HMSPortal.Domain.Models;
+using Microsoft.AspNetCore.Identity;
+using HMSPortal.Domain.Enums;
 
 namespace HMSPortal.Controllers
 {
@@ -16,24 +19,46 @@ namespace HMSPortal.Controllers
 		private readonly ApplicationDbContext _dbContext;
 		private const string PatientCountCacheKey = "PatientCount";
 		private readonly ICacheService _cacheService;
+        private  readonly UserManager<ApplicationUser> _userManager;
 
 
-        public DashboardController(IMemoryCache memoryCache, ApplicationDbContext dbContext, ICacheService cacheService)
+        public DashboardController(IMemoryCache memoryCache, ApplicationDbContext dbContext, ICacheService cacheService, UserManager<ApplicationUser> userManager)
         {
-            _memoryCache=memoryCache;
-            _dbContext=dbContext;
-            _cacheService=cacheService;
+            _memoryCache = memoryCache;
+            _dbContext = dbContext;
+            _cacheService = cacheService;
+            _userManager = userManager;
         }
 
-		//[Authorize(Roles = "Administrator")]
+        //[Authorize(Roles = "Administrator")]
         [Authorize]
         public async Task<IActionResult> Index()
 		{
             //await Email();
+            var currentUser = await _userManager.GetUserAsync(User);
+            var role = await _userManager.GetRolesAsync(currentUser);
+            if (role.Contains("Admin") || role.Contains("SuperAdmin"))
+            {
+                ViewBag.PatialView = "_AdminMiniPartial";
+                ViewBag.PatientCount = _cacheService.GetPatientCount();
+				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
+				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
+				return View();
+            }
+            else if (role.Contains("Patient"))
+            {
+                ViewBag.PatientCount = _cacheService.GetPatientCount();
+                return View();
+            }
+            else
+            {
+                ViewBag.PatientCount = _cacheService.GetPatientCount();
+                return View();
+            }
 
 
-            ViewBag.PatientCount = _cacheService.GetPatientCount();
-			return View();
+
+           
 		}
 
 		public IActionResult Add()

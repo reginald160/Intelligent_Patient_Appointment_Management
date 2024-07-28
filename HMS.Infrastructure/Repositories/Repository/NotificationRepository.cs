@@ -28,6 +28,9 @@ using Microsoft.Extensions.Options;
 using HMS.Infrastructure.Repositories.IRepository;
 using HMSPortal.Application.ViewModels.Notification;
 using Microsoft.EntityFrameworkCore;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using HMS.Infrastructure.Migrations;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -82,7 +85,7 @@ namespace HMS.Infrastructure.Repositories.Repository
             message.From = new MailAddress("reginald.ozougwu@yorksj.ac.uk", "MediSmart");
 
             message.IsBodyHtml = true;
-            message.To.Add(new MailAddress("reginald1149@gmail.com", "MediSmart"));
+            message.To.Add(new MailAddress(emailRequest.To, "MediSmart"));
             message.Body = emailRequest.Body;
             message.Subject = emailRequest.Subject;
 
@@ -376,6 +379,36 @@ namespace HMS.Infrastructure.Repositories.Repository
 
             return true;
         }
-   
+        public  async Task<bool>SendSMS(string to, string messageBody)
+        {
+
+            var sid = _configuration["TwilioSetting:Sid"];
+            var token = _configuration["TwilioSetting:Token"];
+            var systemNumber = _configuration["TwilioSetting:SystemNumber"];
+            TwilioClient.Init(sid, token);
+
+            var message = await MessageResource.CreateAsync(
+                from: new Twilio.Types.PhoneNumber(systemNumber),
+                body: messageBody,
+                to: new Twilio.Types.PhoneNumber(to));
+
+            if (message == null || message.Status.ToString() == "Failed")
+                return false;
+            return true;
+        }
+        public async Task CreateDefaultNotificationSetting(string userId)
+        {
+            var model = new HMSPortal.Domain.Models.Settings.UserNotificationSettings
+            {
+                UserId = userId,
+                NotificationInterval = 5,
+                IsEmailCheck = "true",
+                IsSMSCheck = "true",
+            };
+
+            await _dbContext.UserNotificationSettings.AddAsync(model);
+            await _dbContext.SaveChangesAsync();
+         }
+
     }
 }

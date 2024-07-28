@@ -4,6 +4,7 @@ using HMS.Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240728083012_UserNotificationSettings")]
+    partial class UserNotificationSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1236,20 +1239,11 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("IsEmailCheck")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
-
-                    b.Property<string>("IsSMSCheck")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IsWhatapp")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("LastUpdatedTime")
                         .HasColumnType("datetimeoffset");
@@ -1259,6 +1253,10 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<int>("NotificationInterval")
                         .HasColumnType("int");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");

@@ -17,7 +17,7 @@ namespace HMSPortal.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			var sssss = SystemContent.GetSymptonFilterpath();
+			
 
             return View();
 		}

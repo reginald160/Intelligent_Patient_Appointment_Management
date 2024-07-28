@@ -9,7 +9,7 @@
 			<div class="widget-right">
 				<h4 class="wiget-title">Patients</h4>
 				<span class="numeric color-red">@ViewBag.PatientCount</span>
-				<p class="inc-dec mb-0"><span class="ti-angle-up"></span> +20% Increased</p>
+				<p class="inc-dec mb-0"><span class="ti-angle-up"></span> @* +20% Increased *@</p>
 			</div>
 		</div>
 	</div>
@@ -22,8 +22,8 @@
 			</div>
 			<div class="widget-right">
 				<h4 class="wiget-title">Appointments</h4>
-				<span class="numeric color-green">1585</span>
-				<p class="inc-dec mb-0"><span class="ti-angle-down"></span> -15% Decreased</p>
+				<span class="numeric color-green">@ViewBag.AppointmentCount</span>
+				<p class="inc-dec mb-0"><span class="ti-angle-down"></span> @* -15% Decreased *@</p>
 			</div>
 		</div>
 	</div>
@@ -32,19 +32,19 @@
 	<div class="col-md-4">
 		<div class="widget-area proclinic-box-shadow color-yellow">
 			<div class="widget-left">
-				<span class="ti-money"></span>
+				<span class="ti-user"></span>
 			</div>
 			<div class="widget-right">
-				<h4 class="wiget-title">Total Revenue</h4>
-				<span class="numeric color-yellow">$7300</span>
-				<p class="inc-dec mb-0"><span class="ti-angle-up"></span> +10% Increased</p>
+				<h4 class="wiget-title">Doctors</h4>
+				<span class="numeric color-yellow">@ViewBag.DoctorCount</span>
+				<p class="inc-dec mb-0"><span class="ti-angle-up"></span></p>
 			</div>
 		</div>
 	</div>
 	<!-- /Widget Item -->
 </div>
 
-<div class="row">
+@* <div class="row">
 	<!-- Widget Item -->
 	<div class="col-md-6">
 		<div class="widget-area-2 proclinic-box-shadow">
@@ -61,7 +61,7 @@
 		</div>
 	</div>
 	<!-- /Widget Item -->
-</div>
+</div> *@
 
 <div class="row">
 	<!-- Widget Item -->

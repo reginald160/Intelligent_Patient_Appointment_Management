@@ -45,6 +45,40 @@ namespace HMS.Infrastructure.Repositories.Repository
 
             return patientCount;
         }
+		public string GetDoctorCount()
+		{
+			const string DoctorCountCacheKey = CoreValiables.DoctorCountCacheKey;
+
+			// Try to get the patient count from the cache
+			if (!_memoryCache.TryGetValue(DoctorCountCacheKey, out string patientCount))
+			{
+				// If not found in cache, query the database and set the cache
+				patientCount = _context.Doctors.Count(x => !x.IsDeleted).ToString();
+				var cacheEntryOptions = new MemoryCacheEntryOptions()
+					.SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Set the cache expiration time
+
+				_memoryCache.Set(DoctorCountCacheKey, patientCount, cacheEntryOptions);
+			}
+
+			return patientCount;
+		}
+		public string GetAppointmentCount()
+		{
+			const string appointmentCountCacheKey = CoreValiables.AppointmentCountCacheKey;
+
+			// Try to get the patient count from the cache
+			if (!_memoryCache.TryGetValue(appointmentCountCacheKey, out string patientCount))
+			{
+				// If not found in cache, query the database and set the cache
+				patientCount = _context.Appointments.Count(x => !x.IsDeleted).ToString();
+				var cacheEntryOptions = new MemoryCacheEntryOptions()
+					.SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Set the cache expiration time
+
+				_memoryCache.Set(appointmentCountCacheKey, patientCount, cacheEntryOptions);
+			}
+
+			return patientCount;
+		}
 
 		public CacheUserModel GetCachedUser()
 		{

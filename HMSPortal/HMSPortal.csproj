@@ -68,6 +68,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Statics\EmailTemplates\adminAccountConfirmation.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\DoctorAccountConfirmation.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\doctorSignUp.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\ForgetPassword.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\newAppointment.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\patientGeneric.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Statics\EmailTemplates\patientWelcomeEmail.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Statics\SystemContent\HealthConditonFilter.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

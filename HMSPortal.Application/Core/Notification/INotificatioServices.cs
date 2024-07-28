@@ -12,6 +12,7 @@ namespace HMSPortal.Application.Core.Notification
 {
     public interface INotificatioServices
     {
+        Task CreateDefaultNotificationSetting(string userId);
         Task<bool> CreateNotification(CreateNotificationViewmodel notification);
         Task<bool> SendAdminSignUpEmail(PatientEmailModel model);
 		Task<bool> SendAppointmentConfirmationEmail(AddAppointmentViewModel appointment);
@@ -23,5 +24,6 @@ namespace HMSPortal.Application.Core.Notification
 		void SendNotification(string message, DateTime appointmentDate);
         Task<bool> SendNotificationMessage(PatientGenericEmailModel template);
         Task<bool> SendPatientSignUpEmail(PatientEmailModel model);
+        Task<bool> SendSMS(string to, string messageBody);
     }
 }

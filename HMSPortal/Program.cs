@@ -149,5 +149,5 @@ app.UseEndpoints(endpoints =>
 	endpoints.MapHub<UserHub>("/userHub");
 });
 app.MapRazorPages();
-SeedDataContext.SeeData(app);
+await SeedDataContext.SeeData(app);
 app.Run();

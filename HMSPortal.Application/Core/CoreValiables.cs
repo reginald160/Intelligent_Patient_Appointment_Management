@@ -10,6 +10,8 @@ namespace HMSPortal.Application.Core
 	{
 		public  const string SequenceNumberFormat = "D4";
 		public const string PatientCountCacheKey = "PatientCount";
+		public const string DoctorCountCacheKey = "DoctorCount";
+		public const string AppointmentCountCacheKey = "AppointmentCount";
 		public const string LoginUser = "LoginUser";
 		public const string CacheUserId = "UserId";
 		public const string CacheUserEmail = "UserEmail";
