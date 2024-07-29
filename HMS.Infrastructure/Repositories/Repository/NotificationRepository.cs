@@ -334,7 +334,8 @@ namespace HMS.Infrastructure.Repositories.Repository
 			try
 			{
 				rootPath = _hostingEnvironment.ContentRootPath;
-				var patient = _dbContext.Patients.FirstOrDefault(x => x.Id == Guid.Parse(appointment.PatientId));
+				var patient = _dbContext.Patients.FirstOrDefault(x => x.Id == Guid.Parse(appointment.PatientId) || x.UserId == appointment.PatientId);
+
 				var template = new AppointmentEmailModel
 				{
 					PatientName = patient.FirstName,

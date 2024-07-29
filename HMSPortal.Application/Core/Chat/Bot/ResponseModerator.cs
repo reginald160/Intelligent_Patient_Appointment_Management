@@ -512,6 +512,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
                
             try
             {
+                
                 var convert = Logics.ExtractDate(message);
                 var appointment = new AddAppointmentViewModel
                 {

@@ -58,7 +58,7 @@ namespace HMSPortal.Controllers
             }
             else if (role.Contains("Patient"))
             {
-				ViewBag.PatialView = "_AdminMiniPartial";
+				ViewBag.PatialView = "_PatientMiniPartial";
 				ViewBag.PatientCount = _cacheService.GetPatientCount();
 				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
 				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
