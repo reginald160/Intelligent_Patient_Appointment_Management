@@ -40,9 +40,17 @@
 							<input asp-for="DateOfBirth" type="date" placeholder="Date of Birth" class="form-control" id="dob" required>
 						</div>
 						<div class="form-group col-md-6">
-							<label for="specialization">Specialization</label>
-							<input asp-for="Specialty" type="text" placeholder="Specialization" class="form-control" id="specialization" required>
+							<label for="Specialty">Department</label>
+							<select asp-for="Specialty" class="form-control" id="department">
+								<option >Select department</option>
+								<option value="Orthopedic">Orthopedic</option>
+								<option value="Pediatrics">Pediatrics</option>
+								<option value="Dental">Dental</option>
+								<option value="Optometry">Optometry</option>
+								<option value="General Healthcare">General Healthcare</option>
+							</select>
 						</div>
+						
 						<div class="form-group col-md-6">
 							<label for="experience">Years of Experience</label>
 							<input type="number" asp-for="YearsOfExperience" placeholder="5" class="form-control" id="experience" required>

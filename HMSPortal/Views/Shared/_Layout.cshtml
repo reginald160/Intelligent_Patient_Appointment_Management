@@ -133,10 +133,6 @@
 						;
 						break;
 
-					case var _ when role == superAdminName:
-						@await Html.PartialAsync("_superAdmiLeftBarPartial")
-						;
-						break;
 					case var _ when role == doctorName:
 						@await Html.PartialAsync("_doctorAdmiLeftBarPartial")
 						;
@@ -145,7 +141,7 @@
 					// Add more cases if there are other roles
 					default:
 						// Optional: handle the default case if no roles match
-						@await Html.PartialAsync("_admiLeftBarPartial")
+						@await Html.PartialAsync("_superAdmiLeftBarPartial")
 						break;
 				}
 			}

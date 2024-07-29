@@ -2,6 +2,7 @@
 using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Admin;
+using HMSPortal.Application.ViewModels.Doctor;
 using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,15 @@ namespace HMSPortal.Controllers
         public async Task<IActionResult> Add()
 		{
 			return View();
+		}
+
+
+		[Authorize(Roles = "SuperAdmin,Admin")]
+
+		public async Task<IActionResult> AvialabaleDoctors()
+		{
+			var availableDoctors = await _adminServices.GetAvailableDoctors();
+			return View(availableDoctors);
 		}
 
 		[HttpPost]

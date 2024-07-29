@@ -4,6 +4,7 @@ using HMS.Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HMS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240728102134_user_clockin")]
+    partial class user_clockin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,9 +59,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -203,9 +203,6 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -274,9 +271,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -370,9 +364,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("File")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -568,9 +559,6 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<bool>("HasOptions")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -668,9 +656,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -779,9 +764,6 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -829,9 +811,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -918,9 +897,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1035,9 +1011,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1160,9 +1133,6 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<int?>("InvoiceNumber")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -1266,9 +1236,6 @@ namespace HMS.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -1332,9 +1299,6 @@ namespace HMS.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("DateCreated")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");

@@ -1,5 +1,6 @@
 ﻿using HMSPortal.Application.Core.Response;
 using HMSPortal.Application.ViewModels.Admin;
+using HMSPortal.Application.ViewModels.Doctor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,8 @@ namespace HMSPortal.Application.AppServices.IServices
         Task<AppResponse> DeleteAdmin(Guid id);
         GetAdminViewModel GetAdminById(Guid id);
         List<GetAdminViewModel> GetAllAdmin();
-        Task<AppResponse> LockAdmin(Guid id);
+		Task<List<GetDoctorViewModel>> GetAvailableDoctors();
+		Task<AppResponse> LockAdmin(Guid id);
         Task<AppResponse> UnLockAdmin(Guid id);
         Task<AppResponse> UpdateAdmin(GetAdminViewModel viewModel);
 	}

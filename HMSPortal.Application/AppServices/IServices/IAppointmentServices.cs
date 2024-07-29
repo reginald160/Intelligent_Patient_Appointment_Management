@@ -13,7 +13,8 @@ namespace HMSPortal.Application.AppServices.IServices
 {
     public interface IAppointmentServices
     {
-        Task<AppResponse> CancelAppointment(string userId, string appointmentId);
+		Task AssignAppointmentToDoctor(Guid doctorId, Guid appointmentId);
+		Task<AppResponse> CancelAppointment(string userId, string appointmentId);
 		Task<AppResponse> CancelAppointmentById(string appointmentId);
 		Task<AppResponse> CreateAppointmentByAdmin(AddAppointmentViewModel viewModel);
         Task<AppResponse> CreateAppointmentByPatient(AddAppointmentViewModel viewModel);

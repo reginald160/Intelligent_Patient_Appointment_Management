@@ -10,6 +10,7 @@ namespace HMSPortal.Application.ViewModels.Notification
 	{
 		public Guid Id { get; set; }
 		public string? Message { get; set; }
+		public string? Subject { get; set; }
 		public string? ObjectId { get; set; }
 		public string? Status { get; set; }
 		public DateTime Date { get; set; }

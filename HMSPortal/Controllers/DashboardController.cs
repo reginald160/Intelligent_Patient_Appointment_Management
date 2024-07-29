@@ -9,6 +9,8 @@ using HMSPortal.Application.ViewModels.Dashboard;
 using HMSPortal.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using HMSPortal.Domain.Enums;
+using HMSPortal.Application.ViewModels;
+using HMS.Infrastructure.DataBank;
 
 namespace HMSPortal.Controllers
 {
@@ -37,23 +39,32 @@ namespace HMSPortal.Controllers
             //await Email();
             var currentUser = await _userManager.GetUserAsync(User);
             var role = await _userManager.GetRolesAsync(currentUser);
-            if (role.Contains("Admin") || role.Contains("SuperAdmin"))
+            var dashboard = new DashBoardViewModel();
+
+			if (role.Contains("Admin") || role.Contains("SuperAdmin"))
             {
                 ViewBag.PatialView = "_AdminMiniPartial";
                 ViewBag.PatientCount = _cacheService.GetPatientCount();
 				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
 				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
-				return View();
+                dashboard.AllAppointments = AppointmentBank.GenerateRandomAppointments(50);
+				return View(dashboard);
             }
             else if (role.Contains("Patient"))
             {
-                ViewBag.PatientCount = _cacheService.GetPatientCount();
-                return View();
+				ViewBag.PatialView = "_AdminMiniPartial";
+				ViewBag.PatientCount = _cacheService.GetPatientCount();
+				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
+				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
+				return View();
             }
             else
             {
-                ViewBag.PatientCount = _cacheService.GetPatientCount();
-                return View();
+				ViewBag.PatialView = "_AdminMiniPartial";
+				ViewBag.PatientCount = _cacheService.GetPatientCount();
+				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
+				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
+				return View();
             }
 
 

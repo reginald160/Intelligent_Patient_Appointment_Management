@@ -5,6 +5,7 @@ namespace HMSPortal.Models
 {
     public class BaseIndividual : BaseEntity
     {
+
         public Guid? UserId { get; set; }
 
         [ForeignKey("UserId")]

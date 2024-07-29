@@ -43,7 +43,8 @@ namespace HMS.Infrastructure.Persistence.DataContext
         public DbSet<EmailSettings>? EmailSettings { get; set; }
 		public DbSet<Notification>? Notifications { get; set; }
         public DbSet<UserNotificationSettings>? UserNotificationSettings { get; set; }
-        
+        public DbSet<UserClockIn>? UserClockIns { get; set; }
+
 
 
         //public IDbConnection Connection => throw new NotImplementedException();

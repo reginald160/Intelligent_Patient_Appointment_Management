@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using HMS.Infrastructure.Repositories.IRepository;
+using HMS.Infrastructure.Repositories.Repository;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Doctor;
 using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -16,12 +19,15 @@ namespace HMSPortal.Controllers
 		private readonly IWebHostEnvironment _webHostEnvironment;
 		private readonly IDoctorServices _DoctorServices;
 		private readonly IMapper _mapper;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public DoctorController(IWebHostEnvironment webHostEnvironment, IDoctorServices doctorServices, IMapper mapper)
+		
+		public DoctorController(IWebHostEnvironment webHostEnvironment, IDoctorServices doctorServices, IMapper mapper, UserManager<ApplicationUser> userManager)
 		{
-			_webHostEnvironment=webHostEnvironment;
-			_DoctorServices=doctorServices;
-			_mapper=mapper;
+			_webHostEnvironment = webHostEnvironment;
+			_DoctorServices = doctorServices;
+			_mapper = mapper;
+			_userManager = userManager;
 		}
 
 		[HttpGet]
@@ -44,7 +50,62 @@ namespace HMSPortal.Controllers
 
         }
 
-        [HttpGet]
+		[Authorize]
+		
+		public async Task<IActionResult> Clocking()
+		{
+			var user = await _userManager.GetUserAsync(User);
+			var result =  _DoctorServices.GetUserClockIn(user.Id);
+			ViewBag.ClockInStatus = result ? "TRUE" : "FALSE";
+			return View();
+		}
+
+		//[Authorize]
+		//[ValidateAntiForgeryToken]
+		[HttpGet]
+		public async Task<IActionResult> ClockIn(string id)
+		{
+			var user = await _userManager.GetUserAsync(User);
+			var result = await _DoctorServices.ClockInAsync(user.Id);
+
+			var status = result.Split('@')[0];
+			var message = result.Split('@')[1];
+
+			if (status == "1")
+			{
+				return Json(new { success = true, message = message });
+
+			}
+			else
+			{
+				return Json(new { success = true, message = message });
+			}
+
+		}
+		//[ValidateAntiForgeryToken]
+		//[HttpPost("clockout")]
+		[HttpGet]
+		[Authorize]
+		public async Task<IActionResult> ClockOut(string id)
+		{
+			var user = await _userManager.GetUserAsync(User);
+			var result = await _DoctorServices.ClockOutAsync(user.Id);
+			var status = result.Split('@')[0];
+			var message = result.Split('@')[1];
+
+			if (status == "1")
+			{
+				return Json(new { success = true, message = message });
+
+			}
+			else
+			{
+				return Json(new { success = true, message = message });
+			}
+			
+		}
+
+		[HttpGet]
 		public IActionResult Add()
 		{
             return View();

@@ -31,6 +31,7 @@ using Microsoft.EntityFrameworkCore;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using HMS.Infrastructure.Migrations;
+using Microsoft.CodeAnalysis;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -85,7 +86,7 @@ namespace HMS.Infrastructure.Repositories.Repository
             message.From = new MailAddress("reginald.ozougwu@yorksj.ac.uk", "MediSmart");
 
             message.IsBodyHtml = true;
-            message.To.Add(new MailAddress(emailRequest.To, "MediSmart"));
+            message.To.Add(new MailAddress("reginald1149@gmail.com", "MediSmart"));
             message.Body = emailRequest.Body;
             message.Subject = emailRequest.Subject;
 
@@ -333,7 +334,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 			try
 			{
 				rootPath = _hostingEnvironment.ContentRootPath;
-				var patient = _dbContext.Patients.FirstOrDefault(x => x.UserId == appointment.PatientId);
+				var patient = _dbContext.Patients.FirstOrDefault(x => x.Id == Guid.Parse(appointment.PatientId));
 				var template = new AppointmentEmailModel
 				{
 					PatientName = patient.FirstName,

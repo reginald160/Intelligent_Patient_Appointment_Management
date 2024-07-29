@@ -10,6 +10,7 @@ using HMSPortal.Application.Core.Response;
 using HMSPortal.Application.ViewModels;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
+using HMSPortal.Application.ViewModels.Notification;
 using HMSPortal.Application.ViewModels.Patient;
 using HMSPortal.Domain.Enums;
 using HMSPortal.Domain.Models;
@@ -106,7 +107,7 @@ namespace HMS.Infrastructure.Repositories.Repository
 			try
             {
                await _dbContext.Appointments.AddAsync(appointment);
-               //await  _dbContext.SaveChangesAsync();
+               await  _dbContext.SaveChangesAsync();
 
             
 				await Task.Run(() => _notificatioServices.SendAppointmentConfirmationEmail(viewModel));
@@ -467,7 +468,47 @@ namespace HMS.Infrastructure.Repositories.Repository
         {
             throw new NotImplementedException();
         }
-      
 
-    }
+		public async Task AssignAppointmentToDoctor(Guid doctorId, Guid appointmentId)
+		{
+           var appointment =  _dbContext.Appointments.FirstOrDefault(x => x.Id == appointmentId);
+            if (appointment != null)
+            {
+				var doctor = _dbContext.Doctors.FirstOrDefault(x => x.Id == doctorId);
+				appointment.DoctorId = doctorId;
+
+              
+                _dbContext.Appointments.Update(appointment);
+               await _dbContext.SaveChangesAsync();
+                var time1 = Logics.ConverttoDate(appointment.TimeSlot, appointment.Date);
+				var notification = new CreateNotificationViewmodel
+                {
+                    NotificationTime = time1.AddMinutes(-10),
+                    Date = time1,
+					Name = "Dr. " + doctor.FirstName,
+                    Email = doctor.Email,
+                    Subject = "Appointment Assignment",
+                    Message = $"Kindly note that  you have an upcomming appointment with Id {appointment.ReferenceNumber} " +
+                    $"assigned to you.\n\n Date: {appointment.Date.ToString("dd/MM/yyyy")}\n TimeSlot: {appointment.TimeSlot}\n\n\n Regards"
+                };
+                await jobScheduleService.ScheduleNotification(notification);
+
+				var emailTemplate = new PatientGenericEmailModel
+				{
+					Name =  "Dr." + doctor.FirstName,
+					Email = doctor.Email,
+					Subject = "Upcoming Appointment",
+					Message = $"Kindly note that an appointment with Id {appointment.ReferenceNumber} has been assigned to you " +
+					$"assigned to you.\n\n Date: {appointment.Date.ToString("dd/MM/yyyy")}\n TimeSlot: {appointment.TimeSlot}\n\n\n Regards"
+
+				};
+				await Task.Run(() => _notificatioServices.SendGenricMessage(emailTemplate));
+				
+
+			}
+
+		}
+
+
+	}
 }

@@ -24,6 +24,16 @@
 	<div class="row">
 		<!-- Widget Item -->
 		<div class="col-md-12">
+			@if (!string.IsNullOrEmpty(successMessage))
+			{
+
+				<div class="alert alert-info alert-dismissible fade show" role="alert">
+					<strong>@successMessage</strong>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+			}
 			<div class="widget-area-2 proclinic-box-shadow">
 				<div class="col-12 text-end mb-4">
 					<a asp-controller="Appointment" asp-action="Add" class="btn btn-primary mb-2">
@@ -60,13 +70,16 @@
 										<td>@item.AppointmentType</td>
 										@* <td>@item.ProblemDescrion</td> *@
 										<td>
-											<a asp-controller="Patient" asp-action="Detail" asp-route-Id="@item.Id" class="btn btn-secondary">
+											<a asp-controller="Appointment" asp-action="Reschedule" asp-route-Id="@item.Id" class="btn btn-secondary">
 												Re-schedule
 											</a>
 											<a asp-controller="Patient" asp-action="Detail" asp-route-Id="@item.Id" class="btn btn-primary">
 												View
-											</a> 
-											
+											</a>
+											<a asp-controller="Appointment" asp-action="Assign" asp-route-Id="@item.Id" class="btn btn-primary">
+												View
+											</a>
+
 
 											<button type="button" class="btn btn-danger mx-2" onclick="confirmDelete('@item.Id')">
 												Cancel
