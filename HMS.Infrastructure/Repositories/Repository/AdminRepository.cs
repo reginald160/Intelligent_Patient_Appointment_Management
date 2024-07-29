@@ -19,6 +19,7 @@ using HMSPortal.Application.ViewModels.Admin;
 using Microsoft.Extensions.Logging;
 using HMSPortal.Application.ViewModels.Patient;
 using Microsoft.AspNetCore.Identity;
+using HMSPortal.Application.ViewModels.Doctor;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -38,6 +39,33 @@ namespace HMS.Infrastructure.Repositories.Repository
 			_memoryCache=memoryCache;
 			_notificatioServices=notificatioServices;
 			_logger=logger;
+		}
+		public async Task<List<GetDoctorViewModel>> GetAvailableDoctors()
+		{
+			try
+			{
+				var clockins = _db.UserClockIns.Where(x => x.ClockInTime.Value.Date.Equals(DateTime.UtcNow.Date))
+				.Select(x => x.UserId).ToList();
+				var availabledDoctors = _db.Doctors.Where(x => clockins.Contains(x.UserId))
+					.Select(x => new GetDoctorViewModel
+					{
+						FirstName = x.FirstName,
+						LastName = x.LastName,
+						Phone = x.Phone,
+						Email = x.Email,
+						DoctorDetails = x.DoctorDetails,
+						Specialty = x.Specialty,
+						UserId = x.UserId,
+						Id = x.Id,
+						Address = x.SerialNumber
+						
+					}).ToList();
+
+				return availabledDoctors;
+			}
+			catch (Exception ex) {
+				return null;
+			}
 		}
 
 		public async Task<AppResponse> CreateAdmin(AddAdminViewModel viewModel)

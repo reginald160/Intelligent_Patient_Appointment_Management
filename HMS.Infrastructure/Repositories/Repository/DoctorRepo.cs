@@ -19,6 +19,7 @@ using HMSPortal.Application.Core.MessageBrocker.EmmaBrocker;
 using Newtonsoft.Json;
 using HMSPortal.Application.Core.Notification;
 using HMSPortal.Application.Core.Notification.Email;
+using Twilio.TwiML.Messaging;
 
 namespace HMS.Infrastructure.Repositories.Repository
 {
@@ -43,6 +44,8 @@ namespace HMS.Infrastructure.Repositories.Repository
 		}
         public List <GetDoctorViewModel> GetAllDoctors()
         {
+            var clockins = _db.UserClockIns.Where(x => x.ClockInTime.Value.Date.Equals(DateTime.UtcNow.Date))
+                .Select(x => x.UserId).ToList();
             var doctors = _db.Doctors.Where(x => !x.IsDeleted).Select (viewModel => new GetDoctorViewModel
             {
                 Id = viewModel.Id,
@@ -56,6 +59,7 @@ namespace HMS.Infrastructure.Repositories.Repository
                 DateOfBirth = viewModel.DateOfBirth,
                 Address = viewModel.Address,
                 Gender = viewModel.Gender,
+				IsActive = clockins.Contains(viewModel.UserId),
                 Email = viewModel.Email,
                 PostalCode = viewModel.PostalCode,
                 HouseNumber = viewModel.HouseNumber,
@@ -218,6 +222,95 @@ namespace HMS.Infrastructure.Repositories.Repository
                 };
             }
         }
+		public bool GetUserClockIn(string doctorId)
+		{
+			// Check if the doctor has already clocked in today
+			var today = DateTime.UtcNow.Date;
+			return  _db.UserClockIns
+				.Where(c => c.UserId == doctorId && c.ClockInTime.HasValue && c.ClockInTime.Value.Date == today)
+				.Any();
 		
+		}
+
+		public async Task<string> ClockInAsync(string doctorId)
+		{
+			// Check if the doctor has already clocked in today
+			try
+			{
+				var today = DateTime.UtcNow.Date;
+				var existingClockIn = await _db.UserClockIns
+					.Where(c => c.UserId == doctorId && c.ClockInTime.HasValue && c.ClockInTime.Value.Date == today)
+					.FirstOrDefaultAsync();
+
+				if (existingClockIn != null)
+				{
+					return "Doctor has already clocked in today.";
+				}
+
+				var clockIn = new UserClockIn
+				{
+					UserId = doctorId,
+					ClockInTime = DateTime.UtcNow,
+					DateCreated = DateTime.UtcNow,
+					ClockOutTime = null,
+				};
+
+				_db.UserClockIns.Add(clockIn);
+
+				var doctor = _db.Doctors.FirstOrDefault(x => x.UserId == doctorId);
+				if (doctor != null)
+				{
+					doctor.IsActive = true;
+				}
+
+				_db.Doctors.Update(doctor);
+				await _db.SaveChangesAsync();
+				return "1@Clocked in successfully.";
+			}
+			catch (Exception ex) {
+				return "0@Clocked in was not successfull";
+			}
+		}
+
+		public async Task<string> ClockOutAsync(string doctorId)
+		{
+			var clocakIn = _db.UserClockIns.FirstOrDefault(c => c.UserId == doctorId);
+
+
+			var clockIn = await _db.UserClockIns
+				.Where(x=> x.DateCreated.Date == DateTime.UtcNow.Date)
+				
+				.Where(c => c.UserId == doctorId && c.ClockOutTime == null)
+				.OrderByDescending(c => c.ClockInTime)
+				.FirstOrDefaultAsync();
+			try
+			{
+
+				if (clockIn != null)
+				{
+					clockIn.ClockOutTime = DateTime.UtcNow;
+					_db.UserClockIns.Update(clockIn);
+
+
+					var doctor =  _db.Doctors.FirstOrDefault(x=> x.UserId == doctorId);
+					if (doctor != null)
+					{
+						doctor.IsActive = false;
+					}
+
+					_db.Doctors.Update(doctor);
+					await _db.SaveChangesAsync();
+					return "1@Clocked out successfully.";
+				}
+
+				return "0@No active clock-in found for today.";
+			}
+			catch (Exception ex)
+			{
+				return "0@Error occured while clocking out.";
+			}
+
+		}
+
 	}
 }

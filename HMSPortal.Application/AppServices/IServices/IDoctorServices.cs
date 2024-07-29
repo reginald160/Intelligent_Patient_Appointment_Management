@@ -13,10 +13,13 @@ namespace HMSPortal.Application.AppServices.IServices
 	public interface IDoctorServices
 	{
 		bool CheckExistingDoctor(string email);
+		Task<string> ClockInAsync(string doctorId);
+		Task<string> ClockOutAsync(string doctorId);
 		Task<AppResponse> CreateDoctor(AddDoctorViewModel viewModel);
 		Task<AppResponse> DeleteDoctor(Guid id);
         List<GetDoctorViewModel> GetAllDoctors();
         GetDoctorViewModel GetDoctorById(Guid id);
+		bool GetUserClockIn(string doctorId);
 		Task UpdateDoctorAsync(EditDoctorViewModel model);
 	}
 }

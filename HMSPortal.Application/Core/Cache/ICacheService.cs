@@ -8,7 +8,9 @@ namespace HMSPortal.Application.Core.Cache
 {
     public interface ICacheService
     {
+		string GetAppointmentCount();
 		CacheUserModel GetCachedUser();
+		string GetDoctorCount();
 		string GetPatientCount();
     }
 }

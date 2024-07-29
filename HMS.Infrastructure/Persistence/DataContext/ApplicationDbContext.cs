@@ -1,6 +1,7 @@
 ﻿using HMSPortal.Domain;
 using HMSPortal.Domain.Models;
 using HMSPortal.Domain.Models.Contract;
+using HMSPortal.Domain.Models.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -41,12 +42,15 @@ namespace HMS.Infrastructure.Persistence.DataContext
 		public DbSet<AdminModel>? AdminModels { get; set; }
         public DbSet<EmailSettings>? EmailSettings { get; set; }
 		public DbSet<Notification>? Notifications { get; set; }
+        public DbSet<UserNotificationSettings>? UserNotificationSettings { get; set; }
+        public DbSet<UserClockIn>? UserClockIns { get; set; }
 
 
-		//public IDbConnection Connection => throw new NotImplementedException();
+
+        //public IDbConnection Connection => throw new NotImplementedException();
 
 
-		public override EntityEntry Remove(object entity)
+        public override EntityEntry Remove(object entity)
         {
 
             return base.Remove(entity);

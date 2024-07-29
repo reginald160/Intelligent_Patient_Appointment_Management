@@ -1,9 +1,11 @@
 ﻿@{
 	ViewData["Title"] = "Home Page";
+	var viewName = ViewBag.PatialView;
+
 }
 
 <div class="container-fluid home">
 
-	@await Html.PartialAsync("_AdminMiniPartial")
+	@await Html.PartialAsync($"{viewName}")
 
 </div>

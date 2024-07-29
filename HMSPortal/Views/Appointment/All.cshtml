@@ -1,0 +1,95 @@
+﻿@using HMSPortal.Application.Core.Helpers
+@model List<HMSPortal.Application.ViewModels.Appointment.AllAppointmentViewModel>
+@{
+    ViewData["Title"] = "All";
+}
+<link rel="stylesheet" href="charts/css/morris.css">
+<!-- jvectormap -->
+<link rel="stylesheet" href="css/jquery-jvectormap.css">
+<link rel="stylesheet" href="datatable/dataTables.bootstrap4.min.css">
+
+<script src="js/modernizr.min.js"></script>
+
+<div class="container-fluid">
+
+	<div class="row">
+		<!-- Widget Item -->
+		<div class="col-md-12">
+			<div class="widget-area-2 proclinic-box-shadow">
+				<h3 class="widget-title">Appointments List</h3>
+				<div class="table-responsive mb-3">
+					<table id="tableId" class="table table-bordered table-striped">
+						<thead>
+							<tr>
+								
+								<th>Appointment ID</th>
+								<th>Patient ID</th>
+								<th>Date</th>
+								<th>Slot</th>
+								<th>Doctor Name</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model)
+							{
+								<tr>
+									
+									<td>@item.ReferenceNumber</td>
+									<td>@item.PatientRef</td>
+									<td>@item.Date.ToString("dd/MMM/yyyy")</td>
+									<td>@item.TimeSlot</td>
+									<td>@item.DoctorName</td>
+									<td>
+										<span class="badge badge-success">@item.Status</span>
+									</td>
+								</tr>
+							}
+
+						</tbody>
+					</table>
+
+					<!--Export links-->
+					<nav aria-label="Page navigation example">
+						<ul class="pagination justify-content-center export-pagination">
+							<li class="page-item">
+								<a class="page-link" href="#"><span class="ti-download"></span> csv</a>
+							</li>
+							<li class="page-item">
+								<a class="page-link" href="#"><span class="ti-printer"></span>  print</a>
+							</li>
+							<li class="page-item">
+								<a class="page-link" href="#"><span class="ti-file"></span> PDF</a>
+							</li>
+							<li class="page-item">
+								<a class="page-link" href="#"><span class="ti-align-justify"></span> Excel</a>
+							</li>
+						</ul>
+					</nav>
+					<!-- /Export links-->
+					<button type="button" class="btn btn-danger mt-3 mb-0"><span class="ti-trash"></span> DELETE</button>
+					<button type="button" class="btn btn-primary mt-3 mb-0"><span class="ti-pencil-alt"></span> EDIT</button>
+				</div>
+			</div>
+		</div>
+		<!-- /Widget Item -->
+	</div>
+</div>
+<a id="back-to-top" href="#" class="back-to-top">
+	<span class="ti-angle-up"></span>
+</a>
+<!-- /Back to Top -->
+<!-- Jquery Library-->
+<script src="js/jquery-3.2.1.min.js"></script>
+<!-- Popper Library-->
+<script src="js/popper.min.js"></script>
+<!-- Bootstrap Library-->
+<script src="js/bootstrap.min.js"></script>
+
+<!-- Datatable  -->
+<script src="datatable/jquery.dataTables.min.js"></script>
+<script src="datatable/dataTables.bootstrap4.min.js"></script>
+
+<!-- Custom Script-->
+<script src="js/custom.js"></script>
+<script src="js/custom-datatables.js"></script>

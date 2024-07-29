@@ -1,0 +1,49 @@
+﻿@using HMSPortal.Application.ViewModels.Doctor
+@model List<GetDoctorViewModel>
+@{
+    ViewData["Title"] = "Avialabale Doctors";
+}
+
+<div class="row">
+	<!-- Widget Item -->
+	<div class="col-md-12">
+		<div class="widget-area-2 proclinic-box-shadow">
+			<h3 class="widget-title">Avialabale Doctors</h3>
+			<div class="table-responsive">
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Phone</th>
+							<th>Doctor Id</th>
+							<th>Department</th>
+							<th></th>
+							@* <th>Time</th>
+							<th>Status</th> *@
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>Dr @item.FirstName @item.LastName</td>
+								<td>@item.Email</td>
+								<td>@item.Phone</td>
+								<td>@item.Address</td>
+								<td>@item.Specialty</td>
+								<td>
+									<span class="badge badge-success">Completed</span>
+								</td>
+							</tr>
+						}
+					
+					
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<!-- /Widget Item -->
+</div>
+

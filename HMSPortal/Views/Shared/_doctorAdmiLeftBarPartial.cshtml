@@ -1,0 +1,39 @@
+﻿
+<ul class="list-unstyled components">
+	
+	
+	<li>
+		<ul class="collapse list-unstyled" id="nav-patients">
+			<li >
+				<a asp-action="Index" asp-controller="Dashboard" data-toggle="collapse" aria-expanded="true">
+					<span class="ti-home"></span> Home
+				</a>
+
+			</li>
+		</ul>
+		
+
+	</li>
+
+	<li>
+		<a asp-controller="Doctor" asp-action="Clocking">
+			<span class="ti-clock"></span> Clock in/Out
+		</a>
+		
+	</li>
+	<li>
+		<a href="#nav-appointment" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-pencil-alt"></span> Appointments
+		</a>
+		<ul class="collapse list-unstyled" id="nav-appointment">
+			<li>
+				<a asp-controller="Appointment" asp-action="Add">Add Appointment</a>
+			</li>
+			
+		</ul>
+	</li>
+
+	
+
+	
+</ul>

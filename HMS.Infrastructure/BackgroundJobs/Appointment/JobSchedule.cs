@@ -43,7 +43,7 @@ namespace HMS.Infrastructure.BackgroundJobs.Appointment
             {
                 Name = notification.Name,
                 Email = notification.Email,
-                Subject = "Notification",
+                Subject = string.IsNullOrEmpty(notification.Subject)? "Notification" : notification.Subject,
                 Message = notification.Message,
                 NotificationId = id.ToString(),
 
@@ -179,12 +179,7 @@ namespace HMS.Infrastructure.BackgroundJobs.Appointment
             BackgroundJob.Delete(jobId);
         }
 
-      
-		public Task<string> ScheduleNotification(SchedulerHandler scheduler)
-		{
-			throw new NotImplementedException();
-		}
-
+ 
 
 
 		

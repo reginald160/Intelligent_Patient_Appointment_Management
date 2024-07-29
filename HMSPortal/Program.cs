@@ -111,6 +111,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
 	app.UseMigrationsEndPoint();
+	app.UseDeveloperExceptionPage();
 }
 else
 {
@@ -149,5 +150,5 @@ app.UseEndpoints(endpoints =>
 	endpoints.MapHub<UserHub>("/userHub");
 });
 app.MapRazorPages();
-SeedDataContext.SeeData(app);
+await SeedDataContext.SeeData(app);
 app.Run();

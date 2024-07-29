@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HMS.Infrastructure.DataBank;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.Core;
 using HMSPortal.Application.Core.Attributes;
@@ -16,6 +17,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HMSPortal.Controllers
 {
+	[Authorize]
 	public class AppointmentController : Controller
 	{
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -44,10 +46,21 @@ namespace HMSPortal.Controllers
         {
             var response =  await _appointmentServices.GetAllAppointment();
             var apponitments = response.Data as List<AllAppointmentViewModel>;
+			//var apponitments = AppointmentBank.GenerateRandomAppointments(50);
 
-            return View(apponitments);
+			return View(apponitments);
         }
-        public async Task<IActionResult> Add()
+
+		[Authorize]
+		public async Task<IActionResult> All()
+		{
+
+            var apponitments = AppointmentBank.GenerateRandomAppointments(50);
+
+			return View(apponitments);
+		}
+		[Authorize(Roles = $"SuperAdmin, Admin")]
+		public async Task<IActionResult> Add()
 		{
             var (patients, doctors) = await _appointmentServices.GetPatientAndDoctor();
             var appointment = new AddAppointmentViewModel
@@ -57,11 +70,29 @@ namespace HMSPortal.Controllers
             };
             return View(appointment);
 		}
+		[HttpPost]
+		public async Task<IActionResult> Add(AddAppointmentViewModel viewModel)
+		{
+			await _appointmentServices.CreateAppointmentByAdmin(viewModel);
+			TempData["Success"] = "Patient record has been created successfully.";
+			return RedirectToAction(nameof(Index),"Appointment");
+		}
 
-        [Authorize(Roles = RoleNames.Patient)]
+		[Authorize]
 		public async Task<IActionResult> Reschedule(string Id)
 		{
-			
+			var  app = _appointmentServices.GetappointmentById(Guid.Parse(Id));
+			var appointment = new AddAppointmentViewModel
+			{
+				AppointmentType = app.ReferenceNumber,
+				Department = app.ReferenceNumber,
+			};
+			return View(appointment);
+		}
+		[Authorize]
+		public async Task<IActionResult> View(string Id)
+		{
+
 			var appointment = new AddAppointmentViewModel
 			{
 				AppointmentType = Id,
@@ -69,8 +100,7 @@ namespace HMSPortal.Controllers
 			return View(appointment);
 		}
 
-
-        [ValidateAntiForgeryToken]
+		[ValidateAntiForgeryToken]
 		[Authorize]
         [HttpPost]
 		public async Task<IActionResult> Reschedule(AddAppointmentViewModel model)
@@ -110,6 +140,10 @@ namespace HMSPortal.Controllers
 
             return View(model);
         }
+        //public IActionResult All(int userId)
+        //{
+        //    return View();
+        //}
 
 
 		[Authorize(Roles = RoleNames.Patient)]
@@ -120,12 +154,7 @@ namespace HMSPortal.Controllers
 			var apponitments = response.Data as List<AllAppointmentViewModel>;
 			return View(apponitments);
         }
-        [HttpPost]
-        public async Task<IActionResult> Add(AddAppointmentViewModel viewModel)
-        {
-            await _appointmentServices.CreateAppointmentByAdmin(viewModel);
-            return View(viewModel);
-        }
+       
 
 
         [HttpGet]
@@ -172,7 +201,7 @@ namespace HMSPortal.Controllers
 			
 			if (response.IsSuccessful)
 			{
-				return Json(new { success = true });
+				return Json(new { success = true, message = response });
 
 			}
 			else

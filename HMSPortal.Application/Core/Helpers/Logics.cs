@@ -19,8 +19,17 @@ namespace HMSPortal.Application.Core.Helpers
 
             return new Tuple<DateTime, string>(dt, rep1[0]);
         }
+		public static DateTime ConverttoDate(string slot, DateTime date)
+		{
+		
+			var time = slot.Split('-')[0];
+			var fdfd = date + " " + time;
+			var dt = DateTime.Parse(fdfd);
 
-        public static string GetGreeting()
+			return dt;
+		}
+
+		public static string GetGreeting()
         {
             var currentTime = DateTime.UtcNow;
             if (currentTime.Hour < 12)
