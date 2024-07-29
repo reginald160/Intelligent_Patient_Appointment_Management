@@ -38,7 +38,8 @@ namespace HMSPortal.Controllers
 
 			_logger.LogInformation($"User {User.Identity.Name} logged out.");
 
-			return RedirectToAction("Index", "Dashboard");
+            return Redirect("/Identity/Account/Login");
+
 		}
 
         [HttpGet("Dashboard/AccessDenied")]
@@ -84,7 +85,7 @@ namespace HMSPortal.Controllers
                 if(user.PasswordConfirmed)
                 {
                     ViewBag.Message = "Your account has been confirm";
-                    return RedirectToAction("Index", "Dashboard");
+                    return Redirect("/Identity/Account/Login");
                 }
                 else
                 {

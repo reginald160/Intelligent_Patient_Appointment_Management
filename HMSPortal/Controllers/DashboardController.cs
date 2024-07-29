@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using HMSPortal.Domain.Enums;
 using HMSPortal.Application.ViewModels;
 using HMS.Infrastructure.DataBank;
+using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.ViewModels.Appointment;
 
 namespace HMSPortal.Controllers
 {
@@ -22,14 +24,16 @@ namespace HMSPortal.Controllers
 		private const string PatientCountCacheKey = "PatientCount";
 		private readonly ICacheService _cacheService;
         private  readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAppointmentServices _appointmentServices;
 
 
-        public DashboardController(IMemoryCache memoryCache, ApplicationDbContext dbContext, ICacheService cacheService, UserManager<ApplicationUser> userManager)
+        public DashboardController(IMemoryCache memoryCache, ApplicationDbContext dbContext, ICacheService cacheService, UserManager<ApplicationUser> userManager, IAppointmentServices appointmentServices)
         {
             _memoryCache = memoryCache;
             _dbContext = dbContext;
             _cacheService = cacheService;
             _userManager = userManager;
+            _appointmentServices = appointmentServices;
         }
 
         //[Authorize(Roles = "Administrator")]
@@ -47,7 +51,9 @@ namespace HMSPortal.Controllers
                 ViewBag.PatientCount = _cacheService.GetPatientCount();
 				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
 				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
-                dashboard.AllAppointments = AppointmentBank.GenerateRandomAppointments(50);
+                var response = await _appointmentServices.GetAllAppointment();
+                var apponitments = response.Data as List<AllAppointmentViewModel>;
+                dashboard.AllAppointments = apponitments; //AppointmentBank.GenerateRandomAppointments(50);
 				return View(dashboard);
             }
             else if (role.Contains("Patient"))

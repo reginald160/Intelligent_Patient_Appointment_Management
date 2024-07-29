@@ -267,7 +267,7 @@ namespace HMS.Infrastructure.Repositories.Repository
                 appointment.Status = AppointmentStatus.UpComming.ToString();
                  _dbContext.Appointments.Update(appointment);
                 await _dbContext.SaveChangesAsync();
-                ;
+                viewModel.PatientId = appointment.PatientId.ToString();
                 await Task.Run(() => _notificatioServices.SendAppointmentConfirmationEmail(viewModel));
 
                 var schedular = new SchedulerHandler
@@ -376,7 +376,30 @@ namespace HMS.Infrastructure.Repositories.Repository
 			}
 
 		}
-		public async Task<AppResponse> GetAllAppointment()
+		
+        public AllAppointmentViewModel GetappointmentById( Guid id)
+        {
+            var appointment =  _dbContext.Appointments.Where(x => !x.IsDeleted)
+                .Select(x => new AllAppointmentViewModel
+                {
+                    Id = x.Id,
+                    Date = x.Date,
+                    DoctorComment = x.DoctorComment,
+                    DoctorId = x.DoctorId,
+                    PatientRef = x.Patient.PatientCode,
+                    PatientId = x.PatientId,
+                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                    StartTime = x.StartTime,
+                    Status = x.Status,
+                    ReferenceNumber = x.ReferenceNumber,
+                    ProblemDescrion = x.ProblemDescrion,
+                    TimeSlot = x.TimeSlot,
+                    AppointmentType = x.AppointmentType
+
+                }).FirstOrDefault(x => x.Id == id);
+                return appointment; 
+        }
+        public async Task<AppResponse> GetAllAppointment()
 		{
            
 			try

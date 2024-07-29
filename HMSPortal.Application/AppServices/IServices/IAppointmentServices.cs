@@ -21,7 +21,8 @@ namespace HMSPortal.Application.AppServices.IServices
         Task<AppResponse> CreateAppointmentByPatient(string userId);
         Task<AppResponse> GetAllAppointment();
 		Task<AppResponse> GetAllAppointmentByUser(string userId);
-		List<string> GetAvailableSlotsForDateToString(DateTime date);
+        AllAppointmentViewModel GetappointmentById(Guid id);
+        List<string> GetAvailableSlotsForDateToString(DateTime date);
         Task<(List<SelectListItem> Patients, List<SelectListItem> Doctors)> GetPatientAndDoctor();
         Task<AppResponse> GetRecentAppointmentByPatient(string userId);
         Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages);

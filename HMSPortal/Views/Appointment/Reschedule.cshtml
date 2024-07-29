@@ -32,9 +32,10 @@
                                 <!-- Time slots will be populated here based on the selected date -->
                             </select>
                         </div>
+                        <input asp-for="AppointmentType" hidden="hidden" />
                         <div class="form-group col-md-6">
                             <label for="token-number">Appointment ID <small></small></label>
-                            <input type="text" asp-for="AppointmentType" placeholder="Token Number" class="form-control" id="token-number" readonly>
+                            <input type="text" asp-for="Department" placeholder="Token Number" class="form-control" id="token-number" readonly>
                         </div>
                         
                         <div class="form-check col-md-12 mb-2">

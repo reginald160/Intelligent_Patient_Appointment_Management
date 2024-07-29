@@ -81,10 +81,11 @@ namespace HMSPortal.Controllers
 		[Authorize]
 		public async Task<IActionResult> Reschedule(string Id)
 		{
-			
+			var  app = _appointmentServices.GetappointmentById(Guid.Parse(Id));
 			var appointment = new AddAppointmentViewModel
 			{
-				AppointmentType = Id,
+				AppointmentType = app.ReferenceNumber,
+				Department = app.ReferenceNumber,
 			};
 			return View(appointment);
 		}
