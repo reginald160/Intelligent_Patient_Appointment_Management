@@ -15,6 +15,7 @@ namespace HMSPortal.Domain.Models
         public string Address { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; } = string.Empty;
+		public string SerialNumber { get; set; } = string.Empty;
 
-    }
+	}
 }

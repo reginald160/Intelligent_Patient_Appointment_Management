@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-color: #D86896;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+            .email-header img {
+                max-width: 100px;
+                margin-bottom: 10px;
+            }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-footer {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #D86896;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <img src="{{LogoURL}}" alt="Clinic Logo">
+            <h1>Account Setup Confirmation</h1>
+        </div>
+        <div class="email-body">
+            <p>Your admin account has been successfully set up on the Medi-Smart Appointment System.</p>
+            <p>Please click the button below to activate your account</p>
+            <a href="{{Link}}" class="button">Visit Portal</a>
+        </div>
+        <div class="email-footer">
+            <p>&copy; 2024 Your Clinic Name. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,644 @@
+﻿@using HMSPortal.Application.Core
+@using HMSPortal.Application.Core.Cache
+@using HMSPortal.Domain.Models
+@using Microsoft.AspNetCore.Identity
+@using Newtonsoft.Json
+@model HMSPortal.Application.ViewModels.Chat.BotMessage
+@inject IHttpContextAccessor _httpContextAccessor;
+@inject UserManager<ApplicationUser> _userManager;
+    @inject ICacheService _cache;
+@{
+    ViewData["Title"] = "Chatbot";
+    var userId = string.Empty;
+    var cacheKey = CoreValiables.LoginUser;
+    var userCache = new CacheUserModel();
+    var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(cacheKey);
+
+    var user = _httpContextAccessor.HttpContext.User;
+    if (user.Identity.IsAuthenticated)
+    {
+        var currentUser = await _userManager.GetUserAsync(user);
+        if (currentUser != null)
+        {
+            userId = currentUser.Id;
+        }
+    }
+    else
+    {
+        var currentUser = _userManager.Users.FirstOrDefault(x => x.Email == "ozougwuifeanyi160@gmail.com");
+        if (currentUser != null)
+        {
+            userId = currentUser.Id;
+        }
+    }
+}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<div class="container py-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+            <div class="card" id="chat2">
+                <div class="card-header d-flex justify-content-between align-items-center p-3">
+                    <h5 class="mb-0">Chat</h5>
+                    <button type="button" class="btn btn-primary btn-sm">AI Appointment Chat App</button>
+                </div>
+                <input id="userId" value="@userId" hidden="hidden" />
+                <div class="card-body" id="chat-box" style="position: relative; height: 400px; overflow-y: scroll;">
+                    @foreach (var message in Model.Messages)
+                    {
+                        if (message.Type == CoreValiables.ChatRecieved)
+                        {
+                            <div class="d-flex flex-row mb-4 pt-1 justify-content-end">
+                                <div class="">
+                                    <p class="small p-2 me-3 mb-1 text-white  user-message">@message.Content</p>
+                                    <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">@message.SentAt.ToString("h:mm:ss tt");</p>
+                                </div>
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                            </div>
+                        }
+                        else
+                        {
+                            if (message.HasOptions && !string.IsNullOrEmpty(message.Options))
+                            {
+
+                                var items = JsonConvert.DeserializeObject<List<string>>(message.Options);
+                                <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                    @{
+                                        foreach (var item in items)
+                                        {
+                                            <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
+
+                                                <div>
+                                                    <button disabled class="btn btn-secondary m-1" onclick="sendOption('${option}')">@item</button>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-row mb-4 pt-1 justify-content-start">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                    <div>
+                                        <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">@message.Content</p>
+                                        <p class="small ms-3 mb-3 rounded-3 text-muted">@message.SentAt.ToString("h:mm:ss tt")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <div id="typing-indicator" style="display: none;" class="text-center mt-2">Bot is typing...</div>
+                <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3" id="senderPanel">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
+                         alt="avatar 3" style="width: 40px; height: 100%;">
+                    <input type="text" class="form-control form-control-lg" id="userMessage" placeholder="Type your message">
+                    <button onclick="sendMessage()" class="btn btn-primary ms-3">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="datePickerModal" tabindex="-1" role="dialog" aria-labelledby="datePickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="datePickerModalLabel">Select a Date</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="modalDatePicker" class="form-control" placeholder="Select a date">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #chat2 .form-control {
+        border-color: transparent;
+    }
+
+        #chat2 .form-control:focus {
+            border-color: transparent;
+            box-shadow: inset 0px 0px 0px 1px transparent;
+        }
+
+    .divider:after,
+    .divider:before {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eee;
+    }
+
+    .message {
+        padding: 5px;
+        margin: 5px;
+        border-radius: 5px;
+    }
+
+    .user-message {
+        text-align: right;
+        background-color: #1A76D1;
+        position: relative;
+        clear: both;
+        display: inline-block;
+        padding: 16px 40px 16px 20px;
+        margin: 0 0 20px 0;
+        font: 16px/20px 'Noto Sans', sans-serif;
+        border-radius: 10px;
+    }
+
+    .bot-message {
+        text-align: left;
+        background-color: #DC6C97;
+        position: relative;
+        clear: both;
+        display: inline-block;
+        padding: 16px 40px 16px 20px;
+        margin: 0 0 20px 0;
+        font: 16px/20px 'Noto Sans', sans-serif;
+        border-radius: 10px;
+    }
+
+    @@media (max-width: 450px) {
+        .card {
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+<script>
+
+    $(document).ready(function () {
+
+        alert("hello");
+
+    });
+
+
+
+    const chatBox = document.getElementById('chat-box');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const userMessageInput = document.getElementById('userMessage');
+    const userIdValue = document.getElementById('userId');
+    var endpoint = "SendMessage";
+    var appointmentDate = "";
+
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+
+
+    connection.on("ReceiveMessage", function (user, message) {
+        const messageClass = user === 'You' ? 'user-message' : 'bot-message';
+        appendMessage(user, message, "bot-message");
+
+    });
+    connection.on("ValidateMessage", function (user, message, nextEndpoint) {
+        alert(nextEndpoint);
+        endpoint = nextEndpoint
+        appendMessage(user, message, "bot-message");
+
+    });
+    connection.on("ReceiveDropDown", function (user, options) {
+        endpoint = "BookAppointment";
+        // appendMessage(user, message, "bot-message");
+        appendDropdownAndButtons(options);
+
+    });
+    connection.on("ReceiveMenu", function (user, options) {
+        disableInput()
+        endpoint = "ReadMenu";
+        appendOptions(user, options);
+    });
+    connection.on("ReceiveMenuMessage", function (user, message) {
+
+        if (message.includes("Schedule an Appointment")) {
+
+            endpoint = "ReadMenu";
+            appendMessage(user, message, "bot-message");
+            const options = ["Check-ups", "New Health Concerns"];
+            appendOptions(user, options)
+        }
+        else if (message.includes("Reschedule an Appointment")
+            {
+
+            appendMessage(user, message, "bot-message");
+            try {
+                await connection.invoke("SendAppointments", user, "getAllAppointment");
+            } catch (err) {
+                console.error(err.toString());
+                appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+            }
+
+        }
+
+    });
+    connection.on("ReceieveSheduleCategory", function (user, message) {
+
+        console.log(message);
+        endpoint = "ValidateHealthCondition";
+        appendMessage(user, message, "bot-message");
+
+    });
+    connection.on("ReceiveRescheduleDefault", function (user, message) {
+
+        endpoint = "ReadMenu";
+        appendMessage(user, message, "bot-message");
+        const options = ["Schedule", "Cancel", "Reschedule", "Exit"];
+        appendOptions(user, options)
+
+
+    });
+
+    connection.on("ReceiveReschedule", function (user, messages) {
+
+        endpoint = "SendRescheduleDate";
+        appendDropdownAndButtons(messages);
+    });
+
+    connection.on("ReceiveOptions", function (user, options) {
+        appendOptions(user, options);
+    });
+
+    connection.on("ShowDatePicker", function (user, message) {
+        endpoint = "SendDate";
+        appendMessage(user, message, "bot-message");
+        appendDatePicker('Bot');
+    });
+    connection.on("ReceiveDescription", function (user, message) {
+
+        endpoint = "SendDescription";
+        appendMessage(user, message, "bot-message");
+
+    });
+
+    connection.on("ReceiveQuestions", function (user, questions) {
+
+        endpoint = "SubmitQuestions";
+        appendQuestionsForm(questions);
+    });
+
+    connection.start().then(function () {
+        console.log("SignalR Connected.");
+        sendGreetings();
+        disableInput();
+    }).catch(function (err) {
+        console.error(err.toString());
+    });
+
+    async function sendMessage() {
+        const userMessage = userMessageInput.value.trim();
+        const userId = userIdValue.value.trim();
+
+        if (userMessage === '') return;
+
+        appendMessage('You', userMessage, 'user-message');
+
+        typingIndicator.style.display = 'block';
+
+        try {
+            console.log(endpoint);
+            await connection.invoke(endpoint, userId, userMessage);
+            typingIndicator.style.display = 'none';
+            userMessageInput.value = '';
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function appendMessage(sender, message, className) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1');
+
+        if (className === 'user-message') {
+            messageElement.classList.add('justify-content-end');
+            messageElement.innerHTML = `
+                                                <div class="">
+                                                    <p class="small p-2 me-3 mb-1 text-white  user-message">${message}</p>
+                                                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">${new Date().toLocaleTimeString()}</p>
+                                            </div>
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                        `;
+        } else {
+            messageElement.classList.add('justify-content-start');
+            messageElement.innerHTML = `
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                                            <div>
+                                                        <p class="small p-2 ms-3 mb-1 rounded-3 text-white bg-body-tertiary bot-message">${message}</p>
+                                                <p class="small ms-3 mb-3 rounded-3 text-muted">${new Date().toLocaleTimeString()}</p>
+                                            </div>
+                                        `;
+        }
+
+        disablePreviousInputs();
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+
+    function appendOptions(sender, options) {
+        const optionsElement = document.createElement('div');
+        optionsElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1', 'justify-content-start');
+
+        let optionsHtml = '<div>';
+        options.forEach(option => {
+            optionsHtml += `<button class="btn btn-secondary m-1" onclick="sendOption('${option}')">${option}</button>`;
+        });
+        optionsHtml += '</div>';
+
+        optionsElement.innerHTML = `
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${optionsHtml}
+                    `;
+
+        chatBox.appendChild(optionsElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendOption(option) {
+        userMessageInput.value = option;
+        sendMessage();
+    }
+
+    function appendDatePicker(sender) {
+        const optionsElement = document.createElement('div');
+        optionsElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1', 'justify-content-start');
+
+        // Create unique IDs for the input and buttons
+        const dateInputId = 'datePickerInput-' + Date.now();
+        const sendButtonId = 'sendDateButton-' + Date.now();
+        const cancelButtonId = 'cancelDatePickerButton-' + Date.now();
+
+        // Create the date input and buttons HTML
+        let optionsHtml = `
+                        <input type="date" class="form-control" id="${dateInputId}">
+                        <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
+                        <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
+                    `;
+
+        optionsElement.innerHTML = `
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${optionsHtml}
+                    `;
+
+        const chatBox = document.getElementById('chat-box');
+        chatBox.appendChild(optionsElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Add event listener to the "Send" button
+        // document.getElementById(sendButtonId).addEventListener('click', function () {
+        //     const selectedDate = document.getElementById(dateInputId).value;
+
+        //     appendMessage(userIdValue, "Date: " + selectedDate, "user-message");
+        //     sendDateToBot(selectedDate);
+        //     optionsElement.remove();
+
+        // });
+
+        document.getElementById(sendButtonId).addEventListener('click', function () {
+            const selectedDate = document.getElementById(dateInputId).value;
+            storeString("date", selectedDate)
+            // Append the selected date as a message in the chat
+            appendMessage(userIdValue, `Date: ${selectedDate}`, 'user-message');
+            appointmentDate = selectedDate;
+            // Send the selected date to the SignalR backend
+            sendDateToBot(selectedDate);
+
+            // Remove the optionsElement (date picker UI) from the chat box
+            optionsElement.remove();
+        });
+
+
+        // Add event listener to the "Cancel" button
+        document.getElementById(cancelButtonId).addEventListener('click', function () {
+            // Remove the date picker UI from the chat
+            optionsElement.remove();
+        });
+    }
+
+    async function requestForMenu() {
+        const userId = userIdValue.value.trim();
+
+
+        try {
+            await connection.invoke("ReadMenu", userId, "Menu");
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    async function sendGreetings() {
+        const userId = userIdValue.value.trim();
+
+        try {
+            await connection.invoke("SendGreeting", userId, "WelcomeMessage");
+            await connection.invoke("ReadMenu", userId, "Menu");
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    async function sendDateToBot(dateText) {
+        const userId = userIdValue.value.trim();
+
+        try {
+            await connection.invoke("SendDate", userId, `${dateText}`);
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function appendDropdownAndButtons(options) {
+
+        console.log("heloo" + options);
+        const optionsElement = document.createElement('div');
+        optionsElement.classList.add('d-flex', 'flex-row', 'mb-4', 'pt-1', 'justify-content-start');
+
+        // Create unique IDs for elements
+        const dropdownId = 'doctorDropdown-' + Date.now();
+        const sendButtonId = 'sendDoctorButton-' + Date.now();
+        const cancelButtonId = 'cancelDoctorButton-' + Date.now();
+
+        // Create the dropdown HTML
+        let dropdownHtml = `
+                        <select class="form-control" id="${dropdownId}">
+                            <option value="">Select Time</option>
+                    `;
+
+        // Add options to the dropdown based on the options array
+        options.forEach(option => {
+            dropdownHtml += `<option value="${option}">${option}</option>`;
+        });
+
+        dropdownHtml += `</select>`;
+
+        // Create the buttons HTML
+        let buttonsHtml = `
+                        <button class="btn btn-sm btn-primary ms-2" id="${sendButtonId}">Send</button>
+                        <button class="btn btn-sm btn-secondary ms-2" id="${cancelButtonId}">Cancel</button>
+                    `;
+
+        // Combine dropdown and buttons into optionsElement
+        optionsElement.innerHTML = `
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                        ${dropdownHtml}
+                        ${buttonsHtml}
+                    `;
+
+        // Append optionsElement to chat box
+        const chatBox = document.getElementById('chat-box');
+        chatBox.appendChild(optionsElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Event listener for Send button
+        document.getElementById(sendButtonId).addEventListener('click', function () {
+            const selectedDoctor = document.getElementById(dropdownId).value;
+
+            if (selectedDoctor) {
+                // Append the selected doctor as a message in the chat
+                appendMessage('You', `Selected Time: ${selectedDoctor}`, 'user-message');
+
+                // Send the selected doctor to the SignalR backend
+                sendDoctorToBot(selectedDoctor);
+            }
+
+            // Remove the optionsElement from the chat box
+            optionsElement.remove();
+        });
+
+        // Event listener for Cancel button
+        document.getElementById(cancelButtonId).addEventListener('click', function () {
+            // Remove the dropdown and buttons from the chat box
+            optionsElement.remove();
+        });
+    }
+
+    // Example function to handle sending doctor selection to SignalR
+    async function sendDoctorToBot(selectedDoctor) {
+        const userId = document.getElementById('userId').value.trim();
+        var selectedDate = retrieveString("date")
+        try {
+            await connection.invoke("BookAppointment", userId, ` ${selectedDoctor}@@${appointmentDate}`);
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function appendQuestionsForm(questions) {
+        const formElement = document.createElement('div');
+        formElement.classList.add('d-flex', 'flex-column', 'mb-4', 'pt-1', 'justify-content-start');
+
+        let formHtml = `<form id="questionsForm">`;
+        questions.forEach((question, index) => {
+            formHtml += `
+                                <div class="mb-3">
+                                    <label for="question${index}" class="form-label">${question}</label>
+                                        <input type="text" class="form-control" id="question${index}" name="question${question}" required>
+                                </div>
+                            `;
+        });
+        formHtml += `
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-secondary ms-2" id="cancelQuestionsFormButton">Cancel</button>
+                        </form>`;
+
+        formElement.innerHTML = `
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar" style="width: 45px; height: 100%;">
+                            <div>${formHtml}</div>
+                        `;
+
+        chatBox.appendChild(formElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const form = document.getElementById('questionsForm');
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const answers = {};
+            formData.forEach((value, key) => {
+                answers[key] = value;
+            });
+            await sendAnswersToBot(answers);
+            formElement.remove();
+        });
+
+        document.getElementById('cancelQuestionsFormButton').addEventListener('click', function () {
+            formElement.remove();
+        });
+    }
+
+    async function sendAnswersToBot(answers) {
+        const userId = userIdValue.value.trim();
+
+        try {
+            await connection.invoke("SubmitQuestions", userId, JSON.stringify(answers));
+        } catch (err) {
+            console.error(err.toString());
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bot-message');
+        }
+    }
+
+    function storeString(key, val) {
+        // Store a string in sessionStorage
+        sessionStorage.setItem(key, val);
+
+    }
+
+    function retrieveString(key) {
+        // Retrieve the stored string from sessionStorage
+        var myString = sessionStorage.getItem(key);
+        return myString;
+
+    }
+
+    function removeString() {
+        // Remove the stored string from sessionStorage
+        sessionStorage.removeItem(key);
+
+    }
+
+    function disableInput() {
+
+        $("#senderPanel").hide();
+
+    }
+
+    function enableInput() {
+        $("#senderPanel").show();
+    }
+
+    function disablePreviousInputs() {
+        // Disable all buttons and select elements
+        const buttons = document.querySelectorAll('#chat-box button');
+        const selects = document.querySelectorAll('#chat-box select');
+
+        buttons.forEach(button => button.disabled = true);
+        selects.forEach(select => select.disabled = true);
+    }
+    disableInput()
+
+</script>

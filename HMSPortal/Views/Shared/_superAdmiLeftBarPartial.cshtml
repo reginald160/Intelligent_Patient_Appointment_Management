@@ -1,0 +1,102 @@
+﻿@using HMSPortal.Application.Core
+@using HMSPortal.Application.Core.Cache
+@using HMSPortal.Domain.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Caching.Memory
+@using Newtonsoft.Json
+@inject IHttpContextAccessor _httpContextAccessor;
+
+	
+@{
+	var role = "";
+	var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(CoreValiables.LoginUser);
+	if (userCacheString != null)
+	{
+		var userCache = JsonConvert.DeserializeObject<CacheUserModel>(userCacheString);
+		role = userCache.Role;
+	}
+}
+
+<ul class="list-unstyled components">
+	<li class="active">
+		<a asp-action="Index" asp-controller="Dashboard" data-toggle="collapse" aria-expanded="true">
+			<span class="ti-home"></span> Home
+		</a>
+
+	</li>
+
+	@if (role == "SuperAdmin")
+	{
+		<li>
+			<a href="#nav-patients" data-toggle="collapse" aria-expanded="false">
+				<span class="ti-wheelchair"></span> Admin
+			</a>
+			<ul class="collapse list-unstyled" id="nav-patients">
+
+
+				<li>
+					<a asp-controller="Admin" asp-action="Add">Add Admin</a>
+				</li>
+				<li>
+					<a asp-controller="Admin" asp-action="All">All Admin</a>
+				</li>
+
+
+			</ul>
+
+		</li>
+	}
+	<li>
+		<a href="#nav-payment" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-wheelchair"></span> Patients
+		</a>
+		<ul class="collapse list-unstyled" id="nav-payment">
+			<li>
+				<a asp-controller="Patient" asp-action="Add">Add Patient</a>
+			</li>
+			<li>
+				<a asp-controller="Patient" asp-action="Index">All Patients</a>
+			</li>
+		
+		</ul>
+	</li>
+	
+
+
+	<li>
+		<a href="#nav-doctors" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-user"></span> Doctors
+		</a>
+		<ul class="collapse list-unstyled" id="nav-doctors">
+			<li>
+				<a asp-controller="Doctor" asp-action="Add">Add Doctor</a>
+			</li>
+
+			<li>
+				<a asp-controller="Doctor" asp-action="Index">All Doctors</a>
+			</li>
+			<li>
+				<a asp-controller="Admin" asp-action="AvialabaleDoctors">Available Doctors</a>
+			</li>
+
+		</ul>
+	</li>
+	<li>
+		<a href="#nav-appointment" data-toggle="collapse" aria-expanded="false">
+			<span class="ti-pencil-alt"></span> Appointments
+		</a>
+		<ul class="collapse list-unstyled" id="nav-appointment">
+			<li>
+				<a asp-controller="Appointment" asp-action="Add">Add Appointment</a>
+			</li>
+			<li>
+				<a asp-controller="Appointment" asp-action="Index">All Appointments</a>
+			</li>
+			
+		</ul>
+	</li>
+
+	
+
+	
+</ul>

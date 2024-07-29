@@ -1,0 +1,72 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Medi-Smart - Access Denied</title>
+    <!-- Fav  Icon Link -->
+    <link rel="shortcut icon" type="image/png" href="images/fav.png">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- themify icons CSS -->
+    <link rel="stylesheet" href="css/themify-icons.css">
+    <!-- Animations CSS -->
+    <link rel="stylesheet" href="css/animate.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/red.css" id="style_theme">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- morris charts -->
+    <link rel="stylesheet" href="charts/css/morris.css">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="css/jquery-jvectormap.css">
+
+    <script src="js/modernizr.min.js"></script>
+</head>
+
+<body class="auth-bg">
+    <!-- Pre Loader -->
+    <div class="loading">
+        <div class="spinner">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+    </div>
+    <!--/Pre Loader -->
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-6">
+                <div class="card shadow proclinic-box-shadow text-center">
+                    <div class="card-body">
+                        <h3 class="widget-title">Access Denied</h3>
+                        <p>You do not have permission to access this page.</p>
+                        <a asp-action="Index" asp-controller="Dashboard" class="btn btn-primary mt-3">Home</a>
+                        <p>
+                            <a href="javascript:history.back()" class="btn btn-primary mt-3">Go Back</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jquery Library-->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <!-- Popper Library-->
+    <script src="js/popper.min.js"></script>
+    <!-- Bootstrap Library-->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Custom Script-->
+    <script src="js/custom.js"></script>
+</body>
+</html>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -7,20 +7,48 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HMS.Infrastructure\HMS.Infrastructure.csproj" />
+	  <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+	  <PackageReference Include="CloudinaryDotNet" Version="1.26.2" />
+	  <PackageReference Include="Confluent.Kafka" Version="2.4.0" />
 	  <PackageReference Include="DHTMLX.Scheduler.NET" Version="4.0.3" />
+	  <PackageReference Include="Hangfire" Version="1.8.14" />
+	  <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
 	  <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.3" />
 	  <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.3" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.3" />
+	  <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
+	  <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+	  <PackageReference Include="Microsoft.Bot.Builder" Version="4.22.4" />
+	  <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.22.4" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.3" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.7">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+	  <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+	  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Core\Attributes\DisplayControllerNameAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Update="Core\Extensions\HtmlHelperExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AppServices\Services\" />
+    <Folder Include="Core\Bot\APIRequest\" />
+    <Folder Include="Core\Chat\Odogwu\" />
+    <Folder Include="Core\Model\Enum\" />
+    <Folder Include="Core\Notification\NewFolder\" />
   </ItemGroup>
 
 </Project>

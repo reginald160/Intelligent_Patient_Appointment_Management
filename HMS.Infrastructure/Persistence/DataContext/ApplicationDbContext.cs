@@ -1,5 +1,7 @@
-﻿using HMSPortal.Domain.Models;
+﻿using HMSPortal.Domain;
+using HMSPortal.Domain.Models;
 using HMSPortal.Domain.Models.Contract;
+using HMSPortal.Domain.Models.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -7,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,10 +28,26 @@ namespace HMS.Infrastructure.Persistence.DataContext
 
     
         public DbSet<Patient>? Patients { get; set; }
+		public DbSet<SequenceContract>? SequenceContract { get; set; }
+		public DbSet<Doctor>? Doctors { get; set; }
+        public DbSet<Payment>? Payments { get; set; }
+        public DbSet<PaymentInvoice>? PaymentInvoices { get; set; }
+       public DbSet<AppointmentModel>? Appointments { get; set; }
+		public DbSet<AppointmentJobScheduleModel>? appointmentJobScheduleModels { get; set; }
+		public DbSet<AppointmentEvents>? AppointmentEvents { get; set; }
+		public DbSet<ChatModel>? ChatModels { get; set; }
+        public DbSet<BrockerMessage>? BrockerMessages { get; set; }
+        public DbSet<BrockerSubscription>? BrockerSubscriptions { get; set; }
+        public DbSet<AuthenticationToken>? AuthenticationTokens { get; set; }
+		public DbSet<AdminModel>? AdminModels { get; set; }
+        public DbSet<EmailSettings>? EmailSettings { get; set; }
+		public DbSet<Notification>? Notifications { get; set; }
+        public DbSet<UserNotificationSettings>? UserNotificationSettings { get; set; }
+        public DbSet<UserClockIn>? UserClockIns { get; set; }
 
-        public DbSet<Doctor>? Doctors { get; set; }
 
-        public IDbConnection Connection => throw new NotImplementedException();
+
+        //public IDbConnection Connection => throw new NotImplementedException();
 
 
         public override EntityEntry Remove(object entity)
@@ -40,40 +59,45 @@ namespace HMS.Infrastructure.Persistence.DataContext
         #region Actions
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            var time = DateTime.UtcNow;
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity>().ToList())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.DateCreated = time;
-                        entry.Entity.CreatedBy = "";
-                        break;
 
-                    case EntityState.Modified:
-                        entry.Entity.LastUpdatedTime = time;
-                        entry.Entity.UpdatedBy = "";
-                        //if (entry.Entity is IConcurrencyCheck)
-                        //{
-                        //    ValidateConcurrency(entry.Entity);
-                        //    var concurrencyProperty = entry.Property("ConcurrencyToken");
-                        //    concurrencyProperty.OriginalValue = concurrencyProperty.CurrentValue;
-                        //    concurrencyProperty.IsModified = true;
-                        //}
-                        break;
-                }
-            }
-            bool isAuthenticated = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
-            if (userId == Guid.Empty.ToString())
-            {
-                return await base.SaveChangesAsync(cancellationToken);
-            }
-            else
-            {
-                return await base.SaveChangesAsync(userId);
-            }
-        }
+			return await base.SaveChangesAsync(cancellationToken);
+
+			//      var time = DateTime.UtcNow;
+			//      var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+			//      foreach (var entry in ChangeTracker.Entries<AuditableEntity>().ToList())
+			//      {
+			//          switch (entry.State)
+			//          {
+			//              case EntityState.Added:
+			//                  entry.Entity.DateCreated = time;
+			//                  entry.Entity.CreatedBy = "";
+			//entry.Entity.LastUpdatedTime = time;
+
+			//break;
+
+			//              case EntityState.Modified:
+			//                  entry.Entity.LastUpdatedTime = time;
+			//                  entry.Entity.UpdatedBy = "";
+			//                  //if (entry.Entity is IConcurrencyCheck)
+			//                  //{
+			//                  //    ValidateConcurrency(entry.Entity);
+			//                  //    var concurrencyProperty = entry.Property("ConcurrencyToken");
+			//                  //    concurrencyProperty.OriginalValue = concurrencyProperty.CurrentValue;
+			//                  //    concurrencyProperty.IsModified = true;
+			//                  //}
+			//                  break;
+			//          }
+			//      }
+			//      bool isAuthenticated = _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+			//      if (userId == Guid.Empty.ToString())
+			//      {
+			//          return await base.SaveChangesAsync(cancellationToken);
+			//      }
+			//      else
+			//      {
+			//          return await base.SaveChangesAsync(userId);
+			//      }
+		}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -84,7 +108,26 @@ namespace HMS.Infrastructure.Persistence.DataContext
                 property.SetColumnType("decimal(18,2)");
             }
             base.OnModelCreating(builder);
-        }
+
+
+			builder.Entity<Payment>()
+		        .HasOne(p => p.PaymentInvoice)
+		        .WithMany()
+		        .HasForeignKey(p => p.PaymentInvoiceId)
+		        .OnDelete(DeleteBehavior.Restrict); 
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Patient)
+				.WithMany()
+				.HasForeignKey(p => p.PatientId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Doctor)
+				.WithMany()
+				.HasForeignKey(p => p.DoctorId)
+				.OnDelete(DeleteBehavior.Restrict);
+		}
 
 
         #endregion

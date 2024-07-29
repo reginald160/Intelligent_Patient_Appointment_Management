@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using HMSPortal.Domain.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HMSPortal.Models
 {
     public class BaseIndividual : BaseEntity
     {
+
         public Guid? UserId { get; set; }
 
         [ForeignKey("UserId")]

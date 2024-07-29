@@ -1,6 +1,9 @@
-﻿
-
-
+﻿@model HMSPortal.Application.ViewModels.AddPatientViewModel
+@{
+	ViewData["Title"] = "New";
+	var successMessage = TempData["Success"] as string;
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <div class="container-fluid">
 
 	<div class="row">
@@ -8,49 +11,91 @@
 		<div class="col-md-12">
 			<div class="widget-area-2 proclinic-box-shadow">
 				<h3 class="widget-title">Add Patient</h3>
-				<form>
+				@if (ViewData.ModelState["error-V"] != null && ViewData.ModelState["error-V"].Errors.Count > 0)
+				{
+
+					<div class="alert alert-warning alert-dismissible fade show" role="alert">
+						<strong>Validation Error!</strong> @ViewData.ModelState["error-V"].Errors[0].ErrorMessage.
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+					</div>
+				}
+				<form method="post" class="row" enctype="multipart/form-data">
+					@Html.AntiForgeryToken()
+					@* <div asp-validation-summary="All" class="text-danger"></div> *@
 					<div class="form-row">
+
 						<div class="form-group col-md-6">
-							<label for="patient-name">Patient Name</label>
-							<input type="text" class="form-control" placeholder="Patient name" id="patient-name">
+							<label asp-for="FirstName">Patient First Name</label>
+							<input asp-for="FirstName" class="form-control" placeholder="First name" required>
+							<span asp-validation-for="FirstName" class="text-danger"></span>
 						</div>
 						<div class="form-group col-md-6">
-							<label for="dob">Date Of Birth</label>
-							<input type="date" placeholder="Date of Birth" class="form-control" id="dob">
+							<label asp-for="LastName">Patient Last Name</label>
+							<input asp-for="LastName" class="form-control" placeholder="Last name" required>
+							<span asp-validation-for="LastName" class="text-danger"></span>
+						</div>
+					
+						<div class="form-group col-md-6">
+							<label asp-for="DateOfBirth">Date Of Birth</label>
+							<input asp-for="DateOfBirth" type="date" placeholder="Date of Birth" class="form-control" id="dob" required>							<span asp-validation-for="DateOfBirth" class="text-danger"></span>
+						</div>
+
+						<div class="form-group col-md-6">
+							<label asp-for="Phone">Phone</label>
+							<input asp-for="Phone" class="form-control" placeholder="Phone">
+							<span asp-validation-for="Phone" class="text-danger"></span>
 						</div>
 						<div class="form-group col-md-6">
-							<label for="age">Age</label>
-							<input type="text" placeholder="Age" class="form-control" id="age">
+							<label asp-for="Email">Email</label>
+							<input asp-for="Email" type="email" class="form-control" placeholder="email" required>
+							<span asp-validation-for="Email" class="text-danger"></span>
 						</div>
 						<div class="form-group col-md-6">
-							<label for="phone">Phone</label>
-							<input type="text" placeholder="Phone" class="form-control" id="phone">
-						</div>
-						<div class="form-group col-md-6">
-							<label for="email">Email</label>
-							<input type="email" placeholder="email" class="form-control" id="Email">
-						</div>
-						<div class="form-group col-md-6">
-							<label for="gender">Gender</label>
-							<select class="form-control" id="gender">
+							<label asp-for="Gender">Gender</label>
+							<select asp-for="Gender" class="form-control">
 								<option>Male</option>
 								<option>Female</option>
 								<option>Other</option>
 							</select>
 						</div>
-						<div class="form-group col-md-12">
-							<label for="exampleFormControlTextarea1">Address</label>
-							<textarea placeholder="Address" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+						<div class="form-group col-md-6">
+							<label asp-for="Height">Height</label>
+							<input asp-for="Height" type="number" class="form-control" placeholder="eg: 12" required>
+							<span asp-validation-for="Height" class="text-danger"></span>
 						</div>
-						<div class="form-group col-md-12">
-							<label for="file">File</label>
-							<input type="file" class="form-control" id="file">
+						<div class="form-group col-md-6">
+							<label asp-for="Weight">Weight</label>
+							<input asp-for="Weight" type="number" class="form-control" placeholder="eg: 20" required>
+							<span asp-validation-for="Weight" class="text-danger"></span>
 						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="Address">Address</label>
+							<textarea asp-for="Address" placeholder="Address" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+						</div>
+						<div class="form-group col-md-4">
+							<label asp-for="PostalCode">Post Code</label>
+							<input asp-for="PostalCode" type="text" class="form-control" placeholder="eg: 20" required>
+							<span asp-validation-for="Weight" class="text-danger"></span>
+						</div>
+						<div class="form-group col-md-6">
+							<label asp-for="HouseNumber">Country</label>
+							<select asp-for="HouseNumber" id="countrySelect" class="form-control" required>
+								<option value="">Select a country</option>
+							</select>
+						</div>
+
+						<div class="form-group col-md-12">
+							<label asp-for="Image">Profile Image</label> 
+							<input asp-for="Image" type="file" class="form-control border-0 shadow" accept="image/*" required>
+						</div>
+					
 
 						<div class="form-check col-md-12 mb-2">
 							<div class="text-left">
 								<div class="custom-control custom-checkbox">
-									<input class="custom-control-input" type="checkbox" id="ex-check-2">
+									<input class="custom-control-input" type="checkbox" id="ex-check-2" required>
 									<label class="custom-control-label" for="ex-check-2">Please Confirm</label>
 								</div>
 							</div>
@@ -60,23 +105,32 @@
 						</div>
 					</div>
 				</form>
-				<!-- Alerts-->
-				<div class="alert alert-success alert-dismissible fade show" role="alert">
-					<strong>Successfully Done!</strong> Please add payment now
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>
-				<div class="alert alert-warning alert-dismissible fade show" role="alert">
-					<strong>Holy guacamole!</strong> You should check in on some of those fields below.
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>
-				<!-- /Alerts-->
+			
 			</div>
 		</div>
 		<!-- /Widget Item -->
 	</div>
 </div>
 <!-- /Main Content -->
+<script>
+	function loadCountries() {
+		$.ajax({
+			url: '@Url.Action("GetCountries", "Patient")',
+			method: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var countrySelect = $('#countrySelect');
+				$.each(data, function (index, country) {
+					countrySelect.append('<option value="' + country.code + '">' + country.name + '</option>');
+				});
+			},
+			error: function (error) {
+				console.log("Error fetching countries: ", error);
+			}
+		});
+	}
+
+	$(document).ready(function () {
+		loadCountries();
+	});
+</script>

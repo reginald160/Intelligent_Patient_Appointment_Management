@@ -14,5 +14,13 @@
             Update,
             Delete
         }
+
+        public enum AppointmentStatus
+        {
+            UpComming,
+            Completeted,
+            Cancelled,
+            Ongoing
+        }
     }
 }

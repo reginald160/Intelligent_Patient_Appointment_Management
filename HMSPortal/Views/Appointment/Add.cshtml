@@ -1,0 +1,146 @@
+﻿@model HMSPortal.Application.ViewModels.Appointment.AddAppointmentViewModel
+
+@{
+    ViewData["Title"] = "New Appointment";
+    var successMessage = TempData["Success"] as string;
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Widget Item -->
+        <div class="col-md-12">
+            <div class="widget-area-2 proclinic-box-shadow">
+                <h3 class="widget-title">Add Appointment</h3>
+                <form method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Patients" hidden="hidden" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="patient-name">Patient Name</label>
+                            <select class="form-control" id="patient-name" asp-for="PatientId">
+                                <option value="">Select Patient</option>
+                                @if (Model.Patients != null)
+                                {
+                                    @foreach (var patient in Model.Patients)
+                                    {
+                                        <option value="@patient.Value">@patient.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="department">Department</label>
+                            <select asp-for="Department" class="form-control" id="department">
+                                <option>Select department</option>
+                                <option value="Orthopedic">Orthopedic</option>
+                                <option value="Pediatrics">Pediatrics</option>
+                                <option value="Dental">Dental</option>
+                                <option value="Optometry">Optometry</option>
+                                <option value="General Healthcare">General Healthcare</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="doctor-name">Doctor Name</label>
+                            <select class="form-control" id="doctor-name" asp-for="DoctorId">
+                                <option value="">Select Doctor</option>
+                                @if (Model.Doctors != null)
+                                {
+                                    @foreach (var doctor in Model.Doctors)
+                                    {
+                                        <option value="@doctor.Value">@doctor.Text</option>
+                                    }
+                                }
+
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="appointment-date">Appointment Date</label>
+                            <input asp-for="Date" type="date" placeholder="Appointment Date" class="form-control" id="appointment-date" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="time-slot">Time Slot</label>
+                            <select asp-for="TimeSlot" class="form-control" id="time-slot" required>
+                                <option value="">Select Time Slot</option>
+                                <!-- Time slots will be populated here based on the selected date -->
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="token-number">Token Number <small>(Auto Generated)</small></label>
+                            <input type="text" placeholder="Token Number" class="form-control" id="token-number">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label for="problem">Problem</label>
+                            <textarea asp-for="ProblemDescrion" placeholder="Problem" class="form-control" id="problem" rows="3"></textarea>
+                        </div>
+                        <div class="form-check col-md-12 mb-2">
+                            <div class="text-left">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" type="checkbox" id="ex-check-2" required>
+                                    <label class="custom-control-label" for="ex-check-2">Please Confirm</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6 mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                        </div>
+                    </div>
+                </form>
+                <!-- Alerts-->
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Successfully Done!</strong> Appointment token Generated
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                }
+                <!-- /Alerts-->
+            </div>
+        </div>
+        <!-- /Widget Item -->
+    </div>
+</div>
+<!-- /Main Content -->
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#patient-name').select2({ width: '522px' });
+        $('#doctor-name').select2({ width: '522px' });
+        $('#department').select2({ width: '522px' });
+
+        // Set the min attribute for the appointment-date input to today's date
+        var today = new Date().toISOString().split('T')[0];
+        $('#appointment-date').attr('min', today);
+
+        $('#appointment-date').on('change', function () {
+            var selectedDate = $(this).val();
+            if (selectedDate) {
+                $.ajax({
+                    url: '@Url.Action("GetAvailableTimeSlots", "Appointment")', // Adjust controller and action method as needed
+                    type: 'GET',
+                    data: { date: selectedDate },
+                    success: function (data) {
+                        var timeSlotSelect = $('#time-slot');
+                        timeSlotSelect.empty();
+                        timeSlotSelect.append('<option value="">Select Time Slot</option>');
+                        $.each(data, function (index, timeSlot) {
+                            timeSlotSelect.append('<option value="' + timeSlot + '">' + timeSlot + '</option>');
+                        });
+                        timeSlotSelect.select2({ width: '522px' });
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script src="~/js/custom.js"></script>
+<script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
+<script src="https://cdn.tiny.cloud/1/d1fpkxihlzdu61yllazo0c9ehlxeuk04a3awulg82m1vo2b4/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>

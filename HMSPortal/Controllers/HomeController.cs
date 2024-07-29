@@ -1,4 +1,5 @@
-using HMSPortal.Domain.Models;
+using HMSPortal.Application.Core.Chat.Message;
+using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -14,9 +15,11 @@ namespace HMSPortal.Controllers
 			_logger = logger;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
-			return View();
+			
+
+            return View();
 		}
 
 		public IActionResult Privacy()
@@ -29,5 +32,7 @@ namespace HMSPortal.Controllers
 		{
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
-	}
+
+
+    }
 }

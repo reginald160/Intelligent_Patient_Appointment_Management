@@ -1,0 +1,130 @@
+﻿@model HMSPortal.Application.ViewModels.AddDoctorViewModel
+@{
+	ViewData["Title"] = "New";
+	var successMessage = TempData["Success"] as string;
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Main Content -->
+<div class="container-fluid">
+
+	<div class="row">
+		<!-- Widget Item -->
+		<div class="col-md-12">
+			<div class="widget-area-2 proclinic-box-shadow">
+				<h3 class="widget-title">Add Doctor</h3>
+				@if (ViewData.ModelState["error-V"] != null && ViewData.ModelState["error-V"].Errors.Count > 0)
+				{
+				
+					<div class="alert alert-warning alert-dismissible fade show" role="alert">
+						<strong>Validation Error!</strong> @ViewData.ModelState["error-V"].Errors[0].ErrorMessage.
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">×</span>
+						</button>
+					</div>
+				}
+				
+				<form id="addDoctorForm" method="post" enctype="multipart/form-data">
+					@Html.AntiForgeryToken()
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="Doctor-name">First Name</label>
+
+							<input asp-for="FirstName" type="text" class="form-control" placeholder="Doctor name" id="Doctor-name" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="Doctor-name">Last Name</label>
+							<input asp-for="FirstName" type="text" class="form-control" placeholder="Doctor name" id="Doctor-name" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="dob">Date Of Birth</label>
+							<input asp-for="DateOfBirth" type="date" placeholder="Date of Birth" class="form-control" id="dob" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="Specialty">Department</label>
+							<select asp-for="Specialty" class="form-control" id="department">
+								<option >Select department</option>
+								<option value="Orthopedic">Orthopedic</option>
+								<option value="Pediatrics">Pediatrics</option>
+								<option value="Dental">Dental</option>
+								<option value="Optometry">Optometry</option>
+								<option value="General Healthcare">General Healthcare</option>
+							</select>
+						</div>
+						
+						<div class="form-group col-md-6">
+							<label for="experience">Years of Experience</label>
+							<input type="number" asp-for="YearsOfExperience" placeholder="5" class="form-control" id="experience" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="age">Age</label>
+							<input asp-for="Age" type="number"  class="form-control" id="age" readonly>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="phone">Phone</label>
+							<input asp-for="Phone" type="text" placeholder="Phone" class="form-control" id="phone" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="email">Email</label>
+							<input asp-for="Email" type="email" placeholder="email" class="form-control" id="Email" required>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="gender">Gender</label>
+							<select asp-for="Gender" class="form-control" id="gender" required>
+								<option>Male</option>
+								<option>Female</option>
+								<option>Other</option>
+							</select>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="about-doctor">Professional Details</label>
+							<textarea asp-for="DoctorDetails" placeholder="Doctor Details" class="form-control" id="about-doctor" rows="3"></textarea>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="address">Address</label>
+							<textarea asp-for="Address" placeholder="Address" class="form-control" id="address" rows="3" required></textarea>
+						</div>
+						<div class="form-group col-md-12">
+							<label for="file">Upload Profile Image</label>
+							<input asp-for="Image" type="file" class="form-control" accept="image/*" id="file">
+						</div>
+
+						<div class="form-check col-md-12 mb-2">
+							<div class="text-left">
+								<div class="custom-control custom-checkbox">
+									<input class="custom-control-input" type="checkbox" id="ex-check-2" required>
+									<label class="custom-control-label" for="ex-check-2">Please Confirm</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group col-md-6 mb-3">
+							<button type="submit" class="btn btn-primary btn-lg">Submit</button>
+						</div>
+					</div>
+				</form>
+				
+			</div>
+		</div>
+		<!-- /Widget Item -->
+	</div>
+</div>
+<!-- /Main Content -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+	$(document).ready(function () {
+		$('#dob').on('change', function () {
+
+			var dob = new Date($(this).val());
+			var today = new Date();
+			var age = today.getFullYear() - dob.getFullYear();
+			var m = today.getMonth() - dob.getMonth();
+
+			if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+				age--;
+			}
+
+			$('#age').val(age);
+		});
+
+
+	});
+</script>
