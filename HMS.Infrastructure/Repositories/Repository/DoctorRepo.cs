@@ -99,8 +99,25 @@ namespace HMS.Infrastructure.Repositories.Repository
 
 			await _db.SaveChangesAsync();
 		}
+		public async Task<Dictionary<string, Guid>> GetAllDoctorsDroptDown(string department = null)
+		{
+			var doctors = _db.Doctors
+			   .Where(x => !x.IsDeleted && x.IsActive);
+
+            if (department != null)
+			{
+                doctors = doctors.Where(x=> x.Specialty == department);
+            }
+            var result = doctors.Select(m => new
+                {
+                    FullName = m.FirstName + " " + m.LastName,
+                    Id = m.Id
+                })
+                .ToDictionary(d => d.FullName, d => d.Id);
+            return result;
+        }
 	
-	public GetDoctorViewModel GetDoctorById(Guid id)
+		public GetDoctorViewModel GetDoctorById(Guid id)
 		{
 			var viewModel = _db.Doctors.FirstOrDefault(x => x.Id == id);
 

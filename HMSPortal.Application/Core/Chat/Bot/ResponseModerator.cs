@@ -8,6 +8,7 @@ using HMSPortal.Application.Core.MessageBrocker.KafkaBus;
 using HMSPortal.Application.ViewModels.Appointment;
 using HMSPortal.Application.ViewModels.Chat;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Newtonsoft.Json;
 using System;
@@ -54,8 +55,14 @@ namespace HMSPortal.Application.Core.Chat.Bot
             var userConnection = new ChatTempData { UserId = userId, ConnectionId = connectionId };
             UserConnections.AddOrUpdate(userId, userConnection, (key, oldValue) => userConnection);
         }
+		public async Task Savemessage(BotMessageViewModel message)
+        {
+			
+			await _appointmentServices.SaveChat(message);
+		}
 
-        public async Task<ChatResponse> GetGreeing(string message, string UserId)
+
+		public async Task<ChatResponse> GetGreeing(string message, string UserId)
         {
 
             try
@@ -72,7 +79,8 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 {
                     Content = greeting,
                     UserId = UserId,
-                    Type = CoreValiables.ChatRecieved,
+                    Type = CoreValiables.ChatSent,
+                    HasOptions = false,
 
                 };
                 await _appointmentServices.SaveChat(receievdChat);
@@ -95,12 +103,21 @@ namespace HMSPortal.Application.Core.Chat.Bot
 
             };
            await  _appointmentServices.RescheduleAppointmentByPatient(model, data.AppointmentId);
+			var msg = "Your appointment has been succesfully rescheduled";
+			var sentChat = new BotMessageViewModel
+			{
+				Content = msg,
+				UserId = UserId,
+				Type = CoreValiables.ChatSent,
+				HasOptions = false,
 
-            return new ChatResponse
+			};
+
+			return new ChatResponse
             {
-                Message = "Your appointment has been succesfully rescheduled",
-                Endpoint = "ReceiveRescheduleDefault"
-            };
+                Message = msg,
+                Endpoint = "ReceiveSuccessMessage"
+			};
         }
         public async Task<ChatResponse> ReadMessageAsync(string message, string UserId)
         {
@@ -262,6 +279,7 @@ namespace HMSPortal.Application.Core.Chat.Bot
         {
             try
             {
+                var chatMessage = message;
                 message = GetMenu(message);
                 var response = new ChatResponse
                 {
@@ -319,7 +337,41 @@ namespace HMSPortal.Application.Core.Chat.Bot
 
                     }
                 }
-                return response;
+				var receievdChat = new BotMessageViewModel
+				{
+					Content = chatMessage,
+					UserId = userId,
+					Type = CoreValiables.ChatRecieved,
+					HasOptions = false,
+
+				};
+				await _appointmentServices.SaveChat(receievdChat);
+
+				var sentChat = new BotMessageViewModel
+				{
+					Content = response.Message,
+					UserId = userId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				await _appointmentServices.SaveChat(sentChat);
+                if (message.Contains("Schedule"))
+                {				
+					List<string> menu = new List<string> { "Check-ups", "New Health Concerns" };
+					var schedulePotions = new BotMessageViewModel
+					{
+						Content = message,
+						UserId = userId,
+						Type = CoreValiables.ChatSent,
+						HasOptions = true,
+						Options = JsonConvert.SerializeObject(menu)
+
+					};
+					await _appointmentServices.SaveChat(schedulePotions);
+				}
+				//Log user and Bot
+				return response;
             }
             catch(Exception ex)
             {
@@ -335,16 +387,35 @@ namespace HMSPortal.Application.Core.Chat.Bot
                     Endpoint = CoreValiables.ChatTextEndpoint,
                     
                 };
-                //var receievdChat = new BotMessageViewModel
-                //{
-                //    Content = message,
-                //    UserId = UserId,
-                //    Type = CoreValiables.ChatRecieved,
+				var receievdChat = new BotMessageViewModel
+				{
+					Content = message,
+					UserId = UserId,
+					Type = CoreValiables.ChatRecieved,
+					HasOptions = false,
 
-                //};
-                //await _appointmentServices.SaveChat(receievdChat);
+				};
+				await _appointmentServices.SaveChat(receievdChat);
 
-                var responseBody = await _ilema.ValidateHealthConditionAsync(message, UserId);
+				var sentdChat = new BotMessageViewModel
+				{
+					Content = message,
+					UserId = UserId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				
+				//var receievdChat = new BotMessageViewModel
+				//{
+				//    Content = message,
+				//    UserId = UserId,
+				//    Type = CoreValiables.ChatRecieved,
+
+				//};
+				//await _appointmentServices.SaveChat(receievdChat);
+
+				var responseBody = await _ilema.ValidateHealthConditionAsync(message, UserId);
                 var response = JsonConvert.DeserializeObject<IlemaApiResponse>(responseBody);
                 string chatContent = "";                
                 if (response.Message.Contains("INVALID") || response.Message.Contains("OFFPOINT"))
@@ -364,6 +435,8 @@ namespace HMSPortal.Application.Core.Chat.Bot
                         chatResponse.Endpoint = "ValidateMessage";
                         chatResponse.Messages = questions;
                         chatResponse.Endpoint = "ReceiveQuestions";
+                        sentdChat.HasOptions = true;
+                        sentdChat.Options = string.Concat("\n ,", questions);
                     }
 
                 }
@@ -373,8 +446,9 @@ namespace HMSPortal.Application.Core.Chat.Bot
                     chatResponse.Endpoint = "SendSymtoms";
                     chatResponse.Endpoint = "SendSymtoms";
                 }
-
-                return chatResponse;
+                sentdChat.Content = chatResponse.Message;
+				await _appointmentServices.SaveChat(sentdChat);
+				return chatResponse;
             }
             catch(Exception ex)
             {
@@ -384,16 +458,35 @@ namespace HMSPortal.Application.Core.Chat.Bot
 
         public async Task<ChatResponse> GetAvaialbleSlotsAsync(string message, string UserId)
         {
-            
-            if(string.IsNullOrEmpty(message))
+			var receievdChat = new BotMessageViewModel
+			{
+				Content = message,
+				UserId = UserId,
+				Type = CoreValiables.ChatRecieved,
+				HasOptions = false,
+
+			};
+			await _appointmentServices.SaveChat(receievdChat);
+
+			if (string.IsNullOrEmpty(message))
             {
                 var msg = $"invalid date selected  {message}," +
                 $" Please choose an alternative date for your appointment ";
-                return new ChatResponse
+				var sentChat = new BotMessageViewModel
+				{
+					Content = msg,
+					UserId = UserId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				await _appointmentServices.SaveChat(sentChat);
+				return new ChatResponse
                 {
                     Endpoint = "ShowDatePicker",
                     Message = msg,
                 };
+
             }
 
             var date = DateTime.Parse(message);
@@ -402,7 +495,16 @@ namespace HMSPortal.Application.Core.Chat.Bot
             {
                 var msg = $"there are no available slots for your selected date {message}," +
                 $" Please choose an alternative date for your appointment ";
-                return new ChatResponse
+				var sentChat = new BotMessageViewModel
+				{
+					Content = msg,
+					UserId = UserId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				await _appointmentServices.SaveChat(sentChat);
+				return new ChatResponse
                 {
                     Endpoint = "ShowDatePicker",
                     Message = msg,
@@ -410,11 +512,20 @@ namespace HMSPortal.Application.Core.Chat.Bot
             }
             else
             {
+                var msg = "please select a  suitable date for your appointment";
+				var sentChat = new BotMessageViewModel
+				{
+					Content = msg,
+					UserId = UserId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
 
-                return new ChatResponse
+				};
+				await _appointmentServices.SaveChat(sentChat);
+				return new ChatResponse
                 {
                     Endpoint = "ReceiveDropDown",
-                    Message = "please select a  suitable for your appointment",
+                    Message = "",
                     ResponseType = ResponseType.DropDown,
                     Messages =  slots
                 };
@@ -525,9 +636,19 @@ namespace HMSPortal.Application.Core.Chat.Bot
                 };
                 var appointmentMessage = JsonConvert.SerializeObject(appointment);
                 await _messageBroker.PublishAsync(CoreValiables.BootAppointmentTopic, appointmentMessage);
-                return new ChatResponse
+                var msg = "Your appointment has been booked successfully";
+				var sentChat = new BotMessageViewModel
+				{
+					Content = msg,
+					UserId = UserId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				await _appointmentServices.SaveChat(sentChat);
+				return new ChatResponse
                 {
-                    Message = "I can help",
+                    Message = msg,
                     Endpoint = "ShowDatePicker"
                 };
             }

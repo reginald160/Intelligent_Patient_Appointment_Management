@@ -22,26 +22,28 @@ namespace HMSPortal.Controllers
 	{
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IAppointmentServices _appointmentServices;
+        private readonly IDoctorServices _doctorServices;
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
         public  string Patient = Roles.Patient.ToString();
 		private readonly UserManager<ApplicationUser> _userManager;
 
-        
 
 
 
-		public AppointmentController(IWebHostEnvironment webHostEnvironment,
-			IAppointmentServices appointmentServices, IMapper mapper, ICacheService cacheService,
-            UserManager<ApplicationUser> userManager)
-		{
-			_webHostEnvironment=webHostEnvironment;
-			_appointmentServices=appointmentServices;
-			_mapper=mapper;
-			_cacheService=cacheService;
-			_userManager=userManager;
-		}
-		[Authorize]
+
+        public AppointmentController(IWebHostEnvironment webHostEnvironment,
+            IAppointmentServices appointmentServices, IMapper mapper, ICacheService cacheService,
+            UserManager<ApplicationUser> userManager, IDoctorServices doctorServices)
+        {
+            _webHostEnvironment = webHostEnvironment;
+            _appointmentServices = appointmentServices;
+            _mapper = mapper;
+            _cacheService = cacheService;
+            _userManager = userManager;
+            _doctorServices = doctorServices;
+        }
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var response =  await _appointmentServices.GetAllAppointment();
@@ -78,7 +80,54 @@ namespace HMSPortal.Controllers
 			return RedirectToAction(nameof(Index),"Appointment");
 		}
 
+        [Authorize]
+        public async Task<IActionResult> View(Guid Id)
+        {
+
+
+            var app = _appointmentServices.GetappointmentById(Id);
+            return View(app);
+        }
+
 		[Authorize]
+		public async Task<IActionResult> Details(string Id)
+		{
+
+			var appointment = new AddAppointmentViewModel
+			{
+				AppointmentType = Id,
+			};
+			return View(appointment);
+		}
+
+		[Authorize(Roles = $"SuperAdmin, Admin")]
+       
+        public async Task<IActionResult> Assign(string Id)
+        {
+
+            var appointment = new AssignAppointmentViewModel
+            {
+                DoctorIds = await _doctorServices.GetAllDoctorsDroptDown(),
+                AppointRef = Id
+            };
+            return View(appointment);
+        }
+        [Authorize(Roles = $"SuperAdmin, Admin")]
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public async Task<IActionResult> Assign(AssignAppointmentViewModel model)
+        {
+
+            if (ModelState.IsValid)
+            {
+                await _appointmentServices.AssignAppointmentToDoctor(model.DoctorId, model.AppointRef);
+				TempData["Success"] = "Appointment Assigned successfully.";
+				return RedirectToAction("Index", "Appointment");
+            }
+            return View();
+        }
+
+        [Authorize]
 		public async Task<IActionResult> Reschedule(string Id)
 		{
 			var  app = _appointmentServices.GetappointmentById(Guid.Parse(Id));
@@ -89,17 +138,7 @@ namespace HMSPortal.Controllers
 			};
 			return View(appointment);
 		}
-		[Authorize]
-		public async Task<IActionResult> View(string Id)
-		{
-
-			var appointment = new AddAppointmentViewModel
-			{
-				AppointmentType = Id,
-			};
-			return View(appointment);
-		}
-
+	
 		[ValidateAntiForgeryToken]
 		[Authorize]
         [HttpPost]
@@ -134,7 +173,7 @@ namespace HMSPortal.Controllers
             //var userId = _cacheService.GetCachedUser().Id;
             var model = new BotMessage
             {
-                Messages =  await _appointmentServices.GetRecentMessagesAsync(100),
+                Messages =  await _appointmentServices.GetRecentMessagesAsync(2000),
                 //UserId =  userId
             };
 

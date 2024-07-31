@@ -1,9 +1,6 @@
-﻿@model List<HMSPortal.Application.ViewModels.Appointment.AllAppointmentViewModel>
+﻿@using HMSPortal.Application.ViewModels
+@model DashBoardViewModel
 
-@{
-	ViewData["Title"] = "My appointments";
-	var successMessage = TempData["Success"] as string;
-}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -17,6 +14,50 @@
 <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<div class="row">
+	<!-- Widget Item -->
+	<div class="col-md-4">
+		<div class="widget-area proclinic-box-shadow color-red">
+			<div class="widget-left">
+				<span class="ti-user"></span>
+			</div>
+			<div class="widget-right">
+				<h4 class="wiget-title">Notifications</h4>
+				<span class="numeric color-red">@ViewBag.NotificationCount</span>
+				<p class="inc-dec mb-0"><span class="ti-angle-up"></span> </p>
+			</div>
+		</div>
+	</div>
+	<!-- /Widget Item -->
+	<!-- Widget Item -->
+	<div class="col-md-4">
+		<div class="widget-area proclinic-box-shadow color-green">
+			<div class="widget-left">
+				<span class="ti-bar-chart"></span>
+			</div>
+			<div class="widget-right">
+				<h4 class="wiget-title">Up coming Appointments</h4>
+				<span class="numeric color-green">@ViewBag.UpcomingAppointment</span>
+				<p class="inc-dec mb-0"><span class="ti-angle-down"></span></p>
+			</div>
+		</div>
+	</div>
+	<!-- /Widget Item -->
+	<!-- Widget Item -->
+	<div class="col-md-4">
+		<div class="widget-area proclinic-box-shadow color-yellow">
+			<div class="widget-left">
+				<span class="ti-bar-chart"></span>
+			</div>
+			<div class="widget-right">
+				<h4 class="wiget-title">Completed Appointment</h4>
+				<span class="numeric color-yellow">@ViewBag.CompletedAppointment</span>
+				<p class="inc-dec mb-0"><span class="ti-angle-up"></span></p>
+			</div>
+		</div>
+	</div>
+	<!-- /Widget Item -->
+</div>
 
 <!-- Main Content -->
 <div class="container-fluid">
@@ -26,7 +67,6 @@
 		<div class="col-md-12">
 			<div class="widget-area-2 proclinic-box-shadow">
 				<div class="col-12 text-end mb-4">
-					
 				</div>
 				<div class="table-responsive mb-3">
 					<table id="tblTable" class="table table-bordered table-striped">
@@ -38,14 +78,14 @@
 								<th>Time</th>
 								<th>Status</th>
 								<th></th>
-							
+
 							</tr>
 						</thead>
 						<tbody>
 
-							@if (Model.Any())
+							@if (Model.AllAppointments.Any())
 							{
-								foreach (var item in Model)
+								foreach (var item in Model.AllAppointments)
 								{
 									<tr>
 
@@ -53,21 +93,19 @@
 										<td>@item.Date.ToString("d")</td>
 										<td>@item.TimeSlot</td>
 										<td>@item.Status</td>
-										
-										
+
+
 										@* <td>@item.ProblemDescrion</td> *@
 										<td>
-											@if (item.Status == "UpComming"|| item.Status == "Up coming")
+											@if (item.Status == "UpComming" || item.Status == "Up coming")
 											{
-												<a asp-controller="Appointment" asp-action="Reschedule" asp-route-Id="@item.Id" class="btn btn-secondary">
-													Re-schedule
+												<a asp-controller="Appointment" asp-action="View" asp-route-Id="@item.Id" class="btn btn-secondary">
+													Attend
 												</a>
 
-												<button type="button" class="btn btn-danger mx-2" onclick="ConfirmCancelling('@item.Id')">
-													Cancel
-												</button>
+												
 											}
-											
+
 										</td>
 									</tr>
 								}
@@ -77,7 +115,7 @@
 						</tbody>
 					</table>
 
-					
+
 					<!-- /Export links -->
 
 
@@ -87,7 +125,7 @@
 		<!-- /Widget Item -->
 	</div>
 </div>
-<!-- /Main Content -->
+
 @section Scripts {
 	<script src="~/hmsproj-js/appointment.js"></script>
 	<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>

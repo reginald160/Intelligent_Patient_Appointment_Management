@@ -10,7 +10,13 @@ namespace HMSPortal.Application.Core.Cache
     {
 		string GetAppointmentCount();
 		CacheUserModel GetCachedUser();
-		string GetDoctorCount();
+        string GetCancelledAppointmentCounByUserId(string userid);
+        string GetCompletedAppointmentCounByDoctorId(string userid);
+        string GetCompletedAppointmentCounByUserId(string userid);
+        string GetDoctorCount();
 		string GetPatientCount();
+        string GetPatientNotification(string userid);
+        string GetUpcomingAppointmentCounByDoctorId(string userid);
+        string GetUpcomingAppointmentCounByUserId(string userid);
     }
 }

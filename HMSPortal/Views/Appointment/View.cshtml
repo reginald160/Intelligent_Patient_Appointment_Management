@@ -1,6 +1,11 @@
-﻿@Model HMSPortal.Application.ViewModels.Appointment.AllAppointmentViewModel
+﻿@model HMSPortal.Application.ViewModels.Appointment.AllAppointmentViewModel
 @{
     ViewData["Title"] = "View";
+    var desc = Model.ProblemDescrion;
+    if (Model.ProblemDescrion.Contains("VALID"))
+    {
+        desc = Model.ProblemDescrion.Split(':')[1];
+    }
 }
 
 <div class="container-fluid">
@@ -14,34 +19,30 @@
                     <table class="table table-bordered table-striped">
                         <tbody>
                             <tr>
-                                <td><strong>Patient ID</strong></td>
-                                <td></td>
+                                <td><strong>Appointment id</strong></td>
+                                <td>@Model.ReferenceNumber</td>
                             </tr>
                             <tr>
                                 <td><strong>Department</strong></td>
-                                <td>Dental</td>
+                                <td>@Model.Department</td>
                             </tr>
                             <tr>
-                                <td><strong>Doctor Name</strong></td>
-                                <td>Dr Kiran Sharma</td>
+                                <td><strong>Patient name</strong></td>
+                                <td>@Model.PatientName</td>
                             </tr>
                             <tr>
                                 <td><strong>Appointment Date</strong></td>
-                                <td>16-nov-2018</td>
+                                <td>@Model.Date.ToShortDateString()</td>
                             </tr>
                             <tr>
                                 <td><strong>Time Slot </strong></td>
-                                <td>10AM-11AM</td>
+                                <td>@Model.TimeSlot</td>
                             </tr>
-                            <tr>
-                                <td><strong>Token Number </strong></td>
-                                <td>27</td>
-                            </tr>
+                           
                             <tr>
                                 <td><strong>Problem</strong></td>
                                 <td>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur convallis egestas aliquet.
-                                    Nunc ullamcorper massa in magna pulvinar, a eleifend felis condimentum.
+                                    @desc
                                 </td>
                             </tr>
                         </tbody>

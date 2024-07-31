@@ -18,7 +18,7 @@
         public enum AppointmentStatus
         {
             UpComming,
-            Completeted,
+            Completed,
             Cancelled,
             Ongoing
         }

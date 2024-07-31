@@ -22,6 +22,7 @@
 	var doctorName = Roles.Doctor.ToString();
 	var PatientName = Roles.Patient.ToString();
 	string idValue = "";
+	var successMessage = TempData["Success"] as string;
 
 	var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(cacheKey);
 	IList <string> roles = new List<string>();
@@ -81,9 +82,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ProClinic-Bootstrap4 Hospital Admin</title>
+	<title>Medi smart appointment system</title>
 	<!-- Fav  Icon Link -->
-	<link rel="shortcut icon" type="image/png" href="mediplus-lite/img/logo.png">
+	<link rel="shortcut icon" type="image/png" href="mediplus-lite/img/logo3.png">
 	<!-- Bootstrap core CSS -->
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<!-- themify icons CSS -->
@@ -121,7 +122,7 @@
 		<!-- Sidebar -->
 		<nav id="sidebar" class="proclinic-bg">
 			<div class="sidebar-header">
-				<a asp-controller="Dashboard" asp-action="Index"><img src="mediplus-lite/img/logo.png" class="logo" alt="logo"></a>
+				<a asp-controller="Dashboard" asp-action="Index"><img src="mediplus-lite/img/logo3.png" class="logo" alt="logo"></a>
 			</div>
 			@{
 				var role = userCache.Role;
@@ -259,6 +260,16 @@
 						</li>
 						<li class="breadcrumb-item">@Html.GetControllerDisplayName()</li>
 						<li class="breadcrumb-item active">@ViewData["Title"]</li>
+						@if (!string.IsNullOrEmpty(successMessage))
+						{
+
+							<div class="alert alert-info alert-dismissible fade show" role="alert">
+								<strong>@successMessage</strong>
+								<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+						}
 					</ol>
 				</div>
 			</div>

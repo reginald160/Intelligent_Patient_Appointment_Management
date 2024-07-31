@@ -13,6 +13,8 @@ using HMSPortal.Application.ViewModels;
 using HMS.Infrastructure.DataBank;
 using HMSPortal.Application.AppServices.IServices;
 using HMSPortal.Application.ViewModels.Appointment;
+using System.Text;
+using System.Security.Claims;
 
 namespace HMSPortal.Controllers
 {
@@ -40,7 +42,8 @@ namespace HMSPortal.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
 		{
-            //await Email();
+        
+       
             var currentUser = await _userManager.GetUserAsync(User);
             var role = await _userManager.GetRolesAsync(currentUser);
             var dashboard = new DashBoardViewModel();
@@ -59,18 +62,26 @@ namespace HMSPortal.Controllers
             else if (role.Contains("Patient"))
             {
 				ViewBag.PatialView = "_PatientMiniPartial";
-				ViewBag.PatientCount = _cacheService.GetPatientCount();
-				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
-				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
-				return View();
+				ViewBag.CompletedAppointment = _cacheService.GetCompletedAppointmentCounByUserId(currentUser.Id);
+				ViewBag.UpcomingAppointment = _cacheService.GetUpcomingAppointmentCounByUserId(currentUser.Id);
+				ViewBag.NotificationCount = _cacheService.GetPatientNotification(currentUser.Id);
+                var response = await _appointmentServices.GetAllAppointmentByPatientUser(User.GetUserId());
+
+				var apponitments = response.Data as List<AllAppointmentViewModel>;
+                dashboard.AllAppointments = apponitments; //AppointmentBank.GenerateRandomAppointments(50);
+                return View(dashboard);
             }
             else
             {
-				ViewBag.PatialView = "_AdminMiniPartial";
-				ViewBag.PatientCount = _cacheService.GetPatientCount();
-				ViewBag.AppointmentCount = _cacheService.GetAppointmentCount();
-				ViewBag.DoctorCount = _cacheService.GetDoctorCount();
-				return View();
+				ViewBag.PatialView = "_DoctorMiniPartial";
+                ViewBag.CompletedAppointment = _cacheService.GetCompletedAppointmentCounByDoctorId(currentUser.Id);
+                ViewBag.UpcomingAppointment = _cacheService.GetUpcomingAppointmentCounByDoctorId(currentUser.Id);
+                ViewBag.NotificationCount = _cacheService.GetPatientNotification(currentUser.Id);
+                var response = await _appointmentServices.GetAllAppointmentByDoctorUser(User.GetUserId());
+
+                var apponitments = response.Data as List<AllAppointmentViewModel>;
+                dashboard.AllAppointments = apponitments; //AppointmentBank.GenerateRandomAppointments(50);
+                return View(dashboard);
             }
 
 
@@ -109,27 +120,7 @@ namespace HMSPortal.Controllers
         //{
         //    return RedirectToAction(actionName: model.Action , model.Controller);
         //}
-        public static async Task Email()
-        {
-
-            var key = "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";
-            using var message = new MailMessage();
-            message.From = new MailAddress("reginald.ozougwu@yorksj.ac.uk", "Ifeanyi");
-
-            message.IsBodyHtml = true;
-            message.To.Add(new MailAddress("reginald1149@gmail.com", "Easy Medicare"));
-            message.Body = "hello";
-
-            using var client = new SmtpClient(host: "smtp.sendgrid.net", port: 587);
-            client.Credentials = new NetworkCredential(
-                userName: "apikey",
-                password: key
-                );
-
-
-            client.Send(message);
-
-        }
+      
 
     }
 }

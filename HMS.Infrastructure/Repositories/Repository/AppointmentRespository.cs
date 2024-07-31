@@ -2,6 +2,7 @@
 using HMS.Infrastructure.Persistence.DataContext;
 using HMS.Infrastructure.Schedulers.Appointment;
 using HMSPortal.Application.AppServices.IServices;
+using HMSPortal.Application.Core;
 using HMSPortal.Application.Core.CryptoGraphy;
 using HMSPortal.Application.Core.Helpers;
 using HMSPortal.Application.Core.Notification;
@@ -178,12 +179,12 @@ namespace HMS.Infrastructure.Repositories.Repository
 		public async Task<AppResponse> CancelAppointmentById( string appointmentId)
 		{
 			appointmentId = appointmentId.Replace(" ", "");
-			var appointment = _dbContext.Appointments.FirstOrDefault(x => x.Id == Guid.Parse(appointmentId));
+			var appointment = _dbContext.Appointments.Include("Patient").FirstOrDefault(x => x.Id == Guid.Parse(appointmentId));
 
 
 			try
 			{
-				var patient = _dbContext.Patients.FirstOrDefault(x => x.UserId == appointment.UserId);
+				var patient = appointment.Patient;
 				appointment.Status = AppointmentStatus.Cancelled.ToString();
 				_dbContext.Appointments.Update(appointment);
 				await _dbContext.SaveChangesAsync();
@@ -342,7 +343,8 @@ namespace HMS.Infrastructure.Repositories.Repository
 
 			try
 			{
-				var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted)
+
+				var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted && x.Patient.UserId == userId)
 				.Select(x => new AllAppointmentViewModel
 				{
 					Id = x.Id,
@@ -376,7 +378,90 @@ namespace HMS.Infrastructure.Repositories.Repository
 			}
 
 		}
-		
+        
+		public async Task<AppResponse> GetAllAppointmentByPatientUser(string userId)
+		{
+
+			try
+			{
+               
+				var appointments = await _dbContext.Appointments.Where(x => !x.IsDeleted && x.Patient.UserId == userId)
+				.Select(x => new AllAppointmentViewModel
+				{
+					Id = x.Id,
+					Date = x.Date,
+					DoctorComment = x.DoctorComment,
+					DoctorId = x.DoctorId,
+					PatientRef = x.Patient.PatientCode,
+					PatientId = x.PatientId,
+					PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+					StartTime = x.StartTime,
+					Status = x.Status,
+					ReferenceNumber = x.ReferenceNumber,
+					ProblemDescrion = x.ProblemDescrion,
+					TimeSlot = x.TimeSlot,
+					AppointmentType = x.AppointmentType
+
+				}).ToListAsync();
+
+
+
+				return new AppResponse
+				{
+					IsSuccessful = true,
+					Data = appointments
+				};
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.ToString());
+				return new AppResponse();
+			}
+
+		}
+
+        public async Task<AppResponse> GetAllAppointmentByDoctorUser(string userId)
+        {
+
+            try
+            {
+
+                var appointments = await _dbContext.Appointments.Include("Doctor").Where(x=> x.DoctorId != null)
+                    .Where(x => !x.IsDeleted && x.Doctor.UserId == userId)
+                .Select(x => new AllAppointmentViewModel
+                {
+                    Id = x.Id,
+                    Date = x.Date,
+                    DoctorComment = x.DoctorComment,
+                    DoctorId = x.DoctorId,
+                    PatientRef = x.Patient.PatientCode,
+                    PatientId = x.PatientId,
+                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                    StartTime = x.StartTime,
+                    Status = x.Status,
+                    ReferenceNumber = x.ReferenceNumber,
+                    ProblemDescrion = x.ProblemDescrion,
+                    TimeSlot = x.TimeSlot,
+                    AppointmentType = x.AppointmentType
+
+                }).ToListAsync();
+
+
+
+                return new AppResponse
+                {
+                    IsSuccessful = true,
+                    Data = appointments
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new AppResponse();
+            }
+
+        }
+
         public AllAppointmentViewModel GetappointmentById( Guid id)
         {
             var appointment =  _dbContext.Appointments.Where(x => !x.IsDeleted)
@@ -455,7 +540,60 @@ namespace HMS.Infrastructure.Repositories.Repository
                 })
                 .ToListAsync();
         }
-        public async Task<AppResponse> SaveChat( BotMessageViewModel viewModel)
+
+		public async Task<AppResponse> LogBotmessage(string userId, string message)
+		{
+			try
+			{
+				var model = new ChatModel
+				{
+					SentAt = DateTime.UtcNow,
+					Message = message,
+					UserId = userId,
+					MessageType = CoreValiables.ChatSent,
+					HasOptions = false,
+					Options = "",
+				};
+				await _dbContext.ChatModels.AddAsync(model);
+				await _dbContext.SaveChangesAsync();
+				return new AppResponse
+				{
+					IsSuccessful = true,
+				};
+			}
+			catch (Exception ex)
+			{
+				return new AppResponse();
+			}
+
+		}
+		public async Task<AppResponse> LogUsermessage(string userId, string message)
+		{
+			try
+			{
+				var model = new ChatModel
+				{
+					SentAt = DateTime.UtcNow,
+					Message = message,
+					UserId = userId,
+					MessageType = CoreValiables.ChatRecieved,
+					HasOptions = false,
+					Options = "",
+				};
+				await _dbContext.ChatModels.AddAsync(model);
+				await _dbContext.SaveChangesAsync();
+				return new AppResponse
+				{
+					IsSuccessful = true,
+				};
+			}
+			catch (Exception ex)
+			{
+				return new AppResponse();
+			}
+
+		}
+		public async Task<AppResponse> SaveChat( BotMessageViewModel viewModel)
         {
             try
             {
@@ -492,22 +630,22 @@ namespace HMS.Infrastructure.Repositories.Repository
             throw new NotImplementedException();
         }
 
-		public async Task AssignAppointmentToDoctor(Guid doctorId, Guid appointmentId)
+		public async Task AssignAppointmentToDoctor(Guid doctorId, string appointmentId)
 		{
-           var appointment =  _dbContext.Appointments.FirstOrDefault(x => x.Id == appointmentId);
+           var appointment =  _dbContext.Appointments.FirstOrDefault(x => x.ReferenceNumber == appointmentId);
             if (appointment != null)
             {
 				var doctor = _dbContext.Doctors.FirstOrDefault(x => x.Id == doctorId);
 				appointment.DoctorId = doctorId;
 
-              
+                appointment.DoctorId = doctorId;
                 _dbContext.Appointments.Update(appointment);
                await _dbContext.SaveChangesAsync();
-                var time1 = Logics.ConverttoDate(appointment.TimeSlot, appointment.Date);
+                var time1 = appointment.Date;
 				var notification = new CreateNotificationViewmodel
                 {
                     NotificationTime = time1.AddMinutes(-10),
-                    Date = time1,
+                    Date = appointment.Date,
 					Name = "Dr. " + doctor.FirstName,
                     Email = doctor.Email,
                     Subject = "Appointment Assignment",

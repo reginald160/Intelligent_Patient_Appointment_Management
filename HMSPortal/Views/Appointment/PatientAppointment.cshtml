@@ -303,6 +303,7 @@
     connection.on("ReceiveReschedule", function (user, messages) {
 
         endpoint = "SendRescheduleDate";
+        datepoint = "SendSyncDate";
         // appendMessage(user, message, "bot-message");
         appendMessage(user, "select appointment ", "bot-message");
         appendDropdownAndButtonsPro(messages, "appointment");

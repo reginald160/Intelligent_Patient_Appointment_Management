@@ -68,9 +68,19 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
             List<string> menu = new List<string> { "Schedule", "Cancel" , "Reschedule", "Exit" };
 
-            //var response = GetMenu(message);
+			//var response = GetMenu(message);
+			var receievdChat = new BotMessageViewModel
+			{
+				Content = message,
+				UserId = user,
+				Type = CoreValiables.ChatSent,
+				HasOptions = true,
+                Options = JsonConvert.SerializeObject(menu)
 
-            await Clients.All.SendAsync("ReceiveMenu", "Bot", menu);
+			};
+           await _responseModerator.Savemessage(receievdChat);
+
+			await Clients.All.SendAsync("ReceiveMenu", "Bot", menu);
         }
         public async Task SendSheduleCategory(string user, string message)
         {
@@ -98,7 +108,9 @@ namespace HMSPortal.Application.Core.Chat.SignalR
         public async Task ValidateHealthCondition(string user, string message)
         {
             var respo = await _responseModerator.ValideHealthCondition(message, user);
-            if(respo != null && respo.Messages.Any()) 
+			
+
+			if (respo.Messages != null && respo.Messages.Any()) 
             {
                 if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
                 {
@@ -110,11 +122,13 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                     // Update the dictionary entry to reflect the changes
                     UserConnections[user] = chatTempData;
                 }
-                await Clients.All.SendAsync("ReceiveQuestions", "Bot", respo.Messages.ToList());
+				
+				await Clients.All.SendAsync("ReceiveQuestions", "Bot", respo.Messages.ToList());
             }
             else
             {
-                await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Messages);
+				
+				await Clients.All.SendAsync(respo.Endpoint, "Bot", respo.Message);
 
             }
 
@@ -122,7 +136,17 @@ namespace HMSPortal.Application.Core.Chat.SignalR
 
         public async Task SubmitQuestions(string userId, string answersJson)
         {
-            if (UserConnections.TryGetValue(userId, out ChatTempData chatTempData))
+			var receievdChat = new BotMessageViewModel
+			{
+				Content = answersJson,
+				UserId = userId,
+				Type = CoreValiables.ChatRecieved,
+				HasOptions = false
+
+			};
+			await _responseModerator.Savemessage(receievdChat);
+
+			if (UserConnections.TryGetValue(userId, out ChatTempData chatTempData))
             {
 
                 chatTempData.QuestionsAndAnswers = answersJson;
@@ -134,13 +158,31 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                 chatTempData.Result = response.message;
                 UserConnections[userId] = chatTempData;
                 var mesg = "Please select a date suitable for your appointment;";
-                await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
+				var sentChat = new BotMessageViewModel
+				{
+					Content = mesg,
+					UserId = userId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false
+
+				};
+				await _responseModerator.Savemessage(sentChat);
+				await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
            
             }
             else
             {
                 var mesg = "Please select a date suitable for your appointment\";\r\n";
-                await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
+				var sentChat = new BotMessageViewModel
+				{
+					Content = mesg,
+					UserId = userId,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false
+
+				};
+				await _responseModerator.Savemessage(sentChat);
+				await Clients.All.SendAsync("ShowDatePicker", "Bot", mesg);
 
             }
             // Process the answers as needed
@@ -159,8 +201,18 @@ namespace HMSPortal.Application.Core.Chat.SignalR
             {
 
                 List<string> menu = new List<string> { "Schedule", "Cancel", "Reschedule", "Exit" };
+				var receievdChat = new BotMessageViewModel
+				{
+					Content = message,
+					UserId = user,
+					Type = CoreValiables.ChatSent,
+					HasOptions = true,
+					Options = JsonConvert.SerializeObject(menu)
 
-                await Clients.All.SendAsync("ReceiveMenu", "Bot", menu);
+				};
+				await _responseModerator.Savemessage(receievdChat);
+
+				await Clients.All.SendAsync("ReceiveMenu", "Bot", menu);
             }
            else if(message.Contains("Check-ups") || message.Contains("New Health Concerns"))
             {
@@ -173,22 +225,40 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                     // Update the dictionary entry to reflect the changes
                     UserConnections[user] = chatTempData;
                 }
-
+                var sysMessage = "Please describe the symptoms or health issues you are experiencing.\nInclude any relevant details such as the onset of symptoms, their severity, and how they have been affecting your daily life";
                 if (message == "Check-ups")
                 {
-
-                    await Clients.All.SendAsync("ReceieveSheduleCategory", "Bot", "Please briefly describe the reason for your check-up, such as general wellness, routine monitoring, or follow-up on a previous condition");
+                    sysMessage = "Please briefly describe the reason for your check-up, such as general wellness, routine monitoring, or follow-up on a previous condition";
+                    //Log User and Bot
+                   
 
 
                 }
-                else
-                {
-                    await Clients.All.SendAsync("ReceieveSheduleCategory", "Bot", "Please describe the symptoms or health issues you are experiencing.\nInclude any relevant details such as the onset of symptoms, their severity, and how they have been affecting your daily life");
-                }
-            }
+				var receievdChat = new BotMessageViewModel
+				{
+					Content = message,
+					UserId = user,
+					Type = CoreValiables.ChatRecieved,
+					HasOptions = false,
+
+				};
+				await _responseModerator.Savemessage(receievdChat);
+
+				var sentChat = new BotMessageViewModel
+				{
+					Content = sysMessage,
+					UserId = user,
+					Type = CoreValiables.ChatSent,
+					HasOptions = false,
+
+				};
+				await _responseModerator.Savemessage(sentChat);
+				await Clients.All.SendAsync("ReceieveSheduleCategory", "Bot", sysMessage);
+			}
             else
             {
-                if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
+				
+				if (UserConnections.TryGetValue(user, out ChatTempData chatTempData))
                 {
                     MenuType menu = (MenuType)Enum.Parse(typeof(MenuType), message);
                     chatTempData.MenuType = menu;
@@ -294,9 +364,10 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                 chatTempData.AppointmentId = message;
                 UserConnections[user] = chatTempData;
             }
+            var msg = "Kindly select a date";
 
             // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
-            await Clients.All.SendAsync("ShowDatePicker", user, message);
+            await Clients.All.SendAsync("ShowDatePicker", user, msg);
 
 
         }
@@ -325,21 +396,32 @@ namespace HMSPortal.Application.Core.Chat.SignalR
                 if(message.Contains("@"))
                 {
                     chatTempData.Slot = message.Split('@')[0];
-                }
+
+					var receievdChat = new BotMessageViewModel
+					{
+						Content = chatTempData.Slot,
+						UserId = user,
+						Type = CoreValiables.ChatRecieved,
+						HasOptions = false,
+
+					};
+					await _responseModerator.Savemessage(receievdChat);
+				}
 
                 UserConnections[user] = chatTempData;
             }
 
             if(chatTempData.MenuType == MenuType.Reschedule)
             {
-                await _responseModerator.RescheduleAppointment(user, chatTempData);
-            }
+               var response =  await _responseModerator.RescheduleAppointment(user, chatTempData);
+				await Clients.All.SendAsync("ReceiveSuccessMessage", user, response.Message);
+			}
             else
             {
                 var botResponse = await _responseModerator.BookAppointmentAsync(message, user, chatTempData);
 
                 // await Clients.All.SendAsync(botResponse.Endpoint, user, botResponse.Message);
-                await Clients.All.SendAsync("ShowDatePicker", user, message);
+                await Clients.All.SendAsync("ReceiveSuccessMessage", user, botResponse.Message);
             }
 
 
