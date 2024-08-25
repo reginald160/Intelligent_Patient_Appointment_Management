@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using static HMSPortal.Models.Enums;
@@ -526,7 +527,9 @@ namespace HMS.Infrastructure.Repositories.Repository
 
 		public async Task<List<BotMessageViewModel>> GetRecentMessagesAsync(int numberOfMessages)
         {
-            return await _dbContext.ChatModels
+			var user =   contextAccessor.HttpContext.User;
+			var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			return await _dbContext.ChatModels.Where(x=> x.UserId == userId)
                 .OrderBy(cm => cm.SentAt)
                 .Take(numberOfMessages).Select(x=> new BotMessageViewModel
                 {

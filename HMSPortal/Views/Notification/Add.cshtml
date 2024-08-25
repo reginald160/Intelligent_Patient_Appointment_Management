@@ -1,7 +1,7 @@
 ﻿@model HMSPortal.Application.ViewModels.Notification.CreateNotificationViewmodel
 
 @{
-    ViewData["Title"] = "Reschedule";
+    ViewData["Title"] = "New Notification";
     var successMessage = TempData["Success"] as string;
 }
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -28,7 +28,7 @@
         <!-- Widget Item -->
         <div class="col-md-12">
             <div class="widget-area-2 proclinic-box-shadow">
-                <h3 class="widget-title">Add Appointment</h3>
+                <h3 class="widget-title">Add new notification</h3>
                 @if (ViewData.ModelState["error-V"] != null && ViewData.ModelState["error-V"].Errors.Count > 0)
                 {
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -42,12 +42,12 @@
                     @Html.AntiForgeryToken()
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="appointment-date">Appointment Date</label>
+                            <label for="appointment-date"> Date</label>
                             <input asp-for="Date" type="date" placeholder="Appointment Date" class="form-control" id="appointment-date" required>
                         </div>
 
                         <div class="form-group col-md-3">
-                            <label for="appointment-hour">Appointment Hour</label>
+                            <label for="appointment-hour">Hour</label>
                             <select  asp-for="Hour" id="appointment-hour" class="form-control" required>
                                 <option value="">Select Hour</option>
                                 @for (int i = 0; i < 24; i++)
@@ -58,7 +58,7 @@
                         </div>
 
                         <div class="form-group col-md-3">
-                            <label asp-for="Minute">Appointment Minute</label>
+                            <label asp-for="Minute">Minute</label>
                             <input asp-for="Minute" type="number" id="appointment-minute" class="form-control" min="0" max="59" placeholder="Minute" required />
                         </div>
 

@@ -8,6 +8,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.Extensions.Caching.Memory
 @using Newtonsoft.Json
+@using System.Security.Claims
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject   IHttpContextAccessor _httpContextAccessor;
@@ -24,50 +25,53 @@
 	string idValue = "";
 	var successMessage = TempData["Success"] as string;
 
-	var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(cacheKey);
-	IList <string> roles = new List<string>();
+	var user = _httpContextAccessor.HttpContext.User;
+	var userName = user.FindFirst(ClaimTypes.Role)?.Value;
+	// var cssacheKey = user.Claims.FirstOrDefault();
+	// var userCacheString = _httpContextAccessor.HttpContext.Session.GetString(cacheKey);
+	// IList <string> roles = new List<string>();
 
-	if (string.IsNullOrEmpty(userCacheString))
-	{
-		var user = _httpContextAccessor.HttpContext.User;
-		if (user.Identity.IsAuthenticated)
-		{
-			var currentUser = await UserManager.GetUserAsync(user);
-			if (currentUser != null)
-			{
-				roles =  await UserManager.GetRolesAsync(currentUser);
-				userCache = new CacheUserModel
-						{
-							Id = currentUser.Id,
-							Email = currentUser.Email,
-							Role = roles.FirstOrDefault()
+	// if (string.IsNullOrEmpty(userCacheString))
+	// {
+		
+	// 	if (user.Identity.IsAuthenticated)
+	// 	{
+	// 		var currentUser = await UserManager.GetUserAsync(user);
+	// 		if (currentUser != null)
+	// 		{
+	// 			roles =  await UserManager.GetRolesAsync(currentUser);
+	// 			userCache = new CacheUserModel
+	// 					{
+	// 						Id = currentUser.Id,
+	// 						Email = currentUser.Email,
+	// 						Role = roles.FirstOrDefault()
 
-						};
+	// 					};
 
-			}
+	// 		}
 
-		}
-		else
-		{
-			// var currentUser = UserManager.Users.FirstOrDefault(x => x.Email == "ozougwuifeanyi160@gmail.com");
-			// roles =  await UserManager.GetRolesAsync(currentUser);
-			userCache = JsonConvert.DeserializeObject<CacheUserModel>(userCacheString);
-		}
+	// 	}
+	// 	else
+	// 	{
+	// 		// var currentUser = UserManager.Users.FirstOrDefault(x => x.Email == "ozougwuifeanyi160@gmail.com");
+	// 		// roles =  await UserManager.GetRolesAsync(currentUser);
+	// 		userCache = JsonConvert.DeserializeObject<CacheUserModel>(userCacheString);
+	// 	}
 
-		// Serialize userCache to a JSON string
-		var userCacheString1 = JsonConvert.SerializeObject(userCache);
-		// Store userCacheString in session
-		_httpContextAccessor.HttpContext.Session.SetString(cacheKey, userCacheString1);
+	// 	// Serialize userCache to a JSON string
+	// 	var userCacheString1 = JsonConvert.SerializeObject(userCache);
+	// 	// Store userCacheString in session
+	// 	_httpContextAccessor.HttpContext.Session.SetString(cacheKey, userCacheString1);
 
 
 
-	}
-	else
-	{
-		userCache = JsonConvert.DeserializeObject<CacheUserModel>(userCacheString);
-	}
+	// }
+	// else
+	// {
+	// 	userCache = JsonConvert.DeserializeObject<CacheUserModel>(userCacheString);
+	// }
 
-	idValue = userCache.Id;
+	// idValue = userCache.Id;
 	var leftBarPartialView = "";
 
 
@@ -125,7 +129,7 @@
 				<a asp-controller="Dashboard" asp-action="Index"><img src="mediplus-lite/img/logo3.png" class="logo" alt="logo"></a>
 			</div>
 			@{
-				var role = userCache.Role;
+				var role = user.FindFirst(ClaimTypes.Role)?.Value;
 
 				switch (role)
 				{

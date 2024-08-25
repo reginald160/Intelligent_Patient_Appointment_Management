@@ -176,6 +176,7 @@ namespace HMSPortal.Areas.Identity.Pages.Account
 					var claims = new List<Claim>
 					{
 						new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+						new Claim(ClaimTypes.Email, user.Email),
 						new Claim(ClaimTypes.Role, roles.FirstOrDefault())
 					};
 
