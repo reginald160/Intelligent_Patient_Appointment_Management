@@ -29,7 +29,7 @@ Before running or deploying this project, ensure you have the following tools in
 Start by cloning the project repository:
 
 
-$ git clone https://github.com/reginald160/Intelligent_Patient_Appointment_Management-
+$ git clone https://github.com/reginald160/Intelligent_Patient_Appointment_Management
 $ cd your-repo
 
 # Run Locally
