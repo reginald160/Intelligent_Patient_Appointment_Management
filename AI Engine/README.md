@@ -7,7 +7,7 @@ This project is the IPAM AI Engine, a Web API built with python and Django Rest 
 Start by cloning the project repository:
 
 
-$ git clone https://github.com/reginald160/Intelligent_Patient_Appointment_Management-
+$ git clone https://github.com/reginald160/Intelligent_Patient_Appointment_Management
 $ cd your-repo
 
 ## Local Setup
