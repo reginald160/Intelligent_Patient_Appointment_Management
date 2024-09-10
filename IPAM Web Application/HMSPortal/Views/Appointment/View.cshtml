@@ -1,0 +1,59 @@
+﻿@model HMSPortal.Application.ViewModels.Appointment.AllAppointmentViewModel
+@{
+    ViewData["Title"] = "View";
+    var desc = Model.ProblemDescrion;
+    if (Model.ProblemDescrion.Contains("VALID"))
+    {
+        desc = Model.ProblemDescrion.Split(':')[1];
+    }
+}
+
+<div class="container-fluid">
+
+    <div class="row">
+        <!-- Widget Item -->
+        <div class="col-md-12">
+            <div class="widget-area-2 proclinic-box-shadow">
+                <h3 class="widget-title">Appointment Details</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <tbody>
+                            <tr>
+                                <td><strong>Appointment id</strong></td>
+                                <td>@Model.ReferenceNumber</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Department</strong></td>
+                                <td>@Model.Department</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Patient name</strong></td>
+                                <td>@Model.PatientName</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Appointment Date</strong></td>
+                                <td>@Model.Date.ToShortDateString()</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Time Slot </strong></td>
+                                <td>@Model.TimeSlot</td>
+                            </tr>
+                           
+                            <tr>
+                                <td><strong>Problem</strong></td>
+                                <td>
+                                    @desc
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--Export links-->
+                    
+                    
+                </div>
+            </div>
+        </div>
+        <!-- /Widget Item -->
+    </div>
+</div>
+
