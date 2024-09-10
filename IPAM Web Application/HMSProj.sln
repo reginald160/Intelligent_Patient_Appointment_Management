@@ -11,7 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMS.Infrastructure", "HMS.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMSPortal.Application", "HMSPortal.Application\HMSPortal.Application.csproj", "{137BA465-7BB2-4718-B0DF-F1D523FA0E97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSPortal.MSTest", "HMSPortal.MSTest\HMSPortal.MSTest.csproj", "{613F9332-F41D-4819-BEC5-C5A1BB59668B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HMSPortal.MSTest", "HMSPortal.MSTest\HMSPortal.MSTest.csproj", "{613F9332-F41D-4819-BEC5-C5A1BB59668B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C666FBFB-4725-436D-8B21-38639232B4F7}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -108,7 +108,41 @@ namespace HMSPortal.Application.Core.Chat.Api
             }
         }
 
-        public async Task<string> RequestSymptomAsync(string query, string requestId)
+		public async Task<string> GroupeDepartmentAsync(string query, string requestId)
+		{
+			var path = Path.Combine(rootPath, ParentPath, "HealthConditonFilter.txt");
+			var system_Content = FileHelper.ReadFileContent(path);
+			requestId = DateTime.Now.Ticks.ToString();
+			var requestData = new
+			{
+				inputText = query,
+				system_content = system_Content
+
+			};
+
+			var content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+
+			try
+			{
+				var symptonFilterUrl = _configuration["ChatBot:SymptonFilterUrl"];
+				var groupId = _configuration["ChatBot:GroupId"];
+				var client = new HttpClient();
+				var request = PrepareChatPostRequest(requestId, symptonFilterUrl);
+				request.Content = content;
+				var response = await client.SendAsync(request);
+				response.EnsureSuccessStatusCode();
+				string responseBody = await response.Content.ReadAsStringAsync();
+				return responseBody;
+
+			}
+			catch (HttpRequestException e)
+			{
+				Console.WriteLine($"Error: {e.Message}");
+				return null;
+			}
+		}
+
+		public async Task<string> RequestSymptomAsync(string query, string requestId)
         {
             var path = Path.Combine(rootPath, ParentPath, "HealthConditonFilter.txt");
             var system_Content = FileHelper.ReadFileContent(path);
